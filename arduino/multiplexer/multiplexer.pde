@@ -10,7 +10,6 @@ void setup()
   pinMode(13, OUTPUT);
   pinMode(enablePin, OUTPUT);
   digitalWrite(enablePin, LOW);
-  Serial.begin(9600);
 }
 
 void mux(byte output)
