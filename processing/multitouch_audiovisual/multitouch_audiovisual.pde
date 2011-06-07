@@ -1,65 +1,84 @@
+import arb.soundcipher.*; // get it at http://soundcipher.org
 import processing.serial.*;
-import arb.soundcipher.*;
 
-SoundCipher sc = new SoundCipher();
-
+SoundCipher sc = new SoundCipher(this);
 Serial myPort;
-int lf = 10;
-String myString;
-int size1, size2;
-float myTime;
-int[] touchSensors = new int[2];
-color color1, color2;
+Crosspoint[][] crosspoints;
+PFont myFont;
 
-void setup ()
-{
-  myTime = millis();
-  SoundCipher.getMidiDeviceInfo();
-  sc.instrument(78);
-  sc.setMidiDeviceOutput(0);
-  size(600, 300);
-  println( Serial.list() );
-  myPort = new Serial( this, Serial.list()[0], 9600 );
-  noStroke();
-  color1 = color(102, 102, 102);
-  color2 = color(255, 255, 255);
+// configuration
+int verticalWires = 2;
+int horizontalWires = 1;
+int crosspointDistance = 200; // how many pixels between 2 crosspoints
+float signalPixelRatio = 0.2; // (see crosspoint.pde)
+color backgroundColor = color(240,240,240);
+color wireColor = color(200,200,200);
+color signalColor = color(220,220,220);
+color textColor = color(0,0,0);
+int instrument = 23; // the famous General Midi tango accordion
+
+void setup() {
+  size((verticalWires+1)*crosspointDistance, (horizontalWires+1)*crosspointDistance);
+  smooth();
+  myFont = loadFont("Consolas-12.vlw");
+  textFont(myFont, 12);
+  // sc.getMidiDeviceInfo();
+  // sc.setMidiDeviceOutput(0);
+  // sc.instrument(instrument);
+  // println(Serial.list());
+  myPort = new Serial( this, Serial.list()[0], 115200 );
+  myPort.bufferUntil(32); // buffer everything until ASCII whitespace char triggers serialEvent() 
+  
+  crosspoints = new Crosspoint[horizontalWires][verticalWires];
+  for (int i = 0; i < horizontalWires; i++) {
+    for(int j = 0; j < verticalWires; j++) {
+      crosspoints[i][j] = new Crosspoint(crosspointDistance*(j+1),crosspointDistance*(i+1));
+    } 
+  }
 }
 
-void draw ()
-{
-  background(200);
-  smooth();
-  while (myPort.available() > 0)
-  {
-    myString = myPort.readStringUntil(lf);  // assumes you are sending them with println() ... (change to byte?)
-    if (myString != null) {
-      int myInput = (int) int(myString.trim());  
-      if (myInput/20000 == 0) {
-        touchSensors[0] = myInput%10000;
-        size1 = (int) (size1 * .5 + .5 * round(((touchSensors[0]*0.25))));
-      }
-      else {
-        touchSensors[1] = myInput%10000;
-        size2 = (int) (size2 * .5 + .5 * round(((touchSensors[1])*0.25)));
-      }     
-      // println(myInput + " -> " + touchSensors[0] + " " + size1+" : "+touchSensors[1]+ " " + size2);
+void draw() {
+  background(backgroundColor);
+  // draw the crosspoint signals
+  noStroke();
+  for (int i = 0; i < horizontalWires; i++) {
+    for(int j = 0; j < verticalWires; j++) {
+      crosspoints[i][j].draw();
     }
   }
-  fill(color1);
-  ellipse(180,150,size2,size2);
-  ellipse(420,150,size1,size1);
-  int x = 300+((size2-size1)*4);
-  fill(color2);
-  ellipse(x, 150, 100, 100);
-  float delay = millis() - myTime;
-  if (delay > 500) {
-    delay = 0;
-    myTime = millis();
-    // tone should be between 0 and 127
-    float tone = touchSensors[1] - touchSensors[0];
-    tone = abs(((tone+320)/650)*10)+60;
-    println("sensors: " + touchSensors[1] + " : "+touchSensors[0] + "   tone: " + tone);
-    sc.playNote(tone, 100, 200);
+  // draw the grid
+  stroke(wireColor);
+  for (int i = 1; i <= horizontalWires; i++) {
+    line(crosspointDistance, crosspointDistance*i, crosspointDistance*verticalWires, crosspointDistance*i);
+    for(int j = 1; j <= verticalWires; j++) {
+      line(crosspointDistance*j, crosspointDistance, crosspointDistance*j, crosspointDistance*horizontalWires);
+    } 
   }
 }
 
+void serialEvent(Serial p) {
+  String myString = trim(p.readString());
+  int data[] = int(split(myString,','));
+  int k = 0;
+  for (int i = 0; i < horizontalWires; i++) {
+    for(int j = 0; j < verticalWires; j++) {
+      crosspoints[i][j].signalStrength = data[k];
+      k++;
+    }
+  }
+}
+/*
+void mousePressed() {
+  sc.sendMidi(sc.PROGRAM_CHANGE, 0, instrument, 0);
+  sc.sendMidi(sc.NOTE_ON, 0, 60, 100);
+}
+
+void mouseDragged() {
+  sc.sendMidi(sc.PITCH_BEND, 0, 0, 100 - mouseY + 14);
+  sc.sendMidi(sc.CONTROL_CHANGE, 0, 7, mouseX);
+}
+
+void mouseReleased() {
+  sc.sendMidi(sc.NOTE_OFF, 0, 60, 0);
+}
+*/

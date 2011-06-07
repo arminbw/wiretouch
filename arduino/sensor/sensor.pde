@@ -1,4 +1,3 @@
-
 // defines for setting and clearing register bits
 #ifndef cbi
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
@@ -10,7 +9,7 @@
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
   pinMode(13, OUTPUT);
   // analogReference(EXTERNAL);
   pinMode(12, INPUT);
@@ -40,13 +39,15 @@ void loop()
    //digitalWrite(13, (avg[pos] > 360) ? HIGH : LOW); // led
    digitalWrite(13, (1 == pos));
 
-   //delay(50);
+   // delay(50);
    i++;
 
-   if (0 == i % 500) {
+   if (0 == i % 200) {
       i = 0;
-      Serial.println(10000 + avg[0]);
-      Serial.println(20000 + avg[1]);
+      Serial.print(avg[1], DEC);
+      Serial.print(",");
+      Serial.print(avg[0], DEC);
+      Serial.print(" ");
    }
 }
 
