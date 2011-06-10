@@ -8,7 +8,7 @@ PFont myFont;
 
 // configuration
 int verticalWires = 2;
-int horizontalWires = 1;
+int horizontalWires = 2;
 int crosspointDistance = 200; // how many pixels between 2 crosspoints
 float signalPixelRatio = 0.2; // (see crosspoint.pde)
 color backgroundColor = color(240,240,240);

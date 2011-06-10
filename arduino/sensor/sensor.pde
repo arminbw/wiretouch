@@ -10,7 +10,13 @@
 
 const byte enablePin = 6;
 const byte selPins[] = { 2, 3, 4, 5 };
+const byte valPos[] = {14, 15};
+const byte muxLen = 2;
 
+const byte enablePin2 = 11;
+const byte selPins2[] = { 7, 8, 9, 10 };
+const byte valPos2[] = { 0, 1 };
+const byte muxLen2 = 2;
 
 void setup()
 {
@@ -24,10 +30,18 @@ void setup()
   cbi(ADCSRA,ADPS1) ;
   cbi(ADCSRA,ADPS0) ;
   
-  for (int i=0; i<NUM_SELECT; i++) pinMode(selPins[i], OUTPUT);
+  for (int i=0; i<NUM_SELECT; i++)  {
+    pinMode(selPins[i], OUTPUT);
+    pinMode(selPins2[i], OUTPUT);
+  }
+    
   pinMode(13, OUTPUT);
+
   pinMode(enablePin, OUTPUT);
   digitalWrite(enablePin, LOW);
+  
+  pinMode(enablePin2, OUTPUT);
+  digitalWrite(enablePin2, LOW);
 }
 
 void mux(byte output)
@@ -36,40 +50,48 @@ void mux(byte output)
     digitalWrite(selPins[i], ((output >> i) & 1) ? HIGH : LOW);
 }
 
-void loop()
+void mux2(byte output)
 {
-   static unsigned avg[2];
-   static int i = 0;
-   static int muxPin = 14;
-   
-   //int pos = (HIGH == digitalRead(12)) ? 0 : 1;
-   int pos = (muxPin == 14) ? 1 : 0;
-   
-   unsigned val = 1025;
-   for (int v=0; v<5; v++) {
-     unsigned rd = analogRead(0);
-     if (rd < val)
-       val = rd;
-   }
-
-   avg[pos] = (avg[pos] >> 1) + (val >> 1);
-
-   //digitalWrite(13, (avg[pos] > 360) ? HIGH : LOW); // led
-   digitalWrite(13, (1 == pos));
-
-   // delay(50);
-   i++;
-
-   if (0 == i % 100) {
-      i = 0;
-      Serial.print(avg[1], DEC);
-      Serial.print(",");
-      Serial.print(avg[0], DEC);
-      Serial.print(" ");
-   }
-   if (0 == i % 50) {
-      mux(muxPin);
-      muxPin = (14 == muxPin) ? 15 : 14;
-   }
+  for (int i=0; i<NUM_SELECT; i++)
+    digitalWrite(selPins2[i], ((output >> i) & 1) ? HIGH : LOW);
 }
 
+void measure(byte x, byte y, unsigned* tgt)
+{
+  unsigned val = 1025;
+  for (int v=0; v<5; v++) {
+    unsigned rd = analogRead(0);
+    if (rd < val)
+      val = rd;
+  }
+
+   *tgt = (*tgt >> 1) + (val >> 1);
+}
+
+void loop() {
+  static unsigned rv[muxLen*muxLen2];
+  static unsigned i = 0;
+  
+  for (byte k = 0; k < muxLen; k++) {
+    mux(valPos[k]);
+    
+    for (byte l = 0; l < muxLen2; l++) {
+      mux2(valPos2[l]);
+      
+      delayMicroseconds(100);
+      
+      measure(k, l, &rv[l*muxLen + k]);
+    }
+  }
+  
+   i++;
+
+   if (0 == i % 10) {
+      for (int j=muxLen*muxLen2-1; j>=0; j--) {
+        Serial.print(rv[j], DEC);
+        Serial.print(0==j ? " " : ",");
+      }
+     
+      i = 0;
+   }
+}
