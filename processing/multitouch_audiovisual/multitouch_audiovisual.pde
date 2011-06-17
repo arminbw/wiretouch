@@ -7,10 +7,10 @@ Crosspoint[][] crosspoints;
 PFont myFont;
 
 // configuration
-int verticalWires = 2;
+int verticalWires = 16;
 int horizontalWires = 2;
-int crosspointDistance = 200; // how many pixels between 2 crosspoints
-float signalPixelRatio = 0.2; // (see crosspoint.pde)
+int crosspointDistance = 80; // how many pixels between 2 crosspoints
+float signalPixelRatio = 0.07; // (see crosspoint.pde)
 color backgroundColor = color(240,240,240);
 color wireColor = color(200,200,200);
 color signalColor = color(220,220,220);

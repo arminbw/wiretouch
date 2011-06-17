@@ -9,6 +9,6 @@ class Crosspoint {
     fill(signalColor);
     ellipse(x, y, signalStrength*signalPixelRatio, signalStrength*signalPixelRatio);
     fill(textColor);
-    text(signalStrength, x, y);
+    text(signalStrength, x+2, y-2);
   }
 }
