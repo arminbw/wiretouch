@@ -11,22 +11,21 @@ int verticalWires = 16;
 int horizontalWires = 2;
 int crosspointDistance = 80; // how many pixels between 2 crosspoints
 float signalPixelRatio = 0.07; // (see crosspoint.pde)
+color textColor = color(0,0,0);
 color backgroundColor = color(240,240,240);
 color wireColor = color(200,200,200);
 color signalColor = color(220,220,220);
-color textColor = color(0,0,0);
-int instrument = 23; // the famous General Midi tango accordion
+color signalColorTouched = color(180,180,180);
+float signalThreshold = 400;
+int averageSignalCounter = 100;
 
 void setup() {
   size((verticalWires+1)*crosspointDistance, (horizontalWires+1)*crosspointDistance);
   smooth();
   myFont = loadFont("Consolas-12.vlw");
   textFont(myFont, 12);
-  // sc.getMidiDeviceInfo();
-  // sc.setMidiDeviceOutput(0);
-  // sc.instrument(instrument);
-  // println(Serial.list());
   myPort = new Serial( this, Serial.list()[0], 115200 );
+  myPort.clear(); // do we need this?
   myPort.bufferUntil(32); // buffer everything until ASCII whitespace char triggers serialEvent() 
   
   crosspoints = new Crosspoint[horizontalWires][verticalWires];
@@ -62,23 +61,15 @@ void serialEvent(Serial p) {
   int k = 0;
   for (int i = 0; i < horizontalWires; i++) {
     for(int j = 0; j < verticalWires; j++) {
-      crosspoints[i][j].signalStrength = data[k];
+      crosspoints[i][j].setSignalStrength(data[k]);
+      // calculate the average signal strength for every crosspoint
+      if (averageSignalCounter != 0) {
+        crosspoints[i][j].accumulateAvgSig(data[k]);
+      }
       k++;
     }
   }
+  if (averageSignalCounter != 0) {
+    averageSignalCounter--;
+  }
 }
-/*
-void mousePressed() {
-  sc.sendMidi(sc.PROGRAM_CHANGE, 0, instrument, 0);
-  sc.sendMidi(sc.NOTE_ON, 0, 60, 100);
-}
-
-void mouseDragged() {
-  sc.sendMidi(sc.PITCH_BEND, 0, 0, 100 - mouseY + 14);
-  sc.sendMidi(sc.CONTROL_CHANGE, 0, 7, mouseX);
-}
-
-void mouseReleased() {
-  sc.sendMidi(sc.NOTE_OFF, 0, 60, 0);
-}
-*/
