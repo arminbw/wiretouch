@@ -15,8 +15,8 @@ const byte muxLen = 16;
 
 const byte enablePin2 = 11;
 const byte selPins2[] = { 7, 8, 9, 10 };
-const byte valPos2[] = { 0, 1 };
-const byte muxLen2 = 2;
+const byte valPos2[] = { 0, 1, 2 };
+const byte muxLen2 = 3;
 
 void setup() {
   Serial.begin(115200);
@@ -78,7 +78,7 @@ void loop() {
 
   i++;
 
-  /* if (0 == i % 5) */ {
+  if (0 == i % 3) {
     for (int j=muxLen*muxLen2-1; j>=0; j--) {
       Serial.print(rv[j], DEC);
       Serial.print(0==j ? " " : ",");

@@ -1,23 +1,28 @@
-import arb.soundcipher.*; // get it at http://soundcipher.org
+//import arb.soundcipher.*; // get it at http://soundcipher.org
 import processing.serial.*;
 
-SoundCipher sc = new SoundCipher(this);
+import java.text.DecimalFormat;
+
+//SoundCipher sc = new SoundCipher(this);
 Serial myPort;
 Crosspoint[][] crosspoints;
 PFont myFont;
 
 // configuration
 int verticalWires = 16;
-int horizontalWires = 2;
-int crosspointDistance = 80; // how many pixels between 2 crosspoints
-float signalPixelRatio = 0.07; // (see crosspoint.pde)
+int horizontalWires = 3;
+int crosspointDistance = 100; // how many pixels between 2 crosspoints
+float signalPixelRatio = 0.07*1024; // (see crosspoint.pde)
+
 color textColor = color(0,0,0);
 color backgroundColor = color(240,240,240);
 color wireColor = color(200,200,200);
 color signalColor = color(220,220,220);
 color signalColorTouched = color(180,180,180);
 float signalThreshold = 400;
-int averageSignalCounter = 100;
+int averageSignalCounter = 150;
+
+DecimalFormat df = new DecimalFormat("#.###");
 
 void setup() {
   size((verticalWires+1)*crosspointDistance, (horizontalWires+1)*crosspointDistance);
@@ -61,15 +66,25 @@ void serialEvent(Serial p) {
   int k = 0;
   for (int i = 0; i < horizontalWires; i++) {
     for(int j = 0; j < verticalWires; j++) {
-      crosspoints[i][j].setSignalStrength(data[k]);
       // calculate the average signal strength for every crosspoint
-      if (averageSignalCounter != 0) {
+      if (averageSignalCounter > 0) {
         crosspoints[i][j].accumulateAvgSig(data[k]);
+      } else {
+        crosspoints[i][j].setSignalStrength(data[k]);
       }
       k++;
     }
   }
-  if (averageSignalCounter != 0) {
+  if (averageSignalCounter > 0) {
     averageSignalCounter--;
+    println(averageSignalCounter);
   }
 }
+
+/*void keyPressed() {
+  if (value == 0) {
+    value = 255;
+  } else {
+    value = 0;
+  }
+}*/
