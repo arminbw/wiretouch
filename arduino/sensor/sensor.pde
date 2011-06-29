@@ -16,7 +16,7 @@ const byte verticalWires = 16;
 const byte horizontalEnablePin = 11;
 const byte horizontalPins[] = { 7, 8, 9, 10 };
 const byte horizontalPos[] = { 0, 1, 2 };
-const byte horizontalWires = 3;
+const byte horizontalWires = 1;
 
 void setup() {
   Serial.begin(115200);
@@ -67,15 +67,17 @@ void loop() {
   static unsigned rv;
   static unsigned i = 0;
 
-  for (byte k = verticalWires; k > 0; k--) {
-    muxVertical(verticalPos[k-1]);
+  for (byte k = verticalWires-1; k >= 0; k--) {
+    muxVertical(verticalPos[k]);
     for (byte l = 0; l < horizontalWires; l++) {
-      muxHorizontal(horizontalPos[l-1]);
+      muxHorizontal(horizontalPos[l]);
       delayMicroseconds(100);
       measure(&rv);
       Serial.print(rv, DEC);
-      Serial.print(",");
+      if (k != 1 || l != horizontalWires-1) 
+        Serial.print(",");
     }
   }
   Serial.print(" ");
 }
+

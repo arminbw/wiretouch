@@ -11,7 +11,7 @@ ArrayList notes;
 
 // configuration
 int verticalWires = 16;
-int horizontalWires = 3;
+int horizontalWires = 1;
 int crosspointDistance = 80; // how many pixels between 2 crosspoints
 float signalPixelRatio = 0.06*1024; // (see crosspoint.pde)
 
