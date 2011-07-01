@@ -2,25 +2,25 @@ import arb.soundcipher.*; // get it at http://soundcipher.org
 import processing.serial.*;
 import java.text.DecimalFormat;
 
-//SoundCipher sc = new SoundCipher(this);
 Serial myPort;
 Crosspoint[][] crosspoints;
 PFont myFont;
-SoundCipher sc = new SoundCipher(this);
+SoundCipher sc;
 ArrayList notes;
+String textInformation;
 
 // configuration
 int verticalWires = 16;
-int horizontalWires = 1;
+int horizontalWires = 3;
 int crosspointDistance = 80; // how many pixels between 2 crosspoints
 float signalPixelRatio = 0.06*1024; // (see crosspoint.pde)
 
-color textColor = color(0,0,0);
+color textColor = color(60,60,60);
 color backgroundColor = color(240,240,240);
-color wireColor = color(200,200,200);
-color signalColor = color(220,220,220);
-color signalColorTouched = color(180,180,180);
-float signalThreshold = 0.65;
+color wireColor = color(180,180,180);
+color signalColor = color(190,190,190);
+color signalColorTouched = color(102,149,192);
+float signalThreshold = 0.35;
 int averageSignalCounter = 150;
 
 DecimalFormat df = new DecimalFormat("#.###");
@@ -30,26 +30,22 @@ void setup() {
   smooth();
   myFont = loadFont("Consolas-12.vlw");
   textFont(myFont, 12);
-  myPort = new Serial( this, Serial.list()[0], 115200 );
+  textInformation = "starting";
+  float note = 24.0;
+  notes = new ArrayList();
+  crosspoints = new Crosspoint[verticalWires][horizontalWires];
+  for (int i = 0; i < verticalWires; i++) {
+    for(int j = 0; j < horizontalWires; j++) {
+      crosspoints[i][j] = new Crosspoint(crosspointDistance*(i+1),crosspointDistance*(j+1));
+      crosspoints[i][j].note = note;
+      note++; 
+    } 
+  }   
+  sc = new SoundCipher(this);
+  sc.instrument = 123;  
+  myPort = new Serial( this, Serial.list()[1], 115200 );
   myPort.clear(); // do we need this?
   myPort.bufferUntil(32); // buffer everything until ASCII whitespace char triggers serialEvent() 
-  
-  crosspoints = new Crosspoint[horizontalWires][verticalWires];
-  float note = 0.0;
-  for (int i = 0; i < horizontalWires; i++) {
-    for(int j = 0; j < verticalWires; j++) {
-      crosspoints[i][j] = new Crosspoint(crosspointDistance*(j+1),crosspointDistance*(i+1));
-      // c major chord
-      /* int turn = ((i+j) % 3);
-      if (turn == 0) note = note + 4;
-      if (turn == 1) note = note + 3;
-      if (turn == 2) note = note + 5; */
-      note++; 
-      crosspoints[i][j].note = note;
-    } 
-  } 
-  notes = new ArrayList();
-  sc.instrument = sc.DRUM;
 }
 
 void draw() {
@@ -57,42 +53,52 @@ void draw() {
   if (averageSignalCounter == 0) {
     // draw the crosspoint signals
     noStroke();
-    for (int i = 0; i < horizontalWires; i++) {
-      for(int j = 0; j < verticalWires; j++) {
+    for (int i = 0; i < verticalWires; i++) {
+      for(int j = 0; j < horizontalWires; j++) {
         crosspoints[i][j].draw();
       }
     }
+
     // draw the grid
     stroke(wireColor);
+    for(int j = 1; j <= verticalWires; j++) {
+      line(crosspointDistance*j, crosspointDistance, crosspointDistance*j, crosspointDistance*horizontalWires);
+    }
     for (int i = 1; i <= horizontalWires; i++) {
       line(crosspointDistance, crosspointDistance*i, crosspointDistance*verticalWires, crosspointDistance*i);
-      for(int j = 1; j <= verticalWires; j++) {
-        line(crosspointDistance*j, crosspointDistance, crosspointDistance*j, crosspointDistance*horizontalWires);
-      } 
     }
   }
+  drawTextInformation();
   // play the chord
   playChord();
 }
 
+void drawTextInformation() {
+  fill(textColor);
+  text(textInformation, 10, height-10);
+}
+
 void serialEvent(Serial p) {
-  String myString = trim(p.readString());
+  String myString = p.readString();
+  // println("START"+myString+"END");
+  myString = trim(myString);
   int data[] = int(split(myString,','));
   int k = 0;
   for (int i = 0; i < verticalWires; i++) {
     for(int j = 0; j < horizontalWires; j++) {
       // calculate the average signal strength for every crosspoint
       if (averageSignalCounter > 0) {
-        crosspoints[j][i].accumulateAvgSig(data[k]);
+        crosspoints[i][j].accumulateAvgSig(data[k]);  
       } else {
-        crosspoints[j][i].setSignalStrength(data[k]);
+        crosspoints[i][j].setSignalStrength(data[k]);
       }
+      // println(k+": "+data[k]);
       k++;
     }
   }
   if (averageSignalCounter > 0) {
     averageSignalCounter--;
-    println(averageSignalCounter);
+    textInformation = "calibrating: "+averageSignalCounter;
   }
 }
 
@@ -107,7 +113,26 @@ void playChord() {
     for (int i = 0; i < temp.length; i++) {
       pitches[i] = (Float) temp[i];
     }
-    sc.playChord(pitches, 127.0, 2.0);
+    sc.playChord(pitches, 127.0, 0.8  );
     notes.clear();
   } 
+}
+
+void keyPressed() {
+  if ((key == 'a') && (sc.instrument > 0)) {
+    sc.instrument--;
+    textInformation = "instrument: "+sc.instrument;
+  }
+  if ((key == 'd') && (sc.instrument < 127)) {
+    sc.instrument++;
+    textInformation = "instrument: "+sc.instrument; 
+  }
+  if ((key == 'w') && (sc.instrument > 0)) {
+    signalThreshold = signalThreshold + 0.01;
+    textInformation = "signal threshold: "+signalThreshold; 
+  }
+  if ((key == 's') && (sc.instrument < 127)) {
+    signalThreshold = signalThreshold - 0.01;
+    textInformation = "signal threshold: "+signalThreshold; 
+  }
 }

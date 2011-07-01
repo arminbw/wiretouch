@@ -11,19 +11,19 @@ class Crosspoint {
   Crosspoint (int x, int y) {
     this.x = x;
     this.y = y;
-    this.signalStrengthAverage = 0;
     this.measuredSignal = 1;
+    this.signalStrength = 1;
+    this.signalStrengthAverage = 0;
     this.playingSound = false;
     this.note = 0;
   }
   
   void draw() {
+    fill(signalColor);
     if (signalStrength>signalThreshold) {
-      fill(signalColor);
       this.playingSound = false;
     }
     else {
-      fill(signalColorTouched);
       if (this.playingSound == false) {
         this.playingSound = true;
         playNote(this.note);
@@ -31,9 +31,7 @@ class Crosspoint {
     }
     ellipse(x, y, (float)signalStrength*signalPixelRatio, (float)signalStrength*signalPixelRatio);
     fill(textColor);
-    // text((measuredSignal+"\n"+signalStrength+"\n"+signalStrengthAverage), x+2, y-2);
-    // text((this.signalMax + " (" + df.format(this.signalPMax) +")\n"+df.format(signalStrength)+"\n"+this.signalMin + " (" + df.format(this.signalPMin) + ")"), x-crosspointDistance/2.0, y-2);
-    text((this.signalMax+"\n"+df.format(this.signalStrengthAverage)+"\n"+this.signalMin+"\n"+df.format(signalStrength)), x+4, y-4);
+    text((df.format(signalStrength)+"\n"+this.signalMax+"\n"+df.format(this.signalStrengthAverage)+"\n"+this.signalMin), x+4, y-4);
   }
   
   void setSignalStrength(int msr) {
@@ -55,3 +53,4 @@ class Crosspoint {
     this.signalStrengthAverage = this.signalStrengthAverage/2 + (val/2);
   }
 }
+
