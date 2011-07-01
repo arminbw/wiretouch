@@ -83,6 +83,7 @@ void serialEvent(Serial p) {
   // println("START"+myString+"END");
   myString = trim(myString);
   int data[] = int(split(myString,','));
+  
   int k = 0;
   for (int i = 0; i < verticalWires; i++) {
     for(int j = 0; j < horizontalWires; j++) {

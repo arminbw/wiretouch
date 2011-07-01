@@ -67,9 +67,17 @@ unsigned int measure() {
 void loop() {
   for (int k = verticalWires; k > 0; k--) {
     muxVertical(verticalPos[k-1]);
-    for (byte l = horizontalWires; l > 0; l--) {
+    for (byte l = 0; l < horizontalWires; l++) {
       muxHorizontal(horizontalPos[l]);
       delayMicroseconds(100);
+      
+      /*if (verticalPos[k-1] == 15 && 0 == horizontalPos[l]) {
+        char buf[128];
+        sprintf(buf, "vertical:%d horiz:%d val:%d", verticalPos[k-1], horizontalPos[l], measure());
+        Serial.println(buf);
+      }*/
+      
+      
       Serial.print(measure(),DEC);
       Serial.print(",");
     }
