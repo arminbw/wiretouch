@@ -11,7 +11,7 @@ String textInformation;
 
 // configuration
 int verticalWires = 16;
-int horizontalWires = 3;
+int horizontalWires = 4;
 int crosspointDistance = 80; // how many pixels between 2 crosspoints
 float signalPixelRatio = 0.06*1024; // (see crosspoint.pde)
 
@@ -61,16 +61,16 @@ void draw() {
 
     // draw the grid
     stroke(wireColor);
-    for(int j = 1; j <= verticalWires; j++) {
-      line(crosspointDistance*j, crosspointDistance, crosspointDistance*j, crosspointDistance*horizontalWires);
-    }
     for (int i = 1; i <= horizontalWires; i++) {
       line(crosspointDistance, crosspointDistance*i, crosspointDistance*verticalWires, crosspointDistance*i);
+    }
+    for(int j = 1; j <= verticalWires; j++) {
+      line(crosspointDistance*j, crosspointDistance, crosspointDistance*j, crosspointDistance*horizontalWires);
     }
   }
   drawTextInformation();
   // play the chord
-  playChord();
+  // playChord();
 }
 
 void drawTextInformation() {
@@ -93,6 +93,7 @@ void serialEvent(Serial p) {
       } else {
         crosspoints[i][j].setSignalStrength(data[k]);
       }
+      crosspoints[i][j].id = k;
       // println(k+": "+data[k]);
       k++;
     }
@@ -135,5 +136,9 @@ void keyPressed() {
   if ((key == 's') && (sc.instrument < 127)) {
     signalThreshold = signalThreshold - 0.01;
     textInformation = "signal threshold: "+signalThreshold; 
+  }
+  // recalibrate
+  if (key == 'r') {
+    averageSignalCounter=150;
   }
 }

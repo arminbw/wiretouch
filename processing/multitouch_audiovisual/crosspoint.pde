@@ -7,6 +7,7 @@ class Crosspoint {
   double signalPMin = 1000000000, signalPMax = -1000;
   boolean playingSound;
   float note;
+  int id;
   
   Crosspoint (int x, int y) {
     this.x = x;
@@ -31,7 +32,7 @@ class Crosspoint {
     }
     ellipse(x, y, (float)signalStrength*signalPixelRatio, (float)signalStrength*signalPixelRatio);
     fill(textColor);
-    text((df.format(signalStrength)+"\n"+this.signalMax+"\n"+df.format(this.signalStrengthAverage)+"\n"+this.signalMin), x+4, y-4);
+    text(this.id+"\n"+(df.format(signalStrength)+"\n"+this.signalMax+"\n"+df.format(this.signalStrengthAverage)+"\n"+this.signalMin), x+4, y-4);
   }
   
   void setSignalStrength(int msr) {
