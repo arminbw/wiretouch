@@ -1,6 +1,7 @@
+import processing.opengl.*;
 import arb.soundcipher.*; // get it at http://soundcipher.org
 import processing.serial.*;
-import java.text.DecimalFormat;
+// import java.text.DecimalFormat;
 
 Serial myPort;
 Crosspoint[][] crosspoints;
@@ -11,9 +12,9 @@ String textInformation;
 
 // configuration
 int verticalWires = 16;
-int horizontalWires = 4;
-int crosspointDistance = 80; // how many pixels between 2 crosspoints
-float signalPixelRatio = 0.06*1024; // (see crosspoint.pde)
+int horizontalWires = 11;
+int crosspointDistance = 50; // how many pixels between 2 crosspoints
+float signalPixelRatio = 0.04*1024; // (see crosspoint.pde)
 
 color textColor = color(60,60,60);
 color backgroundColor = color(240,240,240);
@@ -21,12 +22,16 @@ color wireColor = color(180,180,180);
 color signalColor = color(190,190,190);
 color signalColorTouched = color(102,149,192);
 float signalThreshold = 0.35;
-int averageSignalCounter = 150;
+static final int AVERAGESIGNALCOUNTERMAX = 150;
+int averageSignalCounter = AVERAGESIGNALCOUNTERMAX;
+boolean bDebug = false;
+boolean bUpdate = true;
+boolean bShowText = false;
 
 DecimalFormat df = new DecimalFormat("#.###");
 
 void setup() {
-  size((verticalWires+1)*crosspointDistance, (horizontalWires+1)*crosspointDistance);
+  size((verticalWires+1)*crosspointDistance, (horizontalWires+1)*crosspointDistance+100, P2D);
   smooth();
   myFont = loadFont("Consolas-12.vlw");
   textFont(myFont, 12);
@@ -58,7 +63,6 @@ void draw() {
         crosspoints[i][j].draw();
       }
     }
-
     // draw the grid
     stroke(wireColor);
     for (int i = 1; i <= horizontalWires; i++) {
@@ -70,37 +74,42 @@ void draw() {
   }
   drawTextInformation();
   // play the chord
-  // playChord();
+  playChord();
 }
 
 void drawTextInformation() {
   fill(textColor);
-  text(textInformation, 10, height-10);
+  text(textInformation, 10, height-110);
 }
 
 void serialEvent(Serial p) {
   String myString = p.readString();
-  // println("START"+myString+"END");
-  myString = trim(myString);
-  int data[] = int(split(myString,','));
-  
-  int k = 0;
-  for (int i = 0; i < verticalWires; i++) {
-    for(int j = 0; j < horizontalWires; j++) {
-      // calculate the average signal strength for every crosspoint
-      if (averageSignalCounter > 0) {
-        crosspoints[i][j].accumulateAvgSig(data[k]);  
-      } else {
-        crosspoints[i][j].setSignalStrength(data[k]);
+  if (bUpdate) {
+    myString = trim(myString);
+    int data[] = int(split(myString,','));
+    
+    int k = 0;
+    for (int i = 0; i < verticalWires; i++) {
+      for(int j = 0; j < horizontalWires; j++) {
+        // calculate the average signal strength for every crosspoint
+        if (averageSignalCounter > 0) {
+          crosspoints[i][j].accumulateAvgSig(data[k]);  
+        } else {
+          crosspoints[i][j].setSignalStrength(data[k]);
+        }
+        crosspoints[i][j].id = k;
+        k++;
       }
-      crosspoints[i][j].id = k;
-      // println(k+": "+data[k]);
-      k++;
     }
-  }
-  if (averageSignalCounter > 0) {
-    averageSignalCounter--;
-    textInformation = "calibrating: "+averageSignalCounter;
+    if (averageSignalCounter > 0) {
+      averageSignalCounter--;
+      textInformation = "calibrating: "+averageSignalCounter;
+    }
+    if (bDebug == true) {
+      textInformation = "press 'b' to stop debugging mode";
+      println("\nDEBUGGING:\n"+myString);
+      bUpdate = false;
+    }
   }
 }
 
@@ -139,6 +148,11 @@ void keyPressed() {
   }
   // recalibrate
   if (key == 'r') {
-    averageSignalCounter=150;
+    averageSignalCounter=AVERAGESIGNALCOUNTERMAX;
+  }
+  // debug
+  if (key == 'b') {
+    bDebug = !bDebug;
+    if (bDebug == false) bUpdate = true;
   }
 }

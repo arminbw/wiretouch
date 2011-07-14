@@ -15,8 +15,8 @@ const byte verticalWires = 16;
 
 const byte horizontalEnablePin = 11;
 const byte horizontalPins[] = { 7, 8, 9, 10 };
-const byte horizontalPos[] = { 0, 1, 2, 3 };
-const byte horizontalWires = 4;
+const byte horizontalPos[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+const byte horizontalWires = 11;
 
 void setup() {
   Serial.begin(115200);
@@ -49,19 +49,19 @@ void muxVertical(byte output) {
 }
 
 void muxHorizontal(byte output) {
-  for (int i=0; i<NUM_SELECT; i++)
+  for (int i=0; i<NUM_SELECT; i++) {
     digitalWrite(horizontalPins[i], ((output >> i) & 1) ? HIGH : LOW);
+  }
 }
 
 unsigned int measure() {
-  unsigned int tgt;
   int val = 1025;
   for (int v=0; v<5; v++) {
     unsigned rd = analogRead(0);
     if (rd < val)
       val = rd;
   }
-  return ((tgt >> 1) + (val >> 1));
+  return (val);
 }
 
 void loop() {
@@ -69,15 +69,7 @@ void loop() {
     muxVertical(verticalPos[k]);
     for (byte l = 0; l < horizontalWires; l++) {
       muxHorizontal(horizontalPos[l]);
-      delayMicroseconds(100);
-      
-      /*if (verticalPos[k-1] == 15 && 0 == horizontalPos[l]) {
-        char buf[128];
-        sprintf(buf, "vertical:%d horiz:%d val:%d", verticalPos[k-1], horizontalPos[l], measure());
-        Serial.println(buf);
-      }*/
-      
-      
+      delayMicroseconds(100);    
       Serial.print(measure(),DEC);
       Serial.print(",");
     }

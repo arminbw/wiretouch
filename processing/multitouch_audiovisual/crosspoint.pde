@@ -32,7 +32,14 @@ class Crosspoint {
     }
     ellipse(x, y, (float)signalStrength*signalPixelRatio, (float)signalStrength*signalPixelRatio);
     fill(textColor);
-    text(this.id+"\n"+(df.format(signalStrength)+"\n"+this.signalMax+"\n"+df.format(this.signalStrengthAverage)+"\n"+this.signalMin), x+4, y-4);
+    if (bDebug) {
+      text(this.id+"\n"+this.measuredSignal+"\n"+df.format(signalStrength), x+4, y-4);
+    }
+    else {
+      if (bShowText) {
+        text((df.format(signalStrength)+"\n"+this.signalMax+"\n"+df.format(this.signalStrengthAverage)+"\n"+this.signalMin), x+4, y-4);
+      }
+    }
   }
   
   void setSignalStrength(int msr) {
