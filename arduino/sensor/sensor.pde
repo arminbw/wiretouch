@@ -6,6 +6,8 @@
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
 
+#define PRINT_BINARY    1
+
 #define NUM_SELECT 4
 
 const byte verticalEnablePin = 6;
@@ -65,16 +67,36 @@ unsigned int measure() {
 }
 
 void loop() {
+  static boolean isRunning = 0;
+  unsigned sample;
+  
+  while(!isRunning) {
+    if (Serial.available()) {
+      byte c = Serial.read();
+      isRunning = ('s' == c);
+    }
+  }
+  
   for (int k = 0; k < verticalWires; k++) {
     muxVertical(verticalPos[k]);
     for (byte l = 0; l < horizontalWires; l++) {
       muxHorizontal(horizontalPos[l]);
-      delayMicroseconds(100);    
-      Serial.print(measure(),DEC);
+      delayMicroseconds(100);
+    
+      sample = measure();
+      
+#if PRINT_BINARY
+      Serial.print((byte)((sample >> 8) & 0xff), BYTE);
+      Serial.print((byte)(sample & 0xff), BYTE);
+#else
+      Serial.print(sample, DEC);
       Serial.print(",");
+#endif
     }
   }
+
+#if !PRINT_BINARY  
   Serial.print(" ");
-  delayMicroseconds(100);
+#endif
 }
 

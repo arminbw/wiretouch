@@ -23,10 +23,13 @@ float signalThreshold = 0.35;
 static final int AVERAGESIGNALCOUNTERMAX = 150;
 int averageSignalCounter = AVERAGESIGNALCOUNTERMAX;
 boolean bDebug = false;
-boolean bFakeData = true;
+boolean bFakeData = false;
 boolean bUpdate = true;
 boolean bShowText = false;
 boolean bShowPixelMatrix = false;
+boolean bReadBinary = true;
+
+static byte[] serBuffer = null;
 
 DecimalFormat df = new DecimalFormat("#.###");
 
@@ -45,9 +48,16 @@ void setup() {
       // pixelMatrix[i][j] = 0.0;
     } 
   }   
-  myPort = new Serial( this, Serial.list()[1], 115200 );
+  
+  serBuffer = new byte[2 * horizontalWires * verticalWires];
+  
+  myPort = new Serial( this, Serial.list()[0], 115200 );
   myPort.clear(); // do we need this?
-  myPort.bufferUntil(32); // buffer everything until ASCII whitespace char triggers serialEvent() 
+  
+  if (bReadBinary)
+    myPort.buffer(2 * horizontalWires * verticalWires);
+  else
+    myPort.bufferUntil(32); // buffer everything until ASCII whitespace char triggers serialEvent() 
 }
 
 void draw() {
@@ -81,7 +91,39 @@ void drawTextInformation() {
 }
 
 void serialEvent(Serial p) {
-  parseData(p.readString());
+  if (bReadBinary)
+    consumeSerialBuffer(p);
+  else
+    parseData(p.readString());
+}
+
+int sb2ub(byte p) {
+  return p < 0 ? 256+p : p;
+}
+
+void consumeSerialBuffer(Serial p)
+{
+  p.readBytes(serBuffer);
+  
+  if (bUpdate) {    
+    for (int i = 0; i < verticalWires; i++) {
+      for(int j = 0; j < horizontalWires; j++) {
+        int sigPos = i*horizontalWires + j;
+        int sig = ((sb2ub(serBuffer[2*sigPos])) << 8) | (sb2ub(serBuffer[2*sigPos+1]));
+        
+        // calculate the average signal strength for every crosspoint
+        if (averageSignalCounter > 0) {
+          crosspoints[i][j].accumulateAvgSig(sig);  
+        } else {
+          crosspoints[i][j].setSignalStrength(sig);
+        }        
+      }
+    }
+    if (averageSignalCounter > 0) {
+      averageSignalCounter--;
+      textInformation = "calibrating: "+averageSignalCounter;
+    }
+  }
 }
 
 void parseData(String myString) {
@@ -121,5 +163,9 @@ void keyPressed() {
   if (key == 'b') {
     bDebug = !bDebug;
     if (bDebug == false) bUpdate = true;
+  }
+  
+  if (key == 's') {
+    myPort.write('s');
   }
 }
