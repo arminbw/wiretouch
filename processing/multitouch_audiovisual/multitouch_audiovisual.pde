@@ -1,12 +1,10 @@
-import processing.opengl.*;
-import arb.soundcipher.*; // get it at http://soundcipher.org
 import processing.serial.*;
-// import java.text.DecimalFormat;
+import java.text.DecimalFormat;
 
 Serial myPort;
 Crosspoint[][] crosspoints;
+float[][] pixelMatrix; 
 PFont myFont;
-SoundCipher sc;
 ArrayList notes;
 String textInformation;
 
@@ -25,8 +23,10 @@ float signalThreshold = 0.35;
 static final int AVERAGESIGNALCOUNTERMAX = 150;
 int averageSignalCounter = AVERAGESIGNALCOUNTERMAX;
 boolean bDebug = false;
+boolean bFakeData = true;
 boolean bUpdate = true;
 boolean bShowText = false;
+boolean bShowPixelMatrix = false;
 
 DecimalFormat df = new DecimalFormat("#.###");
 
@@ -42,18 +42,18 @@ void setup() {
   for (int i = 0; i < verticalWires; i++) {
     for(int j = 0; j < horizontalWires; j++) {
       crosspoints[i][j] = new Crosspoint(crosspointDistance*(i+1),crosspointDistance*(j+1));
-      crosspoints[i][j].note = note;
-      note++; 
+      // pixelMatrix[i][j] = 0.0;
     } 
   }   
-  sc = new SoundCipher(this);
-  sc.instrument = 123;  
   myPort = new Serial( this, Serial.list()[1], 115200 );
   myPort.clear(); // do we need this?
   myPort.bufferUntil(32); // buffer everything until ASCII whitespace char triggers serialEvent() 
 }
 
 void draw() {
+  if (bFakeData) {
+     // String fakeData = "250,406,519,238,185,29,60,15,46,7,3,263,552,688,368,481,223,467,231,243,135,22,297,682,732,443,647,364,604,372,419,248,130,387,668,714,448,643,345,595,372,408,230,133,353,539,715,403,568,270,504,252,241,101,59,304,496,693,377,446,174,275,120,102,15,3,252,444,663,341,368,131,161,54,24,4,2,252,405,620,313,286,98,127,24,16,3,2,263,359,506,217,153,22,65,12,14,3,2,244,345,343,95,98,31,79,13,12,3,2,246,368,491,212,121,17,58,10,11,3,1,252,384,508,225,103,15,45,8,14,3,2,257,406,595,299,120,17,46,7,71,41,27,291,444,664,345,309,118,146,88,143,78,48,304,445,668,361,369,174,226,160,185,87,48,291,355,596,316,244,71,121,79,92,13,3,");
+  }
   background(backgroundColor);
   if (averageSignalCounter == 0) {
     // draw the crosspoint signals
@@ -73,8 +73,6 @@ void draw() {
     }
   }
   drawTextInformation();
-  // play the chord
-  playChord();
 }
 
 void drawTextInformation() {
@@ -83,11 +81,13 @@ void drawTextInformation() {
 }
 
 void serialEvent(Serial p) {
-  String myString = p.readString();
+  parseData(p.readString());
+}
+
+void parseData(String myString) {
   if (bUpdate) {
     myString = trim(myString);
     int data[] = int(split(myString,','));
-    
     int k = 0;
     for (int i = 0; i < verticalWires; i++) {
       for(int j = 0; j < horizontalWires; j++) {
@@ -97,7 +97,6 @@ void serialEvent(Serial p) {
         } else {
           crosspoints[i][j].setSignalStrength(data[k]);
         }
-        crosspoints[i][j].id = k;
         k++;
       }
     }
@@ -110,42 +109,10 @@ void serialEvent(Serial p) {
       println("\nDEBUGGING:\n"+myString);
       bUpdate = false;
     }
-  }
-}
-
-void playNote(float pitch) {
-  notes.add(pitch);
-}
-
-void playChord() {
-  Object[] temp = notes.toArray();
-  if (notes.size() > 0) {
-    float[] pitches = new float[notes.size()];
-    for (int i = 0; i < temp.length; i++) {
-      pitches[i] = (Float) temp[i];
-    }
-    sc.playChord(pitches, 127.0, 0.8  );
-    notes.clear();
   } 
 }
 
 void keyPressed() {
-  if ((key == 'a') && (sc.instrument > 0)) {
-    sc.instrument--;
-    textInformation = "instrument: "+sc.instrument;
-  }
-  if ((key == 'd') && (sc.instrument < 127)) {
-    sc.instrument++;
-    textInformation = "instrument: "+sc.instrument; 
-  }
-  if ((key == 'w') && (sc.instrument > 0)) {
-    signalThreshold = signalThreshold + 0.01;
-    textInformation = "signal threshold: "+signalThreshold; 
-  }
-  if ((key == 's') && (sc.instrument < 127)) {
-    signalThreshold = signalThreshold - 0.01;
-    textInformation = "signal threshold: "+signalThreshold; 
-  }
   // recalibrate
   if (key == 'r') {
     averageSignalCounter=AVERAGESIGNALCOUNTERMAX;
