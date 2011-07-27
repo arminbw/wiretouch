@@ -1,7 +1,7 @@
 class Crosspoint {
   int x, y;
-  double measuredSignal;
-  double signalStrength;
+  double measuredSignal;          // the actual received values
+  double signalStrength;          // the calculated signal strength (ca0.0-1.0)
   double signalStrengthAverage;
   double signalMin = 1000000000, signalMax = -1000;
   double signalPMin = 1000000000, signalPMax = -1000;
@@ -22,7 +22,7 @@ class Crosspoint {
       text(this.measuredSignal+"\n"+df.format(signalStrength), x+4, y-4);
     }
     else {
-      if (bShowText) {
+      if (bShowCrosspointText) {
         text((df.format(signalStrength)+"\n"+this.signalMax+"\n"+df.format(this.signalStrengthAverage)+"\n"+this.signalMin), x+4, y-4);
       }
     }
@@ -46,5 +46,6 @@ class Crosspoint {
   void accumulateAvgSig(int val) {
     this.signalStrengthAverage = this.signalStrengthAverage/2 + (val/2);
   }
+  
 }
 
