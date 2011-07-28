@@ -1,5 +1,7 @@
+import processing.opengl.*;
 import processing.serial.*;
 import java.text.DecimalFormat;
+
 
 DecimalFormat df = new DecimalFormat("#.###");
 
@@ -10,12 +12,27 @@ PFont myFont;
 String textInformation;
 static byte[] serBuffer = null;
 
+Interpolator interpolator = null;
+
+static final int kInterpLinear = 0;
+static final int kInterpCosine = 1;
+static final int kInterpCubic = 2;
+static final int kInterpCatmullRom = 3;
+static final int kInterpHermite = 4;
+
+static final int kNumInterp = 5;
+
+int interpType = kInterpLinear;
+int interpolationResolution = 4;
+
 // configuration
 int verticalWires = 16;
 int horizontalWires = 11;
 static final int crosspointDistance=60; // how many pixels between 2 crosspoints
 static final int pixelWidth =  crosspointDistance / 2;
 float signalPixelRatio = 0.02*1024; // (see crosspoint.pde)
+
+int sketchWidth, sketchHeight;
 
 color textColor = color(60,60,60);
 color backgroundColor = color(240,240,240);
@@ -33,7 +50,10 @@ boolean bShowPixelMatrix = true;      // show the pixel matrix (instead of the s
 boolean bReadBinary = true;           // read binary data (instead of strings)
 
 void setup() {
-  size((verticalWires+1)*crosspointDistance, (horizontalWires+1)*crosspointDistance+80, P2D);
+  sketchWidth = (verticalWires+1)*crosspointDistance;
+  sketchHeight = (horizontalWires+1)*crosspointDistance+80;
+   
+  size(sketchWidth, sketchHeight, OPENGL);
   smooth();
   myFont = loadFont("Consolas-12.vlw");
   textFont(myFont, 12);
@@ -44,6 +64,9 @@ void setup() {
       crosspoints[i][j] = new Crosspoint(crosspointDistance*(i+1),crosspointDistance*(j+1));
     } 
   }
+  
+  initInterpolator();
+  
   pixelMatrix = new double[(verticalWires*2)+1][(horizontalWires*2)+1];
   wipePixelMatrix();
   if (bFakeData) 
@@ -65,14 +88,19 @@ void draw() {
   if (bFakeData) {
     dataManager.parseFakeData(); 
   }
+  
+  interpolator.interpolate(crosspoints);
+  
   if (bShowPixelMatrix) {
     drawPixelMatrix();
+    fill(textColor);
+    text(interpolator.name() + " x" + interpolationResolution, 15, height-55);
   }
   else {
     drawSignalCircles();
   }
   fill(textColor);
-  text(textInformation, 15, height-70);
+  text(textInformation, 15, height-70); 
 }
 
 void drawSignalCircles() {
@@ -96,30 +124,7 @@ void drawSignalCircles() {
 }
 
 void drawPixelMatrix() {
-  wipePixelMatrix();    
-  for (int i = 0; i < verticalWires; i++) {
-    for(int j = 0; j < horizontalWires; j++) {
-      pixelMatrix[(i*2)+1][(j*2)+1] = crosspoints[i][j].signalStrength;
-      // interpolation
-      pixelMatrix[(i*2)][(j*2)+1] += crosspoints[i][j].signalStrength/2;
-      pixelMatrix[(i*2)+1][(j*2)] += crosspoints[i][j].signalStrength/2;
-      pixelMatrix[(i*2)+1][(j*2)+2] += crosspoints[i][j].signalStrength/2;
-      pixelMatrix[(i*2)+2][(j*2)+1] += crosspoints[i][j].signalStrength/2;
-      // diagonal pixels
-      pixelMatrix[(i*2)][(j*2)] += crosspoints[i][j].signalStrength/4;
-      pixelMatrix[(i*2)+2][(j*2)] += crosspoints[i][j].signalStrength/4;
-      pixelMatrix[(i*2)][(j*2)+2] += crosspoints[i][j].signalStrength/4;
-      pixelMatrix[(i*2)+2][(j*2)+2] += crosspoints[i][j].signalStrength/4;
-    }
-  }
-  // draw the pixel matrix
-  noStroke();
-  for (int i = 0; i < (verticalWires*2)+1; i++) {
-    for (int j = 0; j < (horizontalWires*2)+1; j++) {
-      fill(color((float) pixelMatrix[i][j]*255));
-      rect(i*pixelWidth+15, 15+j*pixelWidth, pixelWidth, pixelWidth);
-    } 
-  }
+  interpolator.drawByWidthPreservingAspectRatio(15, 15, sketchWidth-15);
 }
 
 void serialEvent(Serial p) {
@@ -128,6 +133,27 @@ void serialEvent(Serial p) {
   }
   else {
     dataManager.parseData(p.readString());
+  }
+}
+
+void initInterpolator() {
+  switch (interpType) {
+    case kInterpHermite:
+        interpolator = new HermiteInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
+        break;
+    case kInterpCatmullRom:
+        interpolator = new CatmullRomInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
+        break;
+    case kInterpCubic:
+        interpolator = new CubicInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
+        break;
+    case kInterpCosine:
+        interpolator = new CosineInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
+        break;
+    case kInterpLinear:
+    default:
+        interpolator = new LinearInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
+        break;
   }
 }
 
@@ -158,5 +184,24 @@ void keyPressed() {
     if (!bFakeData) {
       dataManager.myPort.write('s');
     }
+  }
+  
+  // change interpolation algorithm for pixel matrix
+  if (key == 'i') {
+    interpType = ++interpType % kNumInterp;
+    initInterpolator();
+  }
+  
+  //change interpolation resolution
+  if (key == 'o' || key == 'p') {
+    interpolationResolution += ((key == 'o') ? -1 : 1);
+    interpolationResolution = max(1, min(interpolationResolution, 15));
+    initInterpolator();
+  }
+  
+  if (interpolator instanceof HermiteInterpolator && (key == 'k' || key == 'l')) {
+     HermiteInterpolator ip = (HermiteInterpolator)interpolator;
+     ip.tension += (key == 'k') ? -0.1 : 0.1;
+     ip.tension = constrain((float)ip.tension, -2.0, 2.0);
   }
 }
