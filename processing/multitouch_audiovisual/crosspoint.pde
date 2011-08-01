@@ -1,8 +1,8 @@
 class Crosspoint {
   int x, y;
   double measuredSignal;          // the actual received values
-  double signalStrength;          // the calculated signal strength (ca0.0-1.0)
-  double signalStrengthAverage;
+  double measuredSignalAverage;
+  double signalStrength;          // the calculated signal strength (ca. 0.0-1.0)
   double signalMin = 1000000000, signalMax = -1000;
   double signalPMin = 1000000000, signalPMax = -1000;
   
@@ -10,27 +10,23 @@ class Crosspoint {
     this.x = x;
     this.y = y;
     this.measuredSignal = 1;
+    this.measuredSignalAverage = 0;
     this.signalStrength = 1;
-    this.signalStrengthAverage = 0;
   }
   
-  void draw() {
+  void draw(boolean bDrawText) {
     fill(signalColor);
     ellipse(x, y, (float)signalStrength*signalPixelRatio, (float)signalStrength*signalPixelRatio);
     fill(textColor);
-    if (bDebug) {
-      text(this.measuredSignal+"\n"+df.format(signalStrength), x+4, y-4);
-    }
-    else {
-      if (bShowCrosspointText) {
-        text((df.format(signalStrength)+"\n"+this.signalMax+"\n"+df.format(this.signalStrengthAverage)+"\n"+this.signalMin), x+4, y-4);
-      }
+    if (bDrawText) {
+      text((df.format(signalStrength)+"\n"+this.signalMax+"\n"+df.format(this.measuredSignalAverage)+"\n"+this.signalMin), x+4, y-4);
     }
   }
   
   void setSignalStrength(int msr) {
     this.measuredSignal = msr;
-    this.signalStrength = (double)msr / (this.signalStrengthAverage+1);
+    // this.signalStrength = (double)msr / 1024; // without calibration
+    this.signalStrength = (double) msr / (this.measuredSignalAverage+1);
     
     if (msr > this.signalMax)
       this.signalMax = msr;
@@ -44,8 +40,6 @@ class Crosspoint {
   }
   
   void accumulateAvgSig(int val) {
-    this.signalStrengthAverage = this.signalStrengthAverage/2 + (val/2);
+    this.measuredSignalAverage = this.measuredSignalAverage/2 + (val/2);
   }
-  
 }
-

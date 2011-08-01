@@ -5,7 +5,7 @@ class HermiteInterpolator extends Interpolator4x4
    
    HermiteInterpolator(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier)
    {
-      super(horizontalSamples, verticalSamples, horizontalMultiplier, verticalMultiplier, "hermite interpolation");
+      super(horizontalSamples, verticalSamples, horizontalMultiplier, verticalMultiplier, "hermite interpolation [k][l]");
       this.bias = 0;
       this.tension = 0;
       this._df = new DecimalFormat("0.0");
