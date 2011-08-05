@@ -1,9 +1,14 @@
 class Interpolator
 {
+   static final int histogramBins = 256;
+   
+   boolean bContrastStretch; 
+   
    int _x_samples, _y_samples;
    int _x, _y, _nx, _ny;
    float _fx, _fy;
    double[] _ip;
+   int[] _hist;
    String _name;
    
    Interpolator(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier, String name)
@@ -19,6 +24,7 @@ class Interpolator
       this._fy = 1.0 / (2.0 * (float)_ny);
       
       this._ip = new double[_x * _y];
+      this._hist = new int[histogramBins];
       
       this._name = name;      
    }
@@ -85,6 +91,8 @@ class Interpolator
    void interpolate(Crosspoint[][] cp)
    {
       beginInterpolation(cp);
+
+      Arrays.fill(this._hist, 0);
       
       for (int i=0; i<_x_samples-1; i++)
          for (int j=0; j<_y_samples-1; j++) {
@@ -92,14 +100,36 @@ class Interpolator
             
             for (int k=0; k<_nx; k++)
                for (int l=0; l<_ny; l++) {
-                  //this._ip[(j + l) * _x + i * _nx + k] = 
-                  this._ip[((j * _ny + l) * _x) + i * _nx + k] = interpolate4(cp, i, j, k, l, _fx * (1.0 + 2*k), _fy * (1.0 + 2*l));
+                  double val =  interpolate4(cp, i, j, k, l, _fx * (1.0 + 2*k), _fy * (1.0 + 2*l));
+                  val = constrain((float)val, 0.0, 1.0);
+
+                  _hist[(int)(val/(1.0/((double)histogramBins-1)))]++;
+                  
+                  this._ip[((j * _ny + l) * _x) + i * _nx + k] = val;
                }
             
-            beginInterpolate4(cp, i, j);
+            finishInterpolate4(cp, i, j);
          }
       
       finishInterpolation(cp);
+      
+      if (this.bContrastStretch) {
+         float vmin = 0.0, vmax = 1.0;
+      
+         int ss, nHist = (int)(this._x * this._y * 0.1);      
+         for (ss = 0; nHist > 0 && ss<histogramBins; nHist -= this._hist[ss++]);
+         vmin = (1.0/histogramBins) * ss;
+      
+         nHist = (int)(this._x * this._y * 0.1);
+         for (ss = histogramBins-1; nHist > 0 && ss>=0; nHist -= this._hist[ss--]);
+         vmax = (1.0/histogramBins) * ss;
+            
+         for (int i=0; i<_x; i++)
+            for (int j=0; j<_y; j++) {
+               double p = _ip[j * _x + i];
+               _ip[j * _x + i] = (p - vmin) / (vmax - vmin);
+            }
+      }
    }
    
    void beginInterpolation(Crosspoint[][] cp)
@@ -117,7 +147,7 @@ class Interpolator
       // override in subclass if necessary
    }
    
-   void finishInterpolate4(Crosspoint[] cp, int xm, int ym)
+   void finishInterpolate4(Crosspoint[][] cp, int xm, int ym)
    {
       // override in subclass if necessary
    }

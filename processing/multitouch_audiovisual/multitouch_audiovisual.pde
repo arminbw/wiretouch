@@ -38,6 +38,7 @@ int averageSignalCounter = AVERAGESIGNALCOUNTERMAX;
 boolean bDebug = false;               // stop updating and print out some debug data
 int visualizationType = 0;            // which type of visualitazion should be used (0-2)
 boolean bReadBinary = true;           // read binary data (instead of strings)
+boolean bContrastStretch = true;
 String helpText = "";
 
 void setup() {
@@ -128,6 +129,8 @@ void initInterpolator() {
         interpolator = new LinearInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
         break;
   }
+  
+  interpolator.bContrastStretch = bContrastStretch;
 }
 
 void keyPressed() {
@@ -137,14 +140,14 @@ void keyPressed() {
       dataManager = new DataManager(new Serial( this, Serial.list()[0], 115200 ));
       delay(2000); // needed
       dataManager.myPort.write('s');
-      helpText = "[c]alibrate   [d]ebug   [h]elp   [i]nterpolation   [o]/[p] interpolation resolution   [v]isualization";
+      helpText = "[r]ecalibrate   [d]ebug   [h]elp   [i]nterpolation   [o]/[p] interpolation resolution   [v]isualization   [c]ontrast stretch";
     }
   }
   // use fake data
   if (key == 'f') {
     if (dataManager == null) {
       dataManager = new DataManager(null);
-      helpText = "[h]elp   [i]nterpolation   [o]/[p] interpolation resolution   [v]isualization";
+      helpText = "[h]elp   [i]nterpolation   [o]/[p] interpolation resolution   [v]isualization   [c]ontrast stretch";
       textInformation = helpText;
     }
   }
@@ -171,6 +174,12 @@ void keyPressed() {
   if (key == 'v') {
     visualizationType = (visualizationType+1)%3;
   }
+  
+  if (key == 'c') {
+     bContrastStretch = !bContrastStretch;
+     interpolator.bContrastStretch = bContrastStretch;
+  }
+  
   // change interpolation algorithm for pixel matrix
   if (key == 'i') {
     interpType = ++interpType % kNumInterp;
