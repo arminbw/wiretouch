@@ -9,6 +9,7 @@ class Interpolator
    float _fx, _fy;
    double[] _ip;
    int[] _hist;
+   int _histMax;
    String _name;
    
    Interpolator(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier, String name)
@@ -88,11 +89,28 @@ class Interpolator
       drawInRect(x1, y1, x2, y1 + (int)(w*r + 0.5));
    }
    
+   void drawHistogramFromPoint(int x1, int y1, int maxY)
+   {
+      float step = (float)maxY / (float)log(this._histMax);
+      
+      strokeWeight(1.0);
+      for (int i=0; i<histogramBins; i++) {
+         int h = (int)(constrain(log(this._hist[i]) * step, 0.0, maxY));
+         
+         stroke(color(i));
+         line(x1+i, y1, x1+i, y1-maxY);  
+         
+         stroke(color(239, 171, 233));
+         line(x1+i, y1, x1+i, y1-h);       
+      }
+   }
+   
    void interpolate(Crosspoint[][] cp)
    {
       beginInterpolation(cp);
 
       Arrays.fill(this._hist, 0);
+      this._histMax = 0;
       
       for (int i=0; i<_x_samples-1; i++)
          for (int j=0; j<_y_samples-1; j++) {
@@ -103,7 +121,10 @@ class Interpolator
                   double val =  interpolate4(cp, i, j, k, l, _fx * (1.0 + 2*k), _fy * (1.0 + 2*l));
                   val = constrain((float)val, 0.0, 1.0);
 
-                  _hist[(int)(val/(1.0/((double)histogramBins-1)))]++;
+                  int p = (int)(val/(1.0/((double)histogramBins-1)));
+                  _hist[p]++;
+                  if (_hist[p] > this._histMax)
+                     this._histMax = _hist[p];
                   
                   this._ip[((j * _ny + l) * _x) + i * _nx + k] = val;
                }

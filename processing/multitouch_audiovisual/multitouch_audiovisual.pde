@@ -65,6 +65,7 @@ void draw() {
     case 0:
       interpolator.interpolate(crosspoints);
       interpolator.drawByWidthPreservingAspectRatio(15, 15, sketchWidth-15);
+      interpolator.drawHistogramFromPoint(sketchWidth-256-15, sketchHeight-10, 65);
       break;
     case 1:
       drawSignalCircles(true);
