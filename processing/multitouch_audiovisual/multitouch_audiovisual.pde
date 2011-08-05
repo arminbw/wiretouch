@@ -30,6 +30,7 @@ static final int pixelWidth =  crosspointDistance / 2;
 float signalPixelRatio = 0.02*1024; // (see crosspoint.pde)
 
 color textColor = color(60,60,60);
+color guiColor = color(255,0,0);
 color backgroundColor = color(240,240,240);
 color wireColor = color(180,180,180);
 color signalColor = color(190,190,190);
@@ -40,6 +41,7 @@ int visualizationType = 0;            // which type of visualitazion should be u
 boolean bReadBinary = true;           // read binary data (instead of strings)
 boolean bContrastStretch = true;
 String helpText = "";
+Histogram histogram;
 
 void setup() {
   sketchWidth = (verticalWires+1)*crosspointDistance;
@@ -57,6 +59,7 @@ void setup() {
   }
   initInterpolator();
   textInformation = "[r]eceive real data   [f]ake data (static)";
+  histogram = new Histogram(sketchWidth-256-15, sketchHeight, 256);
 }
 
 void draw() {
@@ -65,7 +68,12 @@ void draw() {
     case 0:
       interpolator.interpolate(crosspoints);
       interpolator.drawByWidthPreservingAspectRatio(15, 15, sketchWidth-15);
-      interpolator.drawHistogramFromPoint(sketchWidth-256-15, sketchHeight-10, 65);
+      
+      interpolator.fStretchHistLeft = histogram.valLeft();
+      interpolator.fStretchHistRight = histogram.valRight();
+      interpolator.drawHistogramFromPoint(histogram.x, histogram.y-9, 65);
+      
+      histogram.draw();
       break;
     case 1:
       drawSignalCircles(true);
@@ -132,6 +140,18 @@ void initInterpolator() {
   }
   
   interpolator.bContrastStretch = bContrastStretch;
+}
+
+void mousePressed() {
+  histogram.mousePressed();  
+}
+
+void mouseDragged() {
+  histogram.mouseDragged(mouseX, mouseY);  
+}
+
+void mouseReleased() {
+  histogram.mouseReleased();  
 }
 
 void keyPressed() {
