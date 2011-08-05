@@ -3,6 +3,7 @@ class Interpolator
    static final int histogramBins = 256;
    
    boolean bContrastStretch; 
+   float fStretchHistLeft, fStretchHistRight;
    
    int _x_samples, _y_samples;
    int _x, _y, _nx, _ny;
@@ -26,6 +27,10 @@ class Interpolator
       
       this._ip = new double[_x * _y];
       this._hist = new int[histogramBins];
+      
+      this.bContrastStretch = false;
+      this.fStretchHistLeft = 0.15;
+      this.fStretchHistRight = 0.15;
       
       this._name = name;      
    }
@@ -137,11 +142,11 @@ class Interpolator
       if (this.bContrastStretch) {
          float vmin = 0.0, vmax = 1.0;
       
-         int ss, nHist = (int)(this._x * this._y * 0.1);      
+         int ss, nHist = (int)(this._x * this._y * this.fStretchHistLeft);      
          for (ss = 0; nHist > 0 && ss<histogramBins; nHist -= this._hist[ss++]);
          vmin = (1.0/histogramBins) * ss;
       
-         nHist = (int)(this._x * this._y * 0.1);
+         nHist = (int)(this._x * this._y * this.fStretchHistRight);
          for (ss = histogramBins-1; nHist > 0 && ss>=0; nHist -= this._hist[ss--]);
          vmax = (1.0/histogramBins) * ss;
             
