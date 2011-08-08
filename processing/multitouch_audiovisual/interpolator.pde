@@ -13,7 +13,7 @@ class Interpolator
    int _histMax;
    String _name;
    
-   Interpolator(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier, String name)
+   Interpolator(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier, String name, float contrastLeft, float contrastRight)
    {
       this._x_samples = horizontalSamples;
       this._y_samples = verticalSamples;
@@ -29,8 +29,8 @@ class Interpolator
       this._hist = new int[histogramBins];
       
       this.bContrastStretch = false;
-      this.fStretchHistLeft = 0.0;
-      this.fStretchHistRight = 0.0;
+      this.fStretchHistLeft = contrastLeft;
+      this.fStretchHistRight = contrastRight;
       
       this._name = name;
    }

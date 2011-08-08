@@ -1,8 +1,8 @@
 class CatmullRomInterpolator extends Interpolator4x4
 {
-   CatmullRomInterpolator(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier)
+   CatmullRomInterpolator(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier, float contrastLeft, float contrastRight)
    {
-      super(horizontalSamples, verticalSamples, horizontalMultiplier, verticalMultiplier, "catmull-rom spline interpolation");
+      super(horizontalSamples, verticalSamples, horizontalMultiplier, verticalMultiplier, "catmull-rom spline interpolation", contrastLeft, contrastRight);
    }
 
    double interp_func(double p0, double p1, double p2, double p3, double f)

@@ -35,8 +35,8 @@ final color backgroundColor = color(240,240,240);
 final color wireColor = color(180,180,180);
 final color signalColor = color(190,190,190);
 static final int AVERAGESIGNALCOUNTERMAX = 150;
-static final float kContrastLeft = 0.04;
-static final float kContrastRight = 0.5;
+float contrastLeft = 0.04;
+float contrastRight = 0.5;
 
 int averageSignalCounter = AVERAGESIGNALCOUNTERMAX;
 int visualizationType = 0;            // which type of visualitazion should be used (0-2)
@@ -59,9 +59,9 @@ void setup() {
   }
   initInterpolator();
   histogramGUI = new HistogramGUI(sketchWidth-256-15, sketchHeight-30, 256);
-  histogramGUI.setMarkerPositions(kContrastLeft, kContrastRight);
-  interpolator.fStretchHistLeft = kContrastLeft;
-  interpolator.fStretchHistRight = kContrastRight;
+  histogramGUI.setMarkerPositions(contrastLeft, contrastRight);
+  interpolator.fStretchHistLeft = contrastLeft;
+  interpolator.fStretchHistRight = contrastRight;
   textInformation = "[r]eceive real data   [f]ake data (static)";
   helpText = textInformation;
 }
@@ -125,20 +125,20 @@ void serialEvent(Serial p) {
 void initInterpolator() {
   switch (interpType) {
     case kInterpHermite:
-        interpolator = new HermiteInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
+        interpolator = new HermiteInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, contrastLeft, contrastRight);
         break;
     case kInterpCatmullRom:
-        interpolator = new CatmullRomInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
+        interpolator = new CatmullRomInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, contrastLeft, contrastRight);
         break;
     case kInterpCubic:
-        interpolator = new CubicInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
+        interpolator = new CubicInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, contrastLeft, contrastRight);
         break;
     case kInterpCosine:
-        interpolator = new CosineInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
+        interpolator = new CosineInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, contrastLeft, contrastRight);
         break;
     case kInterpLinear:
     default:
-        interpolator = new LinearInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
+        interpolator = new LinearInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, contrastLeft, contrastRight);
         break;
   }
   interpolator.bContrastStretch = bContrastStretch;
@@ -152,7 +152,7 @@ void mouseDragged() {
   histogramGUI.mouseDragged(mouseX, mouseY);
   interpolator.fStretchHistLeft = histogramGUI.getValLeft();
   interpolator.fStretchHistRight = histogramGUI.getValRight();
-  textInformation = interpolator.fStretchHistLeft + "   " + interpolator.fStretchHistRight;
+  textInformation = "contrast stretch:   " + interpolator.fStretchHistLeft + "   " + interpolator.fStretchHistRight;
 }
 
 void mouseReleased() {
