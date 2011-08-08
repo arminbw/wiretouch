@@ -25,7 +25,7 @@ class Crosspoint {
   
   void setSignalStrength(int msr) {
     this.measuredSignal = msr;
-    // this.signalStrength = (double)msr / 1024; // without calibration
+    // this.signalStrength = (double) msr / 1024; // without calibration
     this.signalStrength = (double) msr / (this.measuredSignalAverage+1);
     
     if (msr > this.signalMax)

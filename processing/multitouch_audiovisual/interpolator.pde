@@ -29,10 +29,10 @@ class Interpolator
       this._hist = new int[histogramBins];
       
       this.bContrastStretch = false;
-      this.fStretchHistLeft = 0.15;
-      this.fStretchHistRight = 0.15;
+      this.fStretchHistLeft = 0.0;
+      this.fStretchHistRight = 0.0;
       
-      this._name = name;      
+      this._name = name;
    }
    
    String name()
@@ -106,7 +106,7 @@ class Interpolator
          line(x1+i, y1, x1+i, y1-maxY);  
          
          stroke(color(239, 171, 233));
-         line(x1+i, y1, x1+i, y1-h);       
+         line(x1+i, y1, x1+i, y1-h);
       }
    }
    

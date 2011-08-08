@@ -11,7 +11,7 @@ String textInformation;
 static byte[] serBuffer = null;
 int sketchWidth, sketchHeight;
 
-// interpolation
+// interpolation, image post-production
 Interpolator interpolator = null;
 static final int kInterpLinear = 0;
 static final int kInterpCosine = 1;
@@ -21,34 +21,34 @@ static final int kInterpHermite = 4;
 static final int kNumInterp = 5;
 int interpType = kInterpCatmullRom;
 int interpolationResolution = 4;
+HistogramGUI histogramGUI;
 
 // configuration
-int verticalWires = 16;
-int horizontalWires = 11;
+static final int verticalWires = 16;
+static final int horizontalWires = 11;
 static final int crosspointDistance=60; // how many pixels between 2 crosspoints
 static final int pixelWidth =  crosspointDistance / 2;
-float signalPixelRatio = 0.02*1024; // (see crosspoint.pde)
-
-color textColor = color(60,60,60);
-color guiColor = color(255,0,0);
-color backgroundColor = color(240,240,240);
-color wireColor = color(180,180,180);
-color signalColor = color(190,190,190);
+static final float signalPixelRatio = 0.03*1024; // (see crosspoint.pde)
+final color textColor = color(60,60,60);
+final color guiColor = color(180,180,180);
+final color backgroundColor = color(240,240,240);
+final color wireColor = color(180,180,180);
+final color signalColor = color(190,190,190);
 static final int AVERAGESIGNALCOUNTERMAX = 150;
+static final float kContrastLeft = 0.04;
+static final float kContrastRight = 0.5;
+
 int averageSignalCounter = AVERAGESIGNALCOUNTERMAX;
-boolean bDebug = false;               // stop updating and print out some debug data
 int visualizationType = 0;            // which type of visualitazion should be used (0-2)
+boolean bDebug = false;               // stop updating and print out some debug data
 boolean bReadBinary = true;           // read binary data (instead of strings)
 boolean bContrastStretch = true;
 String helpText = "";
-Histogram histogram;
 
 void setup() {
   sketchWidth = (verticalWires+1)*crosspointDistance;
-  sketchHeight = (horizontalWires+1)*crosspointDistance+36;
-   
+  sketchHeight = (horizontalWires+1)*crosspointDistance+72;
   size(sketchWidth, sketchHeight, OPENGL);
-  // smooth();
   myFont = loadFont("Consolas-12.vlw");
   textFont(myFont, 12);
   crosspoints = new Crosspoint[verticalWires][horizontalWires];
@@ -58,8 +58,12 @@ void setup() {
     } 
   }
   initInterpolator();
+  histogramGUI = new HistogramGUI(sketchWidth-256-15, sketchHeight-30, 256);
+  histogramGUI.setMarkerPositions(kContrastLeft, kContrastRight);
+  interpolator.fStretchHistLeft = kContrastLeft;
+  interpolator.fStretchHistRight = kContrastRight;
   textInformation = "[r]eceive real data   [f]ake data (static)";
-  histogram = new Histogram(sketchWidth-256-15, sketchHeight, 256);
+  helpText = textInformation;
 }
 
 void draw() {
@@ -68,26 +72,25 @@ void draw() {
     case 0:
       interpolator.interpolate(crosspoints);
       interpolator.drawByWidthPreservingAspectRatio(15, 15, sketchWidth-15);
-      
-      interpolator.fStretchHistLeft = histogram.valLeft();
-      interpolator.fStretchHistRight = histogram.valRight();
-      interpolator.drawHistogramFromPoint(histogram.x, histogram.y-9, 65);
-      
-      histogram.draw();
+      interpolator.drawHistogramFromPoint(sketchWidth-256-15, sketchHeight-30, 65);
+      histogramGUI.draw();
       break;
     case 1:
       drawSignalCircles(true);
       break;
     case 2:
       // TODO: This isn't working yet. Make it work.
+      interpolator.interpolate(crosspoints);
       interpolator.drawByWidthPreservingAspectRatio(15, 15, sketchWidth-15);
+      interpolator.drawHistogramFromPoint(sketchWidth-256-15, sketchHeight-30, 65);
+      histogramGUI.draw();
       drawSignalCircles(true);
       break;
     default:
       break;
   }
   fill(textColor);
-  text(textInformation, 15, height-24);
+  text(textInformation, 15, height-30);
 }
 
 void drawSignalCircles(boolean bDrawText) {
@@ -138,86 +141,113 @@ void initInterpolator() {
         interpolator = new LinearInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
         break;
   }
-  
   interpolator.bContrastStretch = bContrastStretch;
 }
 
 void mousePressed() {
-  histogram.mousePressed();  
+  histogramGUI.mousePressed();  
 }
 
 void mouseDragged() {
-  histogram.mouseDragged(mouseX, mouseY);  
+  histogramGUI.mouseDragged(mouseX, mouseY);
+  interpolator.fStretchHistLeft = histogramGUI.getValLeft();
+  interpolator.fStretchHistRight = histogramGUI.getValRight();
+  textInformation = interpolator.fStretchHistLeft + "   " + interpolator.fStretchHistRight;
 }
 
 void mouseReleased() {
-  histogram.mouseReleased();  
+  histogramGUI.mouseReleased();  
 }
 
 void keyPressed() {
-  // receive real data
-  if (key == 'r') {
+  switch(key) {
+  case 'r':
+    // recalibrate
+    averageSignalCounter=AVERAGESIGNALCOUNTERMAX;
     if (dataManager == null) {
-      dataManager = new DataManager(new Serial( this, Serial.list()[0], 115200 ));
+      // send signal to arduino to receive data
+      try {
+        dataManager = new DataManager(new Serial( this, Serial.list()[0], 115200 ));
+      } catch (Exception e) {
+        textInformation = "error opening Serial connection: "+e;
+        break;
+      }
       delay(2000); // needed
       dataManager.myPort.write('s');
-      helpText = "[r]ecalibrate   [d]ebug   [h]elp   [i]nterpolation   [o]/[p] interpolation resolution   [v]isualization   [c]ontrast stretch";
+      helpText = "[c]ontrast stretch   [d]ebug   [h]elp   [i]nterpolation   [o]/[p] interpolation resolution   [r]ecalibrate   [v]isualization";
     }
-  }
-  // use fake data
-  if (key == 'f') {
+    break;
+  case 'f':
+    // use fake data
     if (dataManager == null) {
       dataManager = new DataManager(null);
-      helpText = "[h]elp   [i]nterpolation   [o]/[p] interpolation resolution   [v]isualization   [c]ontrast stretch";
+      helpText = "[c]ontrast stretch   [h]elp   [i]nterpolation   [o]/[p] interpolation resolution   [v]isualization";
       textInformation = helpText;
     }
-  }
-  // help
-  if (key == 'h') {
+    break;
+  case 'h':
+    // help
     textInformation = helpText;
-  }
-  // recalibrate
-  if (key == 'c') {
-    averageSignalCounter=AVERAGESIGNALCOUNTERMAX;
-  }
-  // debug
-  if (key == 'd') {
+    break;
+  case 'd':
+    // debug
     bDebug = !bDebug;
     if (bDebug) {
-       textInformation = "press [d] again to stop debugging mode";
-       dataManager.printData();
+      textInformation = "[d]ebug: " + getOnOffString(bDebug);
+      dataManager.printData();
     }
     else {
-       textInformation = helpText;
+      textInformation = helpText;
     }
-  }
-  // change the type of visualization
-  if (key == 'v') {
+    break;
+  case 'v':
+    // change the type of visualization
     visualizationType = (visualizationType+1)%3;
-  }
-  
-  if (key == 'c') {
-     bContrastStretch = !bContrastStretch;
-     interpolator.bContrastStretch = bContrastStretch;
-  }
-  
-  // change interpolation algorithm for pixel matrix
-  if (key == 'i') {
+    break;
+  case 'c':
+    bContrastStretch = !bContrastStretch;
+    interpolator.bContrastStretch = bContrastStretch;
+    textInformation = "[c]ontrast stretch: " + getOnOffString(bContrastStretch);
+    break;
+  case 'i':
+    // change interpolation algorithm for pixel matrix
     interpType = ++interpType % kNumInterp;
     initInterpolator();
     textInformation = interpolator.name() + " x" + interpolationResolution;
-  }
-  //change interpolation resolution
-  if (key == 'o' || key == 'p') {
-    interpolationResolution += ((key == 'o') ? -1 : 1);
-    interpolationResolution = max(1, min(interpolationResolution, 15));
+    break;
+  case 'o':
+    // decrease interpolation resolution
+    if (interpolationResolution>1) interpolationResolution--;
     initInterpolator();
     textInformation = interpolator.name() + " x" + interpolationResolution;
+    break;
+  case 'p':
+    // increase interpolation resolution
+    if (interpolationResolution<15) interpolationResolution++;
+    initInterpolator();
+    textInformation = interpolator.name() + " x" + interpolationResolution;
+    break;
+  case 'k':
+    if (interpolator instanceof HermiteInterpolator) {
+      HermiteInterpolator ip = (HermiteInterpolator)interpolator;
+      ip.tension += 0.1;
+      ip.tension = constrain((float)ip.tension, -2.0, 2.0);
+      textInformation = interpolator.name() + " x" + interpolationResolution;
+    }
+    break;
+  case 'l':
+    if (interpolator instanceof HermiteInterpolator) {
+      HermiteInterpolator ip = (HermiteInterpolator)interpolator;
+      ip.tension -= 0.1;
+      ip.tension = constrain((float)ip.tension, -2.0, 2.0);
+      textInformation = interpolator.name() + " x" + interpolationResolution;
+    }
+    break;
   }
-  if (interpolator instanceof HermiteInterpolator && (key == 'k' || key == 'l')) {
-     HermiteInterpolator ip = (HermiteInterpolator)interpolator;
-     ip.tension += (key == 'k') ? -0.1 : 0.1;
-     ip.tension = constrain((float)ip.tension, -2.0, 2.0);
-     textInformation = interpolator.name() + " x" + interpolationResolution;
-  }
+}
+
+String getOnOffString(boolean b) {
+  String s = "OFF";
+  if (b) s = "ON";
+  return s;
 }
