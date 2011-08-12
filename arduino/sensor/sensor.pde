@@ -81,7 +81,7 @@ void loop() {
     muxVertical(verticalPos[k]);
     for (byte l = 0; l < horizontalWires; l++) {
       muxHorizontal(horizontalPos[l]);
-      delayMicroseconds(100);
+      delayMicroseconds(300); // increase to deal with row-error!
     
       sample = measure();
       
