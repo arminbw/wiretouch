@@ -27,13 +27,14 @@ HistogramGUI histogramGUI;
 static final int verticalWires = 16;
 static final int horizontalWires = 11;
 static final int crosspointDistance=60; // how many pixels between 2 crosspoints
-static final int pixelWidth =  crosspointDistance / 2;
+static final int borderDistance=60; // how many pixel distance to the borderDistance
 static final float signalPixelRatio = 0.03*1024; // (see crosspoint.pde)
 final color textColor = color(60,60,60);
 final color guiColor = color(180,180,180);
 final color backgroundColor = color(240,240,240);
-final color wireColor = color(180,180,180);
-final color signalColor = color(190,190,190);
+final color histogramColor = color(239, 171, 233);
+final color signalColor = color(153,233,240);
+final color wireColor = color(0,222,255);
 static final int AVERAGESIGNALCOUNTERMAX = 150;
 float contrastLeft = 0.04;
 float contrastRight = 0.5;
@@ -46,19 +47,19 @@ boolean bContrastStretch = true;
 String helpText = "";
 
 void setup() {
-  sketchWidth = (verticalWires+1)*crosspointDistance;
-  sketchHeight = (horizontalWires+1)*crosspointDistance+72;
+  sketchWidth = (borderDistance*2)+((verticalWires-1)*crosspointDistance);
+  sketchHeight = (horizontalWires+1)*crosspointDistance+90;
   size(sketchWidth, sketchHeight, OPENGL);
   myFont = loadFont("Consolas-12.vlw");
   textFont(myFont, 12);
   crosspoints = new Crosspoint[verticalWires][horizontalWires];
   for (int i = 0; i < verticalWires; i++) {
     for(int j = 0; j < horizontalWires; j++) {
-      crosspoints[i][j] = new Crosspoint(crosspointDistance*(i+1),crosspointDistance*(j+1));
+      crosspoints[i][j] = new Crosspoint(borderDistance+(crosspointDistance*i),borderDistance+(crosspointDistance*j));
     } 
   }
   initInterpolator();
-  histogramGUI = new HistogramGUI(sketchWidth-256-15, sketchHeight-30, 256);
+  histogramGUI = new HistogramGUI(sketchWidth-256-borderDistance, sketchHeight-30, 256);
   histogramGUI.setMarkerPositions(contrastLeft, contrastRight);
   interpolator.fStretchHistLeft = contrastLeft;
   interpolator.fStretchHistRight = contrastRight;
@@ -71,8 +72,8 @@ void draw() {
   switch (visualizationType) {
     case 0:
       interpolator.interpolate(crosspoints);
-      interpolator.drawByWidthPreservingAspectRatio(15, 15, sketchWidth-15);
-      interpolator.drawHistogramFromPoint(sketchWidth-256-15, sketchHeight-30, 65);
+      interpolator.drawByWidthPreservingAspectRatio(borderDistance, borderDistance, sketchWidth-borderDistance);
+      interpolator.drawHistogramFromPoint(sketchWidth-256-borderDistance, sketchHeight-30, 65);
       histogramGUI.draw();
       break;
     case 1:
@@ -81,8 +82,8 @@ void draw() {
     case 2:
       // TODO: This isn't working yet. Make it work.
       interpolator.interpolate(crosspoints);
-      interpolator.drawByWidthPreservingAspectRatio(15, 15, sketchWidth-15);
-      interpolator.drawHistogramFromPoint(sketchWidth-256-15, sketchHeight-30, 65);
+      interpolator.drawByWidthPreservingAspectRatio(borderDistance, borderDistance, sketchWidth-borderDistance);
+      interpolator.drawHistogramFromPoint(sketchWidth-256-borderDistance, sketchHeight-30, 65);
       histogramGUI.draw();
       drawSignalCircles(true);
       break;
@@ -90,7 +91,7 @@ void draw() {
       break;
   }
   fill(textColor);
-  text(textInformation, 15, height-30);
+  text(textInformation, borderDistance, height-60);
 }
 
 void drawSignalCircles(boolean bDrawText) {
@@ -104,12 +105,12 @@ void drawSignalCircles(boolean bDrawText) {
       }
     }
     // draw the grid
-    stroke(wireColor);
-    for (int i = 1; i <= horizontalWires; i++) {
-      line(crosspointDistance, crosspointDistance*i, crosspointDistance*verticalWires, crosspointDistance*i);
+   stroke(wireColor);
+    for (int i = 0; i < horizontalWires; i++) {
+      line(borderDistance, borderDistance+(crosspointDistance*i), borderDistance+(crosspointDistance*(verticalWires-1)), borderDistance+(crosspointDistance*i));
     }
-    for(int j = 1; j <= verticalWires; j++) {
-      line(crosspointDistance*j, crosspointDistance, crosspointDistance*j, crosspointDistance*horizontalWires);
+    for(int j = 0; j < verticalWires; j++) {
+      line(borderDistance+(crosspointDistance*j), borderDistance, borderDistance+(crosspointDistance*j), borderDistance+(crosspointDistance*(horizontalWires-1)));
     }
 }
 
@@ -174,14 +175,14 @@ void keyPressed() {
       }
       delay(2000); // needed
       dataManager.myPort.write('s');
-      helpText = "[c]ontrast stretch   [d]ebug   [h]elp   [i]nterpolation   [o]/[p] interpolation resolution   [r]ecalibrate   [v]isualization";
+      helpText = "[c]ontrast stretch   [d]ebug   [h]elp   [i]nterpolation   [o]/[p] interpolation resolution\n[r]ecalibrate   [v]isualization";
     }
     break;
   case 'f':
     // use fake data
     if (dataManager == null) {
       dataManager = new DataManager(null);
-      helpText = "[c]ontrast stretch   [h]elp   [i]nterpolation   [o]/[p] interpolation resolution   [v]isualization";
+      helpText = "[c]ontrast stretch   [h]elp   [i]nterpolation   [o]/[p] interpolation resolution\n[v]isualization";
       textInformation = helpText;
     }
     break;

@@ -105,7 +105,7 @@ class Interpolator
          stroke(color(i));
          line(x1+i, y1, x1+i, y1-maxY);  
          
-         stroke(color(239, 171, 233));
+         stroke(histogramColor);
          line(x1+i, y1, x1+i, y1-h);
       }
    }

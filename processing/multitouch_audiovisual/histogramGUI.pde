@@ -57,7 +57,7 @@ class GUITriangle {
   }
   
   void draw() {
-    fill(guiColor);
+    fill(wireColor);
     noStroke();
     triangle(this.x-6, this.y+12, this.x, this.y, this.x+6, this.y+12);
   }
