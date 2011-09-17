@@ -25,7 +25,7 @@ HistogramGUI histogramGUI;
 
 // configuration
 static final int verticalWires = 32;
-static final int horizontalWires = 11;
+static final int horizontalWires = 22;
 static final int crosspointDistance=30; // how many pixels between 2 crosspoints
 static final int borderDistance=30; // how many pixel distance to the borderDistance
 static final float signalPixelRatio = 0.03*1024; // (see crosspoint.pde)
@@ -80,12 +80,11 @@ void draw() {
       drawSignalCircles(true);
       break;
     case 2:
-      // TODO: This isn't working yet. Make it work.
       interpolator.interpolate(crosspoints);
       interpolator.drawByWidthPreservingAspectRatio(borderDistance, borderDistance, sketchWidth-borderDistance);
       interpolator.drawHistogramFromPoint(sketchWidth-256-borderDistance, sketchHeight-30, 65);
       histogramGUI.draw();
-      drawSignalCircles(true);
+      drawSignalCircles(false);
       break;
     default:
       break;
