@@ -11,12 +11,11 @@
 #define NUM_SELECT 4
 
 const byte verticalShiftRegPins[] = {
-  2,              // latch / SRCLK
-  3,              // clock / RCLK
+  3,              // latch / SRCLK
+  2,              // clock / RCLK
   4               // data  / SER
 };
 
-const byte verticalPins[] = { 2, 3, 4, 5 };
 const byte verticalPosLeft[] = { 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
 const byte verticalPosRight[] = { 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0}; 
 const byte verticalWires = 32;
@@ -53,14 +52,12 @@ void setup() {
 void muxVertical(byte output) {
   /*for (int i=0; i<NUM_SELECT; i++)
     digitalWrite(verticalPins[i], ((output >> i) & 1) ? HIGH : LOW); */
-  
   byte mux_sel = (output > 15);
-  if (output > 15) output -= 15;
+  if (output >= 16) output -= 16;
   
   byte bits = 0;
   const byte* p = mux_sel ? verticalPosRight : verticalPosLeft;
-  for (int i=0; i<NUM_SELECT; i++)
-    bits |= (p[output] & (1 << i));
+  bits = p[output] & 0x0f;
   
   bits |= ((mux_sel & 1) << 4);
   bits |= ((!mux_sel & 1) << 5);
@@ -101,10 +98,9 @@ void loop() {
     muxVertical(k);
     for (byte l = 0; l < horizontalWires; l++) {
       muxHorizontal(horizontalPos[l]);
-      delayMicroseconds(300); // increase to deal with row-error!
-    
+      delayMicroseconds(100); // increase to deal with row-error!
       sample = measure();
-      
+
 #if PRINT_BINARY
       Serial.print((byte)((sample >> 8) & 0xff), BYTE);
       Serial.print((byte)(sample & 0xff), BYTE);

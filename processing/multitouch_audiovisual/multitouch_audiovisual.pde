@@ -24,10 +24,10 @@ int interpolationResolution = 4;
 HistogramGUI histogramGUI;
 
 // configuration
-static final int verticalWires = 16;
+static final int verticalWires = 32;
 static final int horizontalWires = 11;
-static final int crosspointDistance=60; // how many pixels between 2 crosspoints
-static final int borderDistance=60; // how many pixel distance to the borderDistance
+static final int crosspointDistance=30; // how many pixels between 2 crosspoints
+static final int borderDistance=30; // how many pixel distance to the borderDistance
 static final float signalPixelRatio = 0.03*1024; // (see crosspoint.pde)
 final color textColor = color(60,60,60);
 final color guiColor = color(180,180,180);
