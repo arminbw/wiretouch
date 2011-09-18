@@ -3,9 +3,9 @@ class HermiteInterpolator extends Interpolator4x4
    public double tension, bias;
    DecimalFormat _df;
    
-   HermiteInterpolator(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier, float contrastLeft, float contrastRight)
+   HermiteInterpolator(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier)
    {
-      super(horizontalSamples, verticalSamples, horizontalMultiplier, verticalMultiplier, "hermite interpolation [k][l]", contrastLeft, contrastRight);
+      super(horizontalSamples, verticalSamples, horizontalMultiplier, verticalMultiplier, "hermite interpolation [k][l]");
       this.bias = 0;
       this.tension = 0;
       this._df = new DecimalFormat("0.0");

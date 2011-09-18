@@ -10,9 +10,9 @@ class Interpolator4x4 extends Interpolator
     *    t8    t9    t10   t11
     */
    
-   Interpolator4x4(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier, String name, float contrastLeft, float contrastRight)
+   Interpolator4x4(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier, String name)
    {
-      super(horizontalSamples, verticalSamples, horizontalMultiplier, verticalMultiplier, name, contrastLeft, contrastRight);
+      super(horizontalSamples, verticalSamples, horizontalMultiplier, verticalMultiplier, name);
    }
    
    void beginInterpolate4(Crosspoint[][] cp, int xm, int ym)

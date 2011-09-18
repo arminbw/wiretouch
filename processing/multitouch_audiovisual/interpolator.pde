@@ -3,7 +3,6 @@ class Interpolator
    static final int histogramBins = 256;
    
    boolean bContrastStretch; 
-   float fStretchHistLeft, fStretchHistRight;
    
    int _x_samples, _y_samples;
    int _x, _y, _nx, _ny;
@@ -13,7 +12,7 @@ class Interpolator
    int _histMax;
    String _name;
    
-   Interpolator(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier, String name, float contrastLeft, float contrastRight)
+   Interpolator(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier, String name)
    {
       this._x_samples = horizontalSamples;
       this._y_samples = verticalSamples;
@@ -29,9 +28,6 @@ class Interpolator
       this._hist = new int[histogramBins];
       
       this.bContrastStretch = false;
-      this.fStretchHistLeft = contrastLeft;
-      this.fStretchHistRight = contrastRight;
-      
       this._name = name;
    }
    
@@ -142,11 +138,11 @@ class Interpolator
       if (this.bContrastStretch) {
          float vmin = 0.0, vmax = 1.0;
       
-         int ss, nHist = (int)(this._x * this._y * this.fStretchHistLeft);      
+         int ss, nHist = (int)(this._x * this._y * contrastLeft);      
          for (ss = 0; nHist > 0 && ss<histogramBins; nHist -= this._hist[ss++]);
          vmin = (1.0/histogramBins) * ss;
       
-         nHist = (int)(this._x * this._y * this.fStretchHistRight);
+         nHist = (int)(this._x * this._y * contrastRight);
          for (ss = histogramBins-1; nHist > 0 && ss>=0; nHist -= this._hist[ss--]);
          vmax = (1.0/histogramBins) * ss;
             

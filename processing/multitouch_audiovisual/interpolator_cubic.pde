@@ -1,8 +1,8 @@
 class CubicInterpolator extends Interpolator4x4
 {
-   CubicInterpolator(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier, float contrastLeft, float contrastRight)
+   CubicInterpolator(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier)
    {
-      super(horizontalSamples, verticalSamples, horizontalMultiplier, verticalMultiplier, "cubic interpolation", contrastLeft, contrastRight);
+      super(horizontalSamples, verticalSamples, horizontalMultiplier, verticalMultiplier, "cubic interpolation");
    }
 
    double interp_func(double p0, double p1, double p2, double p3, double f)

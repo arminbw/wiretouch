@@ -36,8 +36,8 @@ final color histogramColor = color(239, 171, 233);
 final color signalColor = color(153,233,240);
 final color wireColor = color(0,222,255);
 static final int AVERAGESIGNALCOUNTERMAX = 150;
-float contrastLeft = 0.04;
-float contrastRight = 0.5;
+float contrastLeft = 0.0;
+float contrastRight = 0.0;
 
 int averageSignalCounter = AVERAGESIGNALCOUNTERMAX;
 int visualizationType = 0;            // which type of visualitazion should be used (0-2)
@@ -61,8 +61,6 @@ void setup() {
   initInterpolator();
   histogramGUI = new HistogramGUI(sketchWidth-256-borderDistance, sketchHeight-30, 256);
   histogramGUI.setMarkerPositions(contrastLeft, contrastRight);
-  interpolator.fStretchHistLeft = contrastLeft;
-  interpolator.fStretchHistRight = contrastRight;
   textInformation = "[r]eceive real data   [f]ake data (static)";
   helpText = textInformation;
 }
@@ -78,6 +76,7 @@ void draw() {
       break;
     case 1:
       drawSignalCircles(true);
+      drawGrid();
       break;
     case 2:
       interpolator.interpolate(crosspoints);
@@ -85,6 +84,7 @@ void draw() {
       interpolator.drawHistogramFromPoint(sketchWidth-256-borderDistance, sketchHeight-30, 65);
       histogramGUI.draw();
       drawSignalCircles(false);
+      drawGrid();
       break;
     default:
       break;
@@ -103,14 +103,22 @@ void drawSignalCircles(boolean bDrawText) {
         }
       }
     }
-    // draw the grid
-   stroke(wireColor);
+}
+
+void drawGrid() {
+    stroke(wireColor);
+    fill(wireColor);
+    textAlign(RIGHT);
     for (int i = 0; i < horizontalWires; i++) {
       line(borderDistance, borderDistance+(crosspointDistance*i), borderDistance+(crosspointDistance*(verticalWires-1)), borderDistance+(crosspointDistance*i));
+      text(i+1, borderDistance-4, borderDistance+(crosspointDistance*i)+4);
     }
+    textAlign(CENTER);
     for(int j = 0; j < verticalWires; j++) {
       line(borderDistance+(crosspointDistance*j), borderDistance, borderDistance+(crosspointDistance*j), borderDistance+(crosspointDistance*(horizontalWires-1)));
+      text(j+1, borderDistance+(crosspointDistance*j), borderDistance-4);
     }
+    textAlign(LEFT);
 }
 
 void serialEvent(Serial p) {
@@ -125,20 +133,20 @@ void serialEvent(Serial p) {
 void initInterpolator() {
   switch (interpType) {
     case kInterpHermite:
-        interpolator = new HermiteInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, contrastLeft, contrastRight);
+        interpolator = new HermiteInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
         break;
     case kInterpCatmullRom:
-        interpolator = new CatmullRomInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, contrastLeft, contrastRight);
+        interpolator = new CatmullRomInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
         break;
     case kInterpCubic:
-        interpolator = new CubicInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, contrastLeft, contrastRight);
+        interpolator = new CubicInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
         break;
     case kInterpCosine:
-        interpolator = new CosineInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, contrastLeft, contrastRight);
+        interpolator = new CosineInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
         break;
     case kInterpLinear:
     default:
-        interpolator = new LinearInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, contrastLeft, contrastRight);
+        interpolator = new LinearInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
         break;
   }
   interpolator.bContrastStretch = bContrastStretch;
@@ -150,9 +158,9 @@ void mousePressed() {
 
 void mouseDragged() {
   histogramGUI.mouseDragged(mouseX, mouseY);
-  interpolator.fStretchHistLeft = histogramGUI.getValLeft();
-  interpolator.fStretchHistRight = histogramGUI.getValRight();
-  textInformation = "contrast stretch:   " + interpolator.fStretchHistLeft + "   " + interpolator.fStretchHistRight;
+  contrastLeft = histogramGUI.getValLeft();
+  contrastRight = histogramGUI.getValRight();
+  textInformation = "contrast stretch:   " + contrastLeft + "   " + contrastRight;
 }
 
 void mouseReleased() {
