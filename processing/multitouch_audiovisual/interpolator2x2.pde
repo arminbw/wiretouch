@@ -2,9 +2,9 @@ class Interpolator2x2 extends Interpolator
 {
    double a, b, c, d;
    
-   Interpolator2x2(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier, String name)
+   Interpolator2x2(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier, int imageWidth, int imageHeight, String name)
    {
-      super(horizontalSamples, verticalSamples, horizontalMultiplier, verticalMultiplier, name);
+      super(horizontalSamples, verticalSamples, horizontalMultiplier, verticalMultiplier, imageWidth, imageHeight, name);
    }
   
    double interp_func(double a, double b, float f)

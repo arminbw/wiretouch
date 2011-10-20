@@ -1,6 +1,7 @@
 import processing.opengl.*;
 import processing.serial.*;
 import java.text.DecimalFormat;
+import blobDetection.*;
 
 DecimalFormat df = new DecimalFormat("#.###");
 
@@ -9,9 +10,8 @@ DataManager dataManager = null;
 PFont myFont;
 String textInformation;
 static byte[] serBuffer = null;
-int sketchWidth, sketchHeight;
 
-// interpolation, image post-production
+// interpolation, image post-production, blob detection
 Interpolator interpolator = null;
 static final int kInterpLinear = 0;
 static final int kInterpCosine = 1;
@@ -22,13 +22,19 @@ static final int kNumInterp = 5;
 int interpType = kInterpCatmullRom;
 int interpolationResolution = 4;
 HistogramGUI histogramGUI;
+BlobManager blobManager;
 
 // configuration
 static final int verticalWires = 32;
 static final int horizontalWires = 22;
-static final int crosspointDistance=30; // how many pixels between 2 crosspoints
-static final int borderDistance=30; // how many pixel distance to the borderDistance
-static final float signalPixelRatio = 0.03*1024; // (see crosspoint.pde)
+static final int crosspointDistance=25; // how many pixels between 2 crosspoints
+static final int borderDistance=15; // how many pixel distance to the borderDistance
+static final int sketchWidth = (borderDistance*2)+((verticalWires-1)*crosspointDistance);
+static final int sketchHeight = (horizontalWires+1)*crosspointDistance+90;
+static final int pictureWidth = (verticalWires-1)*crosspointDistance;
+static final int pictureHeight = (horizontalWires-1)*crosspointDistance;
+
+static final float signalPixelRatio = 0.02*1024; // (see crosspoint.pde)
 final color textColor = color(60,60,60);
 final color guiColor = color(180,180,180);
 final color backgroundColor = color(240,240,240);
@@ -47,9 +53,7 @@ boolean bContrastStretch = true;
 String helpText = "";
 
 void setup() {
-  sketchWidth = (borderDistance*2)+((verticalWires-1)*crosspointDistance);
-  sketchHeight = (horizontalWires+1)*crosspointDistance+90;
-  size(sketchWidth, sketchHeight, OPENGL);
+  size(sketchWidth, sketchHeight, P2D);
   myFont = loadFont("Consolas-12.vlw");
   textFont(myFont, 12);
   crosspoints = new Crosspoint[verticalWires][horizontalWires];
@@ -63,6 +67,7 @@ void setup() {
   histogramGUI.setMarkerPositions(contrastLeft, contrastRight);
   textInformation = "[r]eceive real data   [f]ake data (static)";
   helpText = textInformation;
+  blobManager = new BlobManager(interpolator.pixelWidth, interpolator.pixelHeight);
 }
 
 void draw() {
@@ -70,7 +75,8 @@ void draw() {
   switch (visualizationType) {
     case 0:
       interpolator.interpolate(crosspoints);
-      interpolator.drawByWidthPreservingAspectRatio(borderDistance, borderDistance, sketchWidth-borderDistance);
+      interpolator.drawPicture(borderDistance, borderDistance);
+      blobManager.drawBlobs();
       interpolator.drawHistogramFromPoint(sketchWidth-256-borderDistance, sketchHeight-30, 65);
       histogramGUI.draw();
       break;
@@ -80,7 +86,7 @@ void draw() {
       break;
     case 2:
       interpolator.interpolate(crosspoints);
-      interpolator.drawByWidthPreservingAspectRatio(borderDistance, borderDistance, sketchWidth-borderDistance);
+      interpolator.drawPicture(borderDistance, borderDistance);
       interpolator.drawHistogramFromPoint(sketchWidth-256-borderDistance, sketchHeight-30, 65);
       histogramGUI.draw();
       drawSignalCircles(false);
@@ -133,23 +139,24 @@ void serialEvent(Serial p) {
 void initInterpolator() {
   switch (interpType) {
     case kInterpHermite:
-        interpolator = new HermiteInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
+        interpolator = new HermiteInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, pictureWidth, pictureHeight);
         break;
     case kInterpCatmullRom:
-        interpolator = new CatmullRomInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
+        interpolator = new CatmullRomInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, pictureWidth, pictureHeight);
         break;
     case kInterpCubic:
-        interpolator = new CubicInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
+        interpolator = new CubicInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, pictureWidth, pictureHeight);
         break;
     case kInterpCosine:
-        interpolator = new CosineInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
+        interpolator = new CosineInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, pictureWidth, pictureHeight);
         break;
     case kInterpLinear:
     default:
-        interpolator = new LinearInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution);
+        interpolator = new LinearInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, pictureWidth, pictureHeight);
         break;
   }
   interpolator.bContrastStretch = bContrastStretch;
+  // blobManager = new BlobManager(pictureWidth, pictureHeight);
 }
 
 void mousePressed() {
@@ -182,14 +189,14 @@ void keyPressed() {
       }
       delay(2000); // needed
       dataManager.myPort.write('s');
-      helpText = "[c]ontrast stretch   [d]ebug   [h]elp   [i]nterpolation   [o]/[p] interpolation resolution\n[r]ecalibrate   [v]isualization";
+      helpText = "[c]ontrast stretch   [d]ebug   [h]elp   [i]nterpolation\n[o]/[p] interpolation resolution\n[r]ecalibrate   [v]isualization";
     }
     break;
   case 'f':
     // use fake data
     if (dataManager == null) {
       dataManager = new DataManager(null);
-      helpText = "[c]ontrast stretch   [h]elp   [i]nterpolation   [o]/[p] interpolation resolution\n[v]isualization";
+      helpText = "[c]ontrast stretch   [h]elp   [i]nterpolation\n[o]/[p] interpolation resolution   [v]isualization";
       textInformation = helpText;
     }
     break;
@@ -221,26 +228,26 @@ void keyPressed() {
     // change interpolation algorithm for pixel matrix
     interpType = ++interpType % kNumInterp;
     initInterpolator();
-    textInformation = interpolator.name() + " x" + interpolationResolution;
+    textInformation = interpolator.name + " x" + interpolationResolution;
     break;
   case 'o':
     // decrease interpolation resolution
     if (interpolationResolution>1) interpolationResolution--;
     initInterpolator();
-    textInformation = interpolator.name() + " x" + interpolationResolution;
+    textInformation = interpolator.name + " x" + interpolationResolution;
     break;
   case 'p':
     // increase interpolation resolution
     if (interpolationResolution<15) interpolationResolution++;
     initInterpolator();
-    textInformation = interpolator.name() + " x" + interpolationResolution;
+    textInformation = interpolator.name + " x" + interpolationResolution;
     break;
   case 'k':
     if (interpolator instanceof HermiteInterpolator) {
       HermiteInterpolator ip = (HermiteInterpolator)interpolator;
       ip.tension += 0.1;
       ip.tension = constrain((float)ip.tension, -2.0, 2.0);
-      textInformation = interpolator.name() + " x" + interpolationResolution;
+      textInformation = interpolator.name + " x" + interpolationResolution;
     }
     break;
   case 'l':
@@ -248,7 +255,7 @@ void keyPressed() {
       HermiteInterpolator ip = (HermiteInterpolator)interpolator;
       ip.tension -= 0.1;
       ip.tension = constrain((float)ip.tension, -2.0, 2.0);
-      textInformation = interpolator.name() + " x" + interpolationResolution;
+      textInformation = interpolator.name + " x" + interpolationResolution;
     }
     break;
   }

@@ -1,47 +1,47 @@
 class HistogramGUI {
   private int x, y;
   private int width;
-  public GUITriangle left, right;
+  public GUITriangle triangleLeft, triangleRight;
   
   HistogramGUI (int x, int y, int width) {
      this.x = x;
      this.y = y;
      this.width = width;
-     left = new GUITriangle(this.x, this.y);
-     right = new GUITriangle(this.x+this.width, this.y);
+     triangleLeft = new GUITriangle(this.x, this.y);
+     triangleRight = new GUITriangle(this.x+this.width, this.y);
   }
   
   void mousePressed() {
-    left.mousePressed();
-    right.mousePressed();
+    triangleLeft.mousePressed();
+    triangleRight.mousePressed();
   }
   
   void mouseDragged(int mX, int mY) {
-    left.mouseDragged(constrain(mX, this.x, right.x-13), mY);
-    right.mouseDragged(constrain(mX, left.x+13, this.x+this.width), mY);
+    triangleLeft.mouseDragged(constrain(mX, this.x, triangleRight.x-13), mY);
+    triangleRight.mouseDragged(constrain(mX, triangleLeft.x+13, this.x+this.width), mY);
   }
   
   void mouseReleased() {
-    left.mouseReleased();
-    right.mouseReleased();
+    triangleLeft.mouseReleased();
+    triangleRight.mouseReleased();
   }
   
   void draw() {        
-    left.draw();
-    right.draw();
+    triangleLeft.draw();
+    triangleRight.draw();
   }
   
   void setMarkerPositions(float valLeft, float valRight) {
-    left.x = this.x + (int) (valLeft * this.width);
-    right.x = this.x + this.width - (int) (valRight * this.width);
+    triangleLeft.x = this.x + (int) (valLeft * this.width);
+    triangleRight.x = this.x + this.width - (int) (valRight * this.width);
   }
     
   float getValLeft() {
-    return (float) (left.x - this.x) / (float) this.width;
+    return (float) (triangleLeft.x - this.x) / (float) this.width;
   }
   
   float getValRight() {
-    return 1.0 - (float) (right.x - this.x) / (float) this.width;
+    return 1.0 - (float) (triangleRight.x - this.x) / (float) this.width;
   }
 }
 

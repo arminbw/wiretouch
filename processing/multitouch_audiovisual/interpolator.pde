@@ -4,77 +4,67 @@ class Interpolator
    
    boolean bContrastStretch; 
    
-   int _x_samples, _y_samples;
-   int _x, _y, _nx, _ny;
+   int horizontalSamples, verticalSamples;
+   int pixelWidth, pixelHeight;   // the actual pixel count of the interpolated image
+   int horizontalMultiplier, verticalMultiplier;   // used to calculate pixelWidth and pixelHeight
+   int resizedWidth, resizedHeight;  // the resized, blown up image
    float _fx, _fy;
-   double[] _ip;
+   PImage picture, resizedPicture;
+   double[] interpolPixels;
    int[] _hist;
    int _histMax;
-   String _name;
+   String name;
    
-   Interpolator(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier, String name)
+   Interpolator(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier, int imageWidth, int imageHeight, String name)
    {
-      this._x_samples = horizontalSamples;
-      this._y_samples = verticalSamples;
-      this._nx = horizontalMultiplier;
-      this._ny = verticalMultiplier;
-      this._x = (_x_samples - 1) * _nx;
-      this._y = (_y_samples -1) * _ny;
+      this.horizontalSamples = horizontalSamples;
+      this.verticalSamples = verticalSamples;
+      this.horizontalMultiplier = horizontalMultiplier;
+      this.verticalMultiplier = verticalMultiplier;
+      this.pixelWidth = (horizontalSamples - 1) * horizontalMultiplier;
+      this.pixelHeight = (verticalSamples - 1) * verticalMultiplier;
+      this.resizedWidth = imageWidth;
+      this.resizedHeight = imageHeight;
       
-      this._fx = 1.0 / (2.0 * (float)_nx);
-      this._fy = 1.0 / (2.0 * (float)_ny);
+      this._fx = 1.0 / (2.0 * (float)horizontalMultiplier);
+      this._fy = 1.0 / (2.0 * (float)verticalMultiplier);
       
-      this._ip = new double[_x * _y];
+      this.interpolPixels = new double[pixelWidth * pixelHeight];
       this._hist = new int[histogramBins];
       
       this.bContrastStretch = false;
-      this._name = name;
-   }
-   
-   String name()
-   {
-     return _name;
-   }
-   
-   int getPixelWidth()
-   {
-      return _x;
-   }
-   
-   int getPixelHeight()
-   {
-      return _y;
-   }
-   
-   double[] getPixels()
-   {
-      return _ip;
+      this.name = name;
+      
+      picture = createImage(pixelWidth, pixelHeight, RGB);
+      picture.loadPixels();
+      resizedPicture = createImage(resizedWidth, resizedHeight, RGB);
+      resizedPicture.loadPixels();
    }
    
    // includes value repetition at the borders
    double sensorVal(Crosspoint[][] cp, int x, int y)
    {
-      x = constrain(x, 0, _x_samples-1);
-      y = constrain(y, 0, _y_samples-1);
+      x = constrain(x, 0, horizontalSamples-1);
+      y = constrain(y, 0, verticalSamples-1);
       
       return cp[x][y].signalStrength;
    }
    
-   void drawInRect(int x1, int y1, int x2, int y2)
+/*   void drawInRect(int x1, int y1, int x2, int y2)
    {  
       noStroke();
             
-      float sx = (float)(x2-x1) / (float)_x;
-      float sy = (float)(y2-y1) / (float)_y;
+      float sx = (float)(x2-x1) / (float)pixelWidth;
+      float sy = (float)(y2-y1) / (float)pixelHeight;
       float tx = x1 * (-sx + 1);
       float ty = y1 * (-sy + 1);
       
       translate(tx, ty);
       scale(sx, sy);
       
-      for (int i=0; i<_x; i++)
-         for (int j=0; j<_y; j++) {
-            fill(color((float)_ip[j * _x + i]*255.0));
+      for (int i=0; i<pixelWidth; i++)
+         for (int j=0; j<pixelHeight; j++) {
+            fill(color((float)interpolPixels[j * pixelWidth + i]*255.0));
             rect(x1 + i*1, y1 + j*1, 1, 1);
          }
          
@@ -85,11 +75,28 @@ class Interpolator
    void drawByWidthPreservingAspectRatio(int x1, int y1, int x2)
    {
       int w = x2 - x1;
-      float r = (float)_y / (float)_x;
+      float r = (float)pixelHeight / (float)pixelWidth;
       
       drawInRect(x1, y1, x2, y1 + (int)(w*r + 0.5));
    }
+   */
+
+   void updatePicture() {
+      for (int i=0; i<interpolPixels.length; i++) {
+        picture.pixels[i] = color((float)interpolPixels[i]*255.0);
+      }
+      picture.updatePixels();
+      // resize
+      resizedPicture.copy(picture, 0, 0, picture.width, picture.height, 
+				0, 0, resizedWidth, resizedHeight);
+   }
    
+   void drawPicture(int x, int y) {
+      updatePicture();
+      // image(picture, x, y);
+      image(resizedPicture, x, y);
+   }
+      
    void drawHistogramFromPoint(int x1, int y1, int maxY)
    {
       float step = (float)maxY / (float)log(this._histMax);
@@ -112,13 +119,12 @@ class Interpolator
 
       Arrays.fill(this._hist, 0);
       this._histMax = 0;
-      
-      for (int i=0; i<_x_samples-1; i++)
-         for (int j=0; j<_y_samples-1; j++) {
+      for (int i=0; i<horizontalSamples-1; i++)
+         for (int j=0; j<verticalSamples-1; j++) {
             beginInterpolate4(cp, i, j);
             
-            for (int k=0; k<_nx; k++)
-               for (int l=0; l<_ny; l++) {
+            for (int k=0; k<horizontalMultiplier; k++)
+               for (int l=0; l<verticalMultiplier; l++) {
                   double val =  interpolate4(cp, i, j, k, l, _fx * (1.0 + 2*k), _fy * (1.0 + 2*l));
                   val = constrain((float)val, 0.0, 1.0);
 
@@ -127,7 +133,7 @@ class Interpolator
                   if (_hist[p] > this._histMax)
                      this._histMax = _hist[p];
                   
-                  this._ip[((j * _ny + l) * _x) + i * _nx + k] = val;
+                  this.interpolPixels[((j * verticalMultiplier + l) * pixelWidth) + i * horizontalMultiplier + k] = val;
                }
             
             finishInterpolate4(cp, i, j);
@@ -138,18 +144,18 @@ class Interpolator
       if (this.bContrastStretch) {
          float vmin = 0.0, vmax = 1.0;
       
-         int ss, nHist = (int)(this._x * this._y * contrastLeft);      
+         int ss, nHist = (int) (this.pixelWidth * this.pixelHeight * contrastLeft);
          for (ss = 0; nHist > 0 && ss<histogramBins; nHist -= this._hist[ss++]);
          vmin = (1.0/histogramBins) * ss;
       
-         nHist = (int)(this._x * this._y * contrastRight);
+         nHist = (int)(this.pixelWidth * this.pixelHeight * contrastRight);
          for (ss = histogramBins-1; nHist > 0 && ss>=0; nHist -= this._hist[ss--]);
          vmax = (1.0/histogramBins) * ss;
             
-         for (int i=0; i<_x; i++)
-            for (int j=0; j<_y; j++) {
-               double p = _ip[j * _x + i];
-               _ip[j * _x + i] = (p - vmin) / (vmax - vmin);
+         for (int i=0; i<pixelWidth; i++)
+            for (int j=0; j<pixelHeight; j++) {
+               double p = interpolPixels[j * pixelWidth + i];
+               interpolPixels[j * pixelWidth + i] = (p - vmin) / (vmax - vmin);
             }
       }
    }
