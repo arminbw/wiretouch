@@ -51,9 +51,10 @@ boolean bDebug = false;               // stop updating and print out some debug 
 boolean bReadBinary = true;           // read binary data (instead of strings)
 boolean bContrastStretch = true;
 String helpText = "";
+int lastMillis, frames, packets, fps, pps;
 
 void setup() {
-  size(sketchWidth, sketchHeight, P2D);
+  size(sketchWidth, sketchHeight, P2D); // TODO : change to OPENGL2?
   myFont = loadFont("Consolas-12.vlw");
   textFont(myFont, 12);
   crosspoints = new Crosspoint[verticalWires][horizontalWires];
@@ -68,6 +69,7 @@ void setup() {
   textInformation = "[r]eceive real data   [f]ake data (static)";
   helpText = textInformation;
   blobManager = new BlobManager(interpolator.pixelWidth, interpolator.pixelHeight);
+  lastMillis = millis();
 }
 
 void draw() {
@@ -97,6 +99,17 @@ void draw() {
   }
   fill(textColor);
   text(textInformation, borderDistance, height-60);
+  if ((millis() - lastMillis) > 1000) {
+    lastMillis = millis();
+    fps = frames;
+    pps = packets;
+    frames = 0;
+    packets = 0;
+  } else {
+    frames++;
+  }
+  text(fps+" fps", borderDistance,10);
+  text(pps+" packets per second", 80, 10);
 }
 
 void drawSignalCircles(boolean bDrawText) {
@@ -130,6 +143,7 @@ void drawGrid() {
 void serialEvent(Serial p) {
   if (bReadBinary) {
     dataManager.consumeSerialBuffer(p);
+    packets++;
   }
   else {
     dataManager.parseData(p.readString());
