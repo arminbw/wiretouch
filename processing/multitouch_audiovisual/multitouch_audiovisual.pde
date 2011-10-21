@@ -101,7 +101,7 @@ void draw() {
   text(textInformation, borderDistance, height-60);
   if ((millis() - lastMillis) > 1000) {
     lastMillis = millis();
-    fps = frames;
+    fps = frames+1;
     pps = packets;
     frames = 0;
     packets = 0;
