@@ -11,9 +11,9 @@
 #define NUM_SELECT 4
 
 const byte verticalShiftRegPins[] = {
-  3,              // latch / SRCLK
-  2,              // clock / RCLK
-  4               // data  / SERs
+  3,              // latch / SRCLK   PORTD.3
+  2,              // clock / RCLK    PORTD.2
+  4               // data  / SERs    PORTD.4
 };
 
 const byte verticalPosLeft[] = { 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
@@ -21,9 +21,9 @@ const byte verticalPosRight[] = { 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2
 const byte verticalWires = 32;
 
 const byte horizontalShiftRegPins[] = {
-  6,              // latch / SRCLK
-  5,              // clock / RCLK
-  7               // data  / SER
+  6,              // latch / SRCLK  PORTD.6
+  5,              // clock / RCLK   PORTD.5
+  7               // data  / SER    PORTD.7
 };
 
 const byte horizontalPosTop[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
@@ -53,7 +53,7 @@ void muxVertical(byte output) {
   /*for (int i=0; i<NUM_SELECT; i++)
     digitalWrite(verticalPins[i], ((output >> i) & 1) ? HIGH : LOW); */
   byte mux_sel = (output > 15);
-  if (output >= 16) output -= 16;
+  if (output > 15) output -= 16;
   
   byte bits = 0;
   const byte* p = mux_sel ? verticalPosRight : verticalPosLeft;
@@ -62,9 +62,20 @@ void muxVertical(byte output) {
   bits |= ((mux_sel & 1) << 4);
   bits |= ((!mux_sel & 1) << 5);
   
-  digitalWrite(verticalShiftRegPins[0], LOW);
+  PORTD &= ~(1<<3);
+  for (int i=7; i>=0; i--) {
+    if ((bits >> i) & 1)
+      PORTD |= (1<<4);
+    else
+      PORTD &= ~(1<<4);
+    PORTD |= (1<<2);
+    PORTD &= ~(1<<2);
+  }
+  PORTD |= (1<<3);
+  
+  /*digitalWrite(verticalShiftRegPins[0], LOW);
   shiftOut(verticalShiftRegPins[2], verticalShiftRegPins[1], MSBFIRST, bits);
-  digitalWrite(verticalShiftRegPins[0], HIGH);
+  digitalWrite(verticalShiftRegPins[0], HIGH);*/
 }
 
 void muxHorizontal(byte output) {
@@ -73,7 +84,7 @@ void muxHorizontal(byte output) {
   }*/
   
   byte mux_sel = (output > 15);
-  if (output >= 16) output -= 16;
+  if (output > 15) output -= 16;
   
   byte bits = 0;
   const byte* p = mux_sel ? horizontalPosBottom : horizontalPosTop;
@@ -82,14 +93,25 @@ void muxHorizontal(byte output) {
   bits |= ((mux_sel & 1) << 4);
   bits |= ((!mux_sel & 1) << 5);
   
-  digitalWrite(horizontalShiftRegPins[0], LOW);
+  PORTD &= ~(1<<6);
+  for (int i=7; i>=0; i--) {
+    if ((bits >> i) & 1)
+      PORTD |= (1<<7);
+    else
+      PORTD &= ~(1<<7);
+    PORTD |= (1<<5);
+    PORTD &= ~(1<<5);
+  }
+  PORTD |= (1<<6);
+  
+  /*digitalWrite(horizontalShiftRegPins[0], LOW);
   shiftOut(horizontalShiftRegPins[2], horizontalShiftRegPins[1], MSBFIRST, bits);
-  digitalWrite(horizontalShiftRegPins[0], HIGH);
+  digitalWrite(horizontalShiftRegPins[0], HIGH);*/
 }
 
 unsigned int measure() {
   int val = 1025;
-  for (int v=0; v<5; v++) {
+  for (int v=0; v<3; v++) {
     unsigned rd = analogRead(0);
     if (rd < val)
       val = rd;
