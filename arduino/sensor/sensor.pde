@@ -31,7 +31,7 @@ const byte horizontalPosBottom[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1
 const byte horizontalWires = 22;
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(230400);
   pinMode(13, OUTPUT);
   // analogReference(EXTERNAL);
   pinMode(12, INPUT);
@@ -119,9 +119,29 @@ unsigned int measure() {
   return (val);
 }
 
+void send_packed10(uint16_t w16, byte flush_all)
+{
+  static byte p = 0;
+  static uint16_t d16 = 0;
+  
+  d16 |= (w16 << p);
+  p += 10;
+  
+  while (p >= 8) {
+    Serial.write((byte)(d16 & 0xff));
+    p -= 8;
+    d16 >>= 8;
+  }
+  
+  if (flush_all && p > 0) {
+    Serial.write((byte)(d16 & 0xff));
+    p = 0; d16 = 0;
+  }
+}
+
 void loop() {
   static boolean isRunning = 0;
-  unsigned sample;
+  uint16_t sample;
   
   while(!isRunning) {
     if (Serial.available()) {
@@ -130,16 +150,18 @@ void loop() {
     }
   }
   
+  int cnt = 0;
   for (int k = 0; k < verticalWires; k++) {
     muxVertical(k);
     for (byte l = 0; l < horizontalWires; l++) {
       muxHorizontal(l);
       delayMicroseconds(80); // increase to deal with row-error!
       sample = measure();
+      
+      cnt++;
 
 #if PRINT_BINARY
-      Serial.print((byte)((sample >> 8) & 0xff), BYTE);
-      Serial.print((byte)(sample & 0xff), BYTE);
+      send_packed10(sample, (cnt >= verticalWires*horizontalWires));
 #else
       Serial.print(sample, DEC);
       Serial.print(",");

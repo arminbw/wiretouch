@@ -16,8 +16,8 @@ class DataManager {
       this.myPort.clear(); // // do we need this? (cargo cult programming)
       if (bReadBinary) {
         // TODO: better encapsulation
-        serBuffer = new byte[2 * horizontalWires * verticalWires];
-        this.myPort.buffer(2 * horizontalWires * verticalWires);
+        serBuffer = new byte[(horizontalWires * verticalWires * 10)/8];
+        this.myPort.buffer(serBuffer.length);
       }
       else {
         this.myPort.bufferUntil(32); // buffer everything until ASCII whitespace char triggers serialEvent()
@@ -32,11 +32,43 @@ class DataManager {
   
   void consumeSerialBuffer(Serial p) {
     p.readBytes(serBuffer);
+    
+    if (!bDebug) {
+      
+      int bs = 0, br = 0, cnt = 0;
+      for (int i=0; i<serBuffer.length; i++) {
+        br |= sb2ub(serBuffer[i]) << bs;
+        bs += 8;
+                
+        while (bs >= 10) {          
+          int sig = br & 0x3ff;
+          
+          br >>= 10;
+          bs -= 10;
+          
+          int px = cnt / horizontalWires, py = cnt % horizontalWires;
+                     
+          if (averageSignalCounter > 0) {
+             // calculate the average signal strength for every crosspoint
+             crosspoints[px][py].accumulateAvgSig(sig);
+           } else {
+              crosspoints[px][py].setSignalStrength(sig);
+           }
+           
+           cnt++;
+        }
+      }
+     
+      calibrationFeedback(); 
+    }
+    
+    /*
     if (!bDebug) {
       for (int i = 0; i < verticalWires; i++) {
         for(int j = 0; j < horizontalWires; j++) {
            int sigPos = i*horizontalWires + j;
            int sig = ((sb2ub(serBuffer[2*sigPos])) << 8) | (sb2ub(serBuffer[2*sigPos+1]));
+           
            if (averageSignalCounter > 0) {
              // calculate the average signal strength for every crosspoint
              crosspoints[i][j].accumulateAvgSig(sig);
@@ -46,7 +78,7 @@ class DataManager {
         }
       }
       calibrationFeedback();
-    }
+    }*/
   }
   
   // TODO: this code needs some serious refactoring...

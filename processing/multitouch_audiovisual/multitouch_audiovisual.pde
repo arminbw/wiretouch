@@ -196,7 +196,7 @@ void keyPressed() {
     if (dataManager == null) {
       // send signal to arduino to receive data
       try {
-        dataManager = new DataManager(new Serial( this, Serial.list()[0], 115200 ));
+        dataManager = new DataManager(new Serial( this, Serial.list()[0], 230400 ));
       } catch (Exception e) {
         textInformation = "error opening Serial connection: "+e;
         break;
