@@ -11,8 +11,8 @@
 #define NUM_SELECT 4
 
 const byte verticalShiftRegPins[] = {
-  3,              // latch / SRCLK   PORTD.3
-  2,              // clock / RCLK    PORTD.2
+  3,              // latch / RCLK   PORTD.3  
+  2,              // clock / SRCLK    PORTD.2
   4               // data  / SERs    PORTD.4
 };
 
@@ -21,9 +21,9 @@ const byte verticalPosRight[] = { 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2
 const byte verticalWires = 32;
 
 const byte horizontalShiftRegPins[] = {
-  6,              // latch / SRCLK  PORTD.6
-  5,              // clock / RCLK   PORTD.5
-  7               // data  / SER    PORTD.7
+  6,              // latch / RCLK  PORTD.6
+  5,              // clock / SRCLK   PORTD.5
+  7               // data  / SER    PORTD.7  
 };
 
 const byte horizontalPosTop[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
@@ -155,6 +155,7 @@ void loop() {
     muxVertical(k);
     for (byte l = 0; l < horizontalWires; l++) {
       muxHorizontal(l);
+      //delay(500);
       delayMicroseconds(80); // increase to deal with row-error!
       sample = measure();
       
