@@ -1,7 +1,8 @@
 import processing.opengl.*;
 import processing.serial.*;
 import java.text.DecimalFormat;
-import blobDetection.*;
+// import blobDetection.*;
+import codeanticode.glgraphics.*; // http://glgraphics.sourceforge.net
 
 DecimalFormat df = new DecimalFormat("#.###");
 
@@ -19,7 +20,7 @@ static final int kInterpCatmullRom = 3;
 static final int kInterpHermite = 4;
 static final int kNumInterp = 5;
 int interpType = kInterpCatmullRom;
-int interpolationResolution = 4;
+int interpolationResolution = 3;
 HistogramGUI histogramGUI;
 // BlobManager blobManager;
 
@@ -49,7 +50,8 @@ int lastMillis, frames, packets, fps, pps;
 boolean bNewFrame; // only draw if there's new information
 
 void setup() {
-  size(sketchWidth, sketchHeight, P2D); // TODO : change to OPENGL2?
+  size(sketchWidth, sketchHeight, GLConstants.GLGRAPHICS); // TODO : change to OPENGL2?
+  hint(DISABLE_DEPTH_TEST);
   myFont = loadFont("Consolas-12.vlw");
   textFont(myFont, 12);
   crosspoints = new Crosspoint[verticalWires][horizontalWires];

@@ -49,38 +49,7 @@ class Interpolator
 
     return cp[x][y].signalStrength;
   }
-
-  /*   void drawInRect(int x1, int y1, int x2, int y2)
-   {  
-   noStroke();
-   
-   float sx = (float)(x2-x1) / (float)pixelWidth;
-   float sy = (float)(y2-y1) / (float)pixelHeight;
-   float tx = x1 * (-sx + 1);
-   float ty = y1 * (-sy + 1);
-   
-   translate(tx, ty);
-   scale(sx, sy);
-   
-   for (int i=0; i<pixelWidth; i++)
-   for (int j=0; j<pixelHeight; j++) {
-   fill(color((float)interpolPixels[j * pixelWidth + i]*255.0));
-   rect(x1 + i*1, y1 + j*1, 1, 1);
-   }
-   
-   scale(1.0/sx, 1.0/sy);
-   translate(-tx, -ty);
-   }
-   
-   void drawByWidthPreservingAspectRatio(int x1, int y1, int x2)
-   {
-   int w = x2 - x1;
-   float r = (float)pixelHeight / (float)pixelWidth;
-   
-   drawInRect(x1, y1, x2, y1 + (int)(w*r + 0.5));
-   }
-   */
-
+  
   void updatePicture() {
     for (int i=0; i<interpolPixels.length; i++) {
       picture.pixels[i] = color((float)interpolPixels[i]*255.0);
