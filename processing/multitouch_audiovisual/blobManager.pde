@@ -8,7 +8,7 @@ class BlobManager {
   }
 
   void drawBlobs() {
-    this.blobDetection.computeBlobs(interpolator.picture.pixels);
+    this.blobDetection.computeBlobs(picture.pixels);
     drawBlobsAndEdges(true, true, interpolator.resizedWidth, interpolator.resizedHeight, borderDistance, borderDistance);
   }
 

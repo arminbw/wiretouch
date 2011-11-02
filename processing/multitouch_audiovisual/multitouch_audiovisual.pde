@@ -1,7 +1,7 @@
 import processing.opengl.*;
 import processing.serial.*;
 import java.text.DecimalFormat;
-// import blobDetection.*;
+import blobDetection.*;
 import codeanticode.glgraphics.*; // http://glgraphics.sourceforge.net
 
 DecimalFormat df = new DecimalFormat("#.###");
@@ -22,6 +22,7 @@ static final int kNumInterp = 5;
 int interpType = kInterpCatmullRom;
 int interpolationResolution = 3;
 HistogramGUI histogramGUI;
+GLTexture picture;
 // BlobManager blobManager;
 
 // configuration
@@ -50,8 +51,10 @@ int lastMillis, frames, packets, fps, pps;
 boolean bNewFrame; // only draw if there's new information
 
 void setup() {
-  size(sketchWidth, sketchHeight, GLConstants.GLGRAPHICS); // TODO : change to OPENGL2?
-  hint(DISABLE_DEPTH_TEST);
+  size(sketchWidth, sketchHeight, GLConstants.GLGRAPHICS);
+  // testing GLGRAPHICS
+  GLTextureParameters gp = new GLTextureParameters();
+  picture = new GLTexture(this, (verticalWires - 1)*interpolationResolution, (horizontalWires - 1)*interpolationResolution, gp);    
   myFont = loadFont("Consolas-12.vlw");
   textFont(myFont, 12);
   crosspoints = new Crosspoint[verticalWires][horizontalWires];
@@ -73,6 +76,17 @@ void setup() {
 }
 
 void draw() {
+  if ((millis() - lastMillis) > 1000) {
+      lastMillis = millis();
+      fps = frames+1;
+      pps = packets;
+      frames = 0;
+      packets = 0;
+      bNewFrame = true;
+  } 
+  else {
+      frames++;
+  }
   if (bNewFrame) {
     bNewFrame = false;
     background(backgroundColor);
@@ -101,16 +115,6 @@ void draw() {
     }
     fill(textColor);
     text(textInformation, borderDistance, height-60);
-    if ((millis() - lastMillis) > 1000) {
-      lastMillis = millis();
-      fps = frames+1;
-      pps = packets;
-      frames = 0;
-      packets = 0;
-    } 
-    else {
-      frames++;
-    }
     text(fps+" fps", borderDistance, 10);
     text(pps+" packets per second", 80, 10);
   }
@@ -166,6 +170,11 @@ void showHelpText() {
 }
 
 void initInterpolator() {
+  // testing GLGRAPHICS
+  GLTextureParameters gp = new GLTextureParameters();
+  gp.minFilter = GLConstants.NEAREST_SAMPLING;
+  gp.magFilter = GLConstants.NEAREST_SAMPLING;
+  picture = new GLTexture(this, (verticalWires - 1)*interpolationResolution, (horizontalWires - 1)*interpolationResolution, gp);    
   switch (interpType) {
   case kInterpHermite:
     interpolator = new HermiteInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, pictureWidth, pictureHeight);

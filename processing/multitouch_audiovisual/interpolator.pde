@@ -9,14 +9,14 @@ class Interpolator
   int horizontalMultiplier, verticalMultiplier;   // used to calculate pixelWidth and pixelHeight
   int resizedWidth, resizedHeight;  // the resized, blown up image
   float _fx, _fy;
-  PImage picture, resizedPicture;
   double[] interpolPixels;
   int[] _hist;
   int _histMax;
   String name;
-
+  
   Interpolator(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier, int imageWidth, int imageHeight, String name)
   {
+    // TODO: simplify (use picture)
     this.horizontalSamples = horizontalSamples;
     this.verticalSamples = verticalSamples;
     this.horizontalMultiplier = horizontalMultiplier;
@@ -34,11 +34,6 @@ class Interpolator
 
     this.bContrastStretch = false;
     this.name = name;
-
-    picture = createImage(pixelWidth, pixelHeight, RGB);
-    picture.loadPixels();
-    resizedPicture = createImage(resizedWidth, resizedHeight, RGB);
-    resizedPicture.loadPixels();
   }
 
   // includes value repetition at the borders
@@ -51,19 +46,16 @@ class Interpolator
   }
   
   void updatePicture() {
+    picture.loadPixels();
     for (int i=0; i<interpolPixels.length; i++) {
       picture.pixels[i] = color((float)interpolPixels[i]*255.0);
     }
-    picture.updatePixels();
-    // resize
-    resizedPicture.copy(picture, 0, 0, picture.width, picture.height, 
-    0, 0, resizedWidth, resizedHeight);
+    picture.loadTexture();
   }
 
   void drawPicture(int x, int y) {
     updatePicture();
-    // image(picture, x, y);
-    image(resizedPicture, x, y);
+    picture.render(x, y, resizedWidth, resizedHeight);
   }
 
   void drawHistogramFromPoint(int x1, int y1, int maxY)
