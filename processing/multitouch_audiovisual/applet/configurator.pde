@@ -19,12 +19,10 @@ class Configurator {
     case 'r':
       if (averageSignalCounter == 0) {
         // recalibrate
-        averageSignalCounter=AVERAGESIGNALCOUNTERMAX;
         textInformation = "recalibrating";
+        averageSignalCounter=AVERAGESIGNALCOUNTERMAX;
       }
       else {
-        averageSignalCounter=AVERAGESIGNALCOUNTERMAX;
-        textInformation = "calibrating";
         initSerial();
         configurator.helpText = "[c]ontrast stretch   [d]ebug   [h]elp   [i]nterpolation\n[o]/[p] interpolation resolution\n[r]ecalibrate   [u]calibrate(ON/OFF)   [v]isualization";
       }

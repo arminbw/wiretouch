@@ -157,6 +157,7 @@ void initSerial() {
     println(Serial.list());
     exit();
   }
+  textInformation = "Serial connection initalized.";
 }
 
 void serialEvent(Serial p) {
