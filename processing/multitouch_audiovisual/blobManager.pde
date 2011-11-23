@@ -1,10 +1,10 @@
 class BlobManager {
   BlobDetection blobDetection;
 
-  BlobManager(int pixelWidth, int pixelHeight) {
+  BlobManager(int pixelWidth, int pixelHeight, float lumThreshold) {
     this.blobDetection = new BlobDetection(pixelWidth, pixelHeight);
     this.blobDetection.setPosDiscrimination(false); // detect dark areas
-    this.blobDetection.setThreshold(0.9f); // will detect dark areas whose luminosity > 0.2f;
+    this.blobDetection.setThreshold(lumThreshold);
   }
 
   void drawBlobs() {
@@ -18,13 +18,13 @@ class BlobManager {
     noFill();
     Blob b;
     EdgeVertex eA, eB;
-    for (int n=0 ; n<blobDetection.getBlobNb() ; n++) {
+    for (int n=0 ; n<blobDetection.getBlobNb(); n++) {
       b=blobDetection.getBlob(n);
       if (b!=null) {
         // Edges
         if (drawEdges) {
-          strokeWeight(3);
-          stroke(0, 255, 0);
+          strokeWeight(2);
+          stroke(wireColor);
           for (int m=0;m<b.getEdgeNb();m++) {
             eA = b.getEdgeVertexA(m);
             eB = b.getEdgeVertexB(m);
@@ -37,11 +37,16 @@ class BlobManager {
         }
         // Blobs
         if (drawBlobs) {
-          strokeWeight(1);
-          stroke(255, 0, 0);
+          strokeWeight(2);
+          stroke(wireColor);
           rect(x+ (b.xMin*w), y+ (b.yMin*h), b.w*w, b.h*h);
         }
       }
     }
+    noStroke();
+  }
+  
+  void setThreshold(float lumThreshold) {
+    this.blobDetection.setThreshold(lumThreshold); 
   }
 }

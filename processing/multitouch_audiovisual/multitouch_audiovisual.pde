@@ -23,14 +23,14 @@ int interpType = kInterpCatmullRom;
 int interpolationResolution = 3;
 HistogramGUI histogramGUI;
 GLTexture picture;
-// BlobManager blobManager;
+BlobManager blobManager;
 
 // configuration
 Configurator configurator;
 static final int verticalWires = 32;
 static final int horizontalWires = 22;
 static final int crosspointDistance=25; // how many pixels between 2 crosspoints
-static final int borderDistance=15; // how many pixel distance to the borderDistance
+static final int borderDistance=20; // how many pixel distance to the borderDistance
 static final int sketchWidth = (borderDistance*2)+((verticalWires-1)*crosspointDistance);
 static final int sketchHeight = (horizontalWires+1)*crosspointDistance+90;
 static final int pictureWidth = (verticalWires-1)*crosspointDistance;
@@ -41,18 +41,18 @@ final color guiColor = color(180, 180, 180);
 final color backgroundColor = color(240, 240, 240);
 final color histogramColor = color(239, 171, 233);
 final color signalColor = color(153, 233, 240);
-final color wireColor = color(0, 222, 255);
+final color wireColor = color(0, 222, 255);      // also used for blobs and histogram GUI triangles
 static final int AVERAGESIGNALCOUNTERMAX = 150;
 int averageSignalCounter = AVERAGESIGNALCOUNTERMAX;
 float contrastLeft = 0.0;
 float contrastRight = 0.0;
+float blobThreshold = 0.32;
 
 int lastMillis, frames, packets, fps, pps;
-boolean bNewFrame; // only draw if there's new information
+boolean bNewFrame; // only draw if there's new information (but at least every second)
 
 void setup() {
   size(sketchWidth, sketchHeight, GLConstants.GLGRAPHICS);
-  // testing GLGRAPHICS
   GLTextureParameters gp = new GLTextureParameters();
   picture = new GLTexture(this, (verticalWires - 1)*interpolationResolution, (horizontalWires - 1)*interpolationResolution, gp);    
   myFont = loadFont("Consolas-12.vlw");
@@ -67,10 +67,10 @@ void setup() {
   configurator = new Configurator(dataManager);
   initInterpolator();
   histogramGUI = new HistogramGUI(sketchWidth-256-borderDistance, sketchHeight-30, 256);
-  histogramGUI.setMarkerPositions(contrastLeft, contrastRight);
+  histogramGUI.setMarkerPositions(contrastLeft, contrastRight, blobThreshold);
   configurator.helpText = "[r]eceive real data   [f]ake data (static)";
   textInformation = configurator.helpText;
-  // blobManager = new BlobManager(interpolator.pixelWidth, interpolator.pixelHeight);
+  blobManager = new BlobManager(interpolator.pixelWidth, interpolator.pixelHeight, blobThreshold);
   lastMillis = millis();
   bNewFrame = true;
 }
@@ -78,23 +78,20 @@ void setup() {
 void draw() {
   if ((millis() - lastMillis) > 1000) {
       lastMillis = millis();
-      fps = frames+1;
+      fps = frames;
       pps = packets;
       frames = 0;
       packets = 0;
       bNewFrame = true;
   } 
-  else {
-      frames++;
-  }
   if (bNewFrame) {
+    frames++;
     bNewFrame = false;
     background(backgroundColor);
     switch (configurator.visualizationType) {
     case 0:
       interpolator.interpolate(crosspoints);
       interpolator.drawPicture(borderDistance, borderDistance);
-      // rblobManager.drawBlobs();
       interpolator.drawHistogramFromPoint(sketchWidth-256-borderDistance, sketchHeight-30, 65);
       histogramGUI.draw();
       break;
@@ -113,10 +110,11 @@ void draw() {
     default:
       break;
     }
+    if (configurator.bShowBlobs) blobManager.drawBlobs();
     fill(textColor);
-    text(textInformation, borderDistance, height-60);
-    text(fps+" fps", borderDistance, 10);
-    text(pps+" packets per second", 80, 10);
+    text(textInformation, borderDistance, sketchHeight-60);
+    text(fps+" fps", borderDistance, pictureHeight+(borderDistance*2));
+    text(pps+" packets per second", 80, pictureHeight+(borderDistance*2));
   }
 }
 
@@ -146,6 +144,7 @@ void drawGrid() {
     text(j+1, borderDistance+(crosspointDistance*j), borderDistance-4);
   }
   textAlign(LEFT);
+  noStroke();
 }
 
 void initSerial() {
@@ -194,7 +193,7 @@ void initInterpolator() {
     break;
   }
   interpolator.bContrastStretch = configurator.bContrastStretch;
-  // blobManager = new BlobManager(pictureWidth, pictureHeight);
+  blobManager = new BlobManager(interpolator.pixelWidth, interpolator.pixelHeight, blobThreshold);
 }
 
 void mousePressed() {
@@ -202,11 +201,14 @@ void mousePressed() {
 }
 
 void mouseDragged() {
-  histogramGUI.mouseDragged(mouseX, mouseY);
-  contrastLeft = histogramGUI.getValLeft();
-  contrastRight = histogramGUI.getValRight();
-  textInformation = "contrast stretch:   " + contrastLeft + "   " + contrastRight;
-  bNewFrame = true;
+  if (histogramGUI.mouseDragged(mouseX, mouseY) == true) {
+    contrastLeft = histogramGUI.getValLeft();
+    contrastRight = histogramGUI.getValRight();
+    blobThreshold = histogramGUI.getValBlob();
+    blobManager.setThreshold(blobThreshold);
+    textInformation = "contrast stretch:   " + contrastLeft + "   " + contrastRight + "\nblob threshold: "+ blobThreshold + "\nback to the main [m]enu";
+    bNewFrame = true;
+  }
 }
 
 void mouseReleased() {

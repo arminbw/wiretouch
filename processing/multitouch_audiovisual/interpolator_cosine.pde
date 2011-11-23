@@ -2,7 +2,7 @@ class CosineInterpolator extends Interpolator2x2
 {   
   CosineInterpolator(int horizontalSamples, int verticalSamples, int horizontalMultiplier, int verticalMultiplier, int imageWidth, int imageHeight)
   {
-    super(horizontalSamples, verticalSamples, horizontalMultiplier, verticalMultiplier, imageWidth, imageHeight, "cosine interpolation");
+    super(horizontalSamples, verticalSamples, horizontalMultiplier, verticalMultiplier, imageWidth, imageHeight, "cosine [i]nterpolation");
   }
 
   double interp_func(double a, double b, float f)

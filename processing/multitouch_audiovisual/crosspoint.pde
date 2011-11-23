@@ -1,7 +1,7 @@
 class Crosspoint {
   int x, y;
   double measuredSignal;          // the actual received values
-  double measuredSignalAverage;
+  double measuredSignalAverage;   // the calculates signal average without touch
   double signalStrength;          // the calculated signal strength (ca. 0.0-1.0)
   double signalMin = 1000000000, signalMax = -1000;
   double signalPMin = 1000000000, signalPMax = -1000;

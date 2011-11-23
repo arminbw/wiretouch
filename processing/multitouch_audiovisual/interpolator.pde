@@ -42,7 +42,9 @@ class Interpolator
     x = constrain(x, 0, horizontalSamples-1);
     y = constrain(y, 0, verticalSamples-1);
 
+    // TODO: use boolean var
     return cp[x][y].signalStrength;
+    // return cp[x][y].measuredSignal/1024;
   }
   
   void updatePicture() {
@@ -55,6 +57,7 @@ class Interpolator
 
   void drawPicture(int x, int y) {
     updatePicture();
+    noStroke();
     picture.render(x, y, resizedWidth, resizedHeight);
   }
 

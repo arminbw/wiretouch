@@ -1,21 +1,27 @@
 class Configurator {
   int visualizationType;
-  boolean bDebug, bContrastStretch, bShowCalibrated, bFakeData;
+  boolean bShowBlobs, bDebug, bContrastStretch, bShowCalibrated, bFakeData;
   String helpText;
   DataManager dataManager;
 
   Configurator(DataManager dataManager) {
-    visualizationType = 0;            // which type of visualitazion should be used (0-2)
+    visualizationType = 0;                // which type of visualitazion should be used (0-2)
     bDebug = false;                       // stop updating and print out some debug data
     bContrastStretch = true;              // show signal strength after contrast stretch?
     bShowCalibrated = true;               // show signal strength after calibration?
     bFakeData = false;                    // use fake data for "offline" testing?
+    bShowBlobs = false;                   // show blobs and edges
     helpText = "";
     this.dataManager = dataManager;
   }
-
+  
+  // TODO: use common GUI elements
   void changeConfiguration(char key) {
   switch(key) {
+    case 'b':
+      this.bShowBlobs = !this.bShowBlobs;
+      textInformation = "[b]lobs: " + getOnOffString(this.bShowBlobs) + "\nback to the main [m]enu";
+      break;
     case 'r':
       if (averageSignalCounter == 0) {
         // recalibrate
@@ -26,24 +32,24 @@ class Configurator {
         averageSignalCounter=AVERAGESIGNALCOUNTERMAX;
         textInformation = "calibrating";
         initSerial();
-        configurator.helpText = "[c]ontrast stretch   [d]ebug   [h]elp   [i]nterpolation\n[o]/[p] interpolation resolution\n[r]ecalibrate   [u]calibrate(ON/OFF)   [v]isualization";
+        configurator.helpText = "[b]lobs(ON/OFF)   [c]alibration(ON/OFF)   [d]ebugn   [i]nterpolation\nthis [m]enu   [o]/[p] interpolation resolution\n[r]ecalibrate    contrast [s]tretch(ON/OFF)   [v]isualization";
       }
       break;
     case 'f':
       // use fake data
       dataManager.initFakeData();
-      configurator.helpText = "[c]ontrast stretch   [h]elp   [i]nterpolation\n[o]/[p] interpolation resolution   [u]calibrate(ON/OFF)   [v]isualization";
+      configurator.helpText = "[b]lobs(ON/OFF)   [c]alibration(ON/OFF)   [i]nterpolation\nthis [m]enu   [o]/[p] interpolation resolution\ncontrast [s]tretch(ON/OFF)   [v]isualization"; 
       textInformation = configurator.helpText;
       break;
-    case 'h':
-      // help
+    case 'm':
+      // show this menu
       textInformation = helpText;
       break;
     case 'd':
       // debug
       this.bDebug = !bDebug;
       if (this.bDebug) {
-        textInformation = "[d]ebug: " + getOnOffString(this.bDebug);
+        textInformation = "[d]ebug: " + getOnOffString(this.bDebug) + "\nback to the main [m]enu";
         dataManager.printData();
       }
       else {
@@ -54,35 +60,39 @@ class Configurator {
       // change the type of visualization
       visualizationType = (visualizationType+1)%3;
       break;
-    case 'c':
+    case 's':
       this.bContrastStretch = !this.bContrastStretch;
       interpolator.bContrastStretch = this.bContrastStretch;
-      textInformation = "[c]ontrast stretch: " + getOnOffString(this.bContrastStretch);
+      textInformation = "contrast [s]tretch: " + getOnOffString(this.bContrastStretch) + "\nback to the main [m]enu";
       break;
     case 'i':
       // change interpolation algorithm for pixel matrix
       interpType = ++interpType % kNumInterp;
       initInterpolator();
       textInformation = interpolator.name + " x" + interpolationResolution;
+      if (interpolator instanceof HermiteInterpolator) {
+        HermiteInterpolator ip = (HermiteInterpolator)interpolator;
+        textInformation = interpolator.name + " x" + interpolationResolution + "   tension: " + ip.tension + "\nback to the main [m]enu";
+      }
       break;
     case 'o':
       // decrease interpolation resolution
       if (interpolationResolution>1) interpolationResolution--;
       initInterpolator();
-      textInformation = interpolator.name + " x" + interpolationResolution;
+      textInformation = interpolator.name + " x" + interpolationResolution + "\nback to the main [m]enu";
       break;
     case 'p':
       // increase interpolation resolution
       if (interpolationResolution<15) interpolationResolution++;
       initInterpolator();
-      textInformation = interpolator.name + " x" + interpolationResolution;
+      textInformation = interpolator.name + " x" + interpolationResolution + "\nback to the main [m]enu";
       break;
     case 'k':
       if (interpolator instanceof HermiteInterpolator) {
         HermiteInterpolator ip = (HermiteInterpolator)interpolator;
         ip.tension += 0.1;
         ip.tension = constrain((float)ip.tension, -2.0, 2.0);
-        textInformation = interpolator.name + " x" + interpolationResolution;
+        textInformation = interpolator.name + " x" + interpolationResolution + "   tension: " + ip.tension + "\nback to the main [m]enu";
       }
       break;
     case 'l':
@@ -90,11 +100,12 @@ class Configurator {
         HermiteInterpolator ip = (HermiteInterpolator)interpolator;
         ip.tension -= 0.1;
         ip.tension = constrain((float)ip.tension, -2.0, 2.0);
-        textInformation = interpolator.name + " x" + interpolationResolution;
+        textInformation = interpolator.name + " x" + interpolationResolution + "   tension: " + ip.tension + "\nback to the main [m]enu";
       }
       break;
     case 'u':
       this.bShowCalibrated = !this.bShowCalibrated;
+      textInformation = "[u]calibrate: " + getOnOffString(this.bShowCalibrated) + "\nback to the main [m]enu";
       break;
     default:
       break;

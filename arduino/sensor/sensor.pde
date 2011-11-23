@@ -156,7 +156,7 @@ void loop() {
     for (byte l = 0; l < horizontalWires; l++) {
       muxHorizontal(l);
       //delay(500);
-      delayMicroseconds(80); // increase to deal with row-error!
+      // delayMicroseconds(40); // increase to deal with row-error!
       sample = measure();
       
       cnt++;
