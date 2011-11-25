@@ -43,8 +43,12 @@ class Interpolator
     y = constrain(y, 0, verticalSamples-1);
 
     // TODO: use boolean var
-    return cp[x][y].signalStrength;
-    // return cp[x][y].measuredSignal/1024;
+    if (configurator.bShowCalibrated) {
+      return cp[x][y].signalStrength;
+    }
+    else {
+      return cp[x][y].measuredSignal/1024;
+    }
   }
   
   void updatePicture() {

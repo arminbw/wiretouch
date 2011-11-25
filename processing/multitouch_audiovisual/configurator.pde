@@ -103,9 +103,9 @@ class Configurator {
         textInformation = interpolator.name + " x" + interpolationResolution + "   tension: " + ip.tension + "\nback to the main [m]enu";
       }
       break;
-    case 'u':
+    case 'c':
       this.bShowCalibrated = !this.bShowCalibrated;
-      textInformation = "[u]calibrate: " + getOnOffString(this.bShowCalibrated) + "\nback to the main [m]enu";
+      textInformation = "[c]alibrate: " + getOnOffString(this.bShowCalibrated) + "\nback to the main [m]enu";
       break;
     default:
       break;

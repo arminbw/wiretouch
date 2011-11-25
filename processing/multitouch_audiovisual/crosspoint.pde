@@ -17,7 +17,12 @@ class Crosspoint {
   void draw(boolean bDrawText) {
     noFill();
     stroke(signalColor);
-    ellipse(x, y, (float)signalStrength*signalPixelRatio, (float)signalStrength*signalPixelRatio);
+    if (configurator.bShowCalibrated) {
+      ellipse(x, y, (float)signalStrength*signalPixelRatio, (float)signalStrength*signalPixelRatio);
+    }
+    else {
+      ellipse(x, y, (float)(measuredSignal/1024)*signalPixelRatio, (float)(measuredSignal/1024)*signalPixelRatio);
+    }
     fill(wireColor);
     if (bDrawText) {
       // text((df.format(signalStrength)+"\n"+this.signalMax+"\n"+df.format(this.measuredSignalAverage)+"\n"+this.signalMin), x+4, y-4);
