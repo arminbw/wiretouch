@@ -42,11 +42,11 @@ final color backgroundColor = color(240, 240, 240);
 final color histogramColor = color(239, 171, 233);
 final color signalColor = color(153, 233, 240);
 final color wireColor = color(0, 222, 255);      // also used for blobs and histogram GUI triangles
-static final int AVERAGESIGNALCOUNTERMAX = 150;
+static final int AVERAGESIGNALCOUNTERMAX = 100;
 int averageSignalCounter = AVERAGESIGNALCOUNTERMAX;
 float contrastLeft = 0.0;
 float contrastRight = 0.0;
-float blobThreshold = 0.32;
+float blobThreshold = 0.73;
 
 int lastMillis, frames, packets, fps, pps;
 boolean bNewFrame; // only draw if there's new information (but at least every second)

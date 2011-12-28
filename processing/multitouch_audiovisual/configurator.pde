@@ -32,7 +32,7 @@ class Configurator {
         averageSignalCounter=AVERAGESIGNALCOUNTERMAX;
         textInformation = "calibrating";
         initSerial();
-        configurator.helpText = "[b]lobs(ON/OFF)   [c]alibration(ON/OFF)   [d]ebugn   [i]nterpolation\nthis [m]enu   [o]/[p] interpolation resolution\n[r]ecalibrate    contrast [s]tretch(ON/OFF)   [v]isualization";
+        configurator.helpText = "[b]lobs(ON/OFF)   [c]alibration(ON/OFF)   [d]ebug   [i]nterpolation\nthis [m]enu   [o]/[p] interpolation resolution\n[r]ecalibrate    contrast [s]tretch(ON/OFF)   [v]isualization";
       }
       break;
     case 'f':

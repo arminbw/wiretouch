@@ -46,6 +46,7 @@ void setup() {
     pinMode(horizontalShiftRegPins[i], OUTPUT);
   }
 
+  pinMode(8, OUTPUT);
   pinMode(13, OUTPUT);
 }
 
@@ -110,11 +111,12 @@ void muxHorizontal(byte output) {
 }
 
 unsigned int measure() {
-  int val = 1025;
-  for (int v=0; v<3; v++) {
+  int val = 0;
+  delayMicroseconds(50);
+  for (int v=0; v<1; v++) {
     unsigned rd = analogRead(0);
-    if (rd < val)
-      val = rd;
+   // if (rd > val)
+      val = rd; // (val >> 1) + (rd >> 1);
   }
   return (val);
 }
@@ -156,9 +158,12 @@ void loop() {
     for (byte l = 0; l < horizontalWires; l++) {
       muxHorizontal(l);
       //delay(500);
+      PORTB &= ~(1 << 5);
       // delayMicroseconds(40); // increase to deal with row-error!
       sample = measure();
       
+      PORTB |= 1 << 5;
+      // delay(40);
       cnt++;
 
 #if PRINT_BINARY
