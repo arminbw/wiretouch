@@ -141,9 +141,20 @@ void send_packed10(uint16_t w16, byte flush_all)
   }
 }
 
+volatile uint16_t sample;
+volatile uint8_t sampleTaken;
+
+void measureInterrupt()
+{
+  detachInterrupt(1);
+  
+  sample = measure();
+  sampleTaken = 1;
+}
+
 void loop() {
   static boolean isRunning = 0;
-  uint16_t sample;
+  //uint16_t sample;
   
   while(!isRunning) {
     if (Serial.available()) {
@@ -160,7 +171,10 @@ void loop() {
       //delay(500);
       PORTB &= ~(1 << 5);
       // delayMicroseconds(40); // increase to deal with row-error!
-      sample = measure();
+      //sample = measure();
+      sampleTaken = 0;
+      attachInterrupt(1, measureInterrupt, FALLING);
+      while(!sampleTaken);
       
       PORTB |= 1 << 5;
       // delay(40);
