@@ -11,9 +11,9 @@
 #define NUM_SELECT 4
 
 const byte verticalShiftRegPins[] = {
-  3,              // latch / RCLK   PORTD.3  
-  2,              // clock / SRCLK    PORTD.2
-  4               // data  / SERs    PORTD.4
+  9,              // latch / RCLK   PORTB.1  
+  8,              // clock / SRCLK    PORTB.0
+  10              // data  / SERs    PORTB.2
 };
 
 const byte verticalPosLeft[] = { 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
@@ -63,16 +63,16 @@ void muxVertical(byte output) {
   bits |= ((mux_sel & 1) << 4);
   bits |= ((!mux_sel & 1) << 5);
   
-  PORTD &= ~(1<<3);
+  PORTB &= ~(1<<1);
   for (int i=7; i>=0; i--) {
     if ((bits >> i) & 1)
-      PORTD |= (1<<4);
+      PORTB |= (1<<2);
     else
-      PORTD &= ~(1<<4);
-    PORTD |= (1<<2);
-    PORTD &= ~(1<<2);
+      PORTB &= ~(1<<2);
+    PORTB |= (1<<0);
+    PORTB &= ~(1<<0);
   }
-  PORTD |= (1<<3);
+  PORTB |= (1<<1);
   
   /*digitalWrite(verticalShiftRegPins[0], LOW);
   shiftOut(verticalShiftRegPins[2], verticalShiftRegPins[1], MSBFIRST, bits);
