@@ -27,7 +27,7 @@ BlobManager blobManager;
 
 // configuration
 Configurator configurator;
-static final int verticalWires = 32;
+static final int verticalWires = 30;
 static final int horizontalWires = 22;
 static final int crosspointDistance=25; // how many pixels between 2 crosspoints
 static final int borderDistance=20; // how many pixel distance to the borderDistance
@@ -42,7 +42,7 @@ final color backgroundColor = color(240, 240, 240);
 final color histogramColor = color(239, 171, 233);
 final color signalColor = color(153, 233, 240);
 final color wireColor = color(0, 222, 255);      // also used for blobs and histogram GUI triangles
-static final int AVERAGESIGNALCOUNTERMAX = 100;
+static final int AVERAGESIGNALCOUNTERMAX = 10;
 int averageSignalCounter = AVERAGESIGNALCOUNTERMAX;
 float contrastLeft = 0.0;
 float contrastRight = 0.0;

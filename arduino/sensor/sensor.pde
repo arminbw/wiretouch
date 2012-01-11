@@ -18,7 +18,7 @@ const byte verticalShiftRegPins[] = {
 
 const byte verticalPosLeft[] = { 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
 const byte verticalPosRight[] = { 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0}; 
-const byte verticalWires = 32;
+const byte verticalWires = 30;
 
 const byte horizontalShiftRegPins[] = {
   6,              // latch / RCLK  PORTD.6
@@ -61,7 +61,7 @@ void muxVertical(byte output) {
   bits = p[output] & 0x0f;
   
   bits |= ((mux_sel & 1) << 4);
-  bits |= ((!mux_sel & 1) << 5);
+  bits |= (!(mux_sel & 1) << 5);
   
   PORTB &= ~(1<<1);
   for (int i=7; i>=0; i--) {
@@ -92,7 +92,7 @@ void muxHorizontal(byte output) {
   bits = p[output] & 0x0f;
   
   bits |= ((mux_sel & 1) << 4);
-  bits |= ((!mux_sel & 1) << 5);
+  bits |= (!(mux_sel & 1) << 5);
   
   PORTD &= ~(1<<6);
   for (int i=7; i>=0; i--) {
@@ -142,14 +142,20 @@ void send_packed10(uint16_t w16, byte flush_all)
 }
 
 volatile uint16_t sample;
-volatile uint8_t sampleTaken;
+volatile uint8_t sampleTaken = 1;
+volatile int8_t vmux = -1;
 
 void measureInterrupt()
 {
   detachInterrupt(1);
   
-  sample = measure();
-  sampleTaken = 1;
+  if (0 == sampleTaken) {
+    sample = measure();
+    sampleTaken = 1;
+  } else if (-1 < vmux) {
+    muxVertical(vmux);
+    vmux = -1;
+  }
 }
 
 void loop() {
@@ -166,8 +172,11 @@ void loop() {
   int cnt = 0;
   for (int k = 0; k < verticalWires; k++) {
     muxVertical(k);
+    vmux = 4;
+    attachInterrupt(1, measureInterrupt, RISING);
+    while (vmux > -1);
     for (byte l = 0; l < horizontalWires; l++) {
-      muxHorizontal(l);
+      muxHorizontal(4);
       //delay(500);
       PORTB &= ~(1 << 5);
       // delayMicroseconds(40); // increase to deal with row-error!
