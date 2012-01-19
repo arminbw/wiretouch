@@ -17,12 +17,12 @@ const byte verticalShiftRegPins[] = {
 };
 
 const byte verticalPosLeft[] = { 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
-const byte verticalPosRight[] = { 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0}; 
+const byte verticalPosRight[] = { 15, 14, 13, 12, 11, 10, 9, 8, 6, 5, 4, 3, 2, 1, 0, 7}; 
 const byte verticalWires = 30;
 
 const byte horizontalShiftRegPins[] = {
   6,              // latch / RCLK  PORTD.6
-  5,              // clock / SRCLK   PORTD.5
+  5,              // clock / SRCLK   PORrTD.5
   7               // data  / SER    PORTD.7  
 };
 
@@ -171,14 +171,14 @@ void loop() {
   
   int cnt = 0;
   for (int k = 0; k < verticalWires; k++) {
-    muxVertical(k);
-    vmux = 4;
+    // muxVertical(k);
+    vmux = k;
     attachInterrupt(1, measureInterrupt, RISING);
     while (vmux > -1);
     for (byte l = 0; l < horizontalWires; l++) {
-      muxHorizontal(4);
+      muxHorizontal(l);
       //delay(500);
-      PORTB &= ~(1 << 5);
+      PORTB &= ~(1 << 5); // pin 13
       // delayMicroseconds(40); // increase to deal with row-error!
       //sample = measure();
       sampleTaken = 0;

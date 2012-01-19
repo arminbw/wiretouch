@@ -7,8 +7,8 @@ class Configurator {
   Configurator(DataManager dataManager) {
     visualizationType = 0;                // which type of visualitazion should be used (0-2)
     bDebug = false;                       // stop updating and print out some debug data
-    bContrastStretch = false;              // show signal strength after contrast stretch?
-    bShowCalibrated = true;               // show signal strength after calibration?
+    bContrastStretch = true;              // show signal strength after contrast stretch?
+    bShowCalibrated = false;               // show signal strength after calibration?
     bFakeData = false;                    // use fake data for "offline" testing?
     bShowBlobs = false;                   // show blobs and edges
     helpText = "";
