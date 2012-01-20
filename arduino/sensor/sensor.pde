@@ -137,16 +137,20 @@ inline long read_pcm1308(void)
   lsb = SPI_SlaveReceive(); //load lsb last
         
   if (msb > 127)
-     msb = -255 + msb;
+     msb =  msb - 127;
+  else
+      msb += 128;
   
   return lsb | (csb << 8) | (msb << 16); //concatenate each 8 bit segment
 }
 
 unsigned int measure_with_pcm1308()
 {
+   delayMicroseconds(50);
+   while((PINB & (1 << PINB2)));
    while(!(PINB & (1 << PINB2)));//wait while LRCK is low
    
-   return read_pcm1308() >> 16;
+   return read_pcm1308() >> 14;
 }
 
 //#define measure measure_with_atmega_adc

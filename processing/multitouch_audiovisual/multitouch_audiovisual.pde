@@ -29,7 +29,7 @@ BlobManager blobManager;
 Configurator configurator;
 static final int verticalWires = 30;
 static final int horizontalWires = 22;
-static final int crosspointDistance=25; // how many pixels between 2 crosspoints
+static final int crosspointDistance=50; // 25; // how many pixels between 2 crosspoints
 static final int borderDistance=20; // how many pixel distance to the borderDistance
 static final int sketchWidth = (borderDistance*2)+((verticalWires-1)*crosspointDistance);
 static final int sketchHeight = (horizontalWires+1)*crosspointDistance+90;
@@ -104,7 +104,7 @@ void draw() {
       interpolator.drawPicture(borderDistance, borderDistance);
       interpolator.drawHistogramFromPoint(sketchWidth-256-borderDistance, sketchHeight-30, 65);
       histogramGUI.draw();
-      drawSignalCircles(false);
+      drawSignalCircles(true);
       drawGrid();
       break;
     default:

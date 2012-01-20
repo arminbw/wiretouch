@@ -5,7 +5,7 @@ class Configurator {
   DataManager dataManager;
 
   Configurator(DataManager dataManager) {
-    visualizationType = 0;                // which type of visualitazion should be used (0-2)
+    visualizationType = 1;                // which type of visualitazion should be used (0-2)
     bDebug = false;                       // stop updating and print out some debug data
     bContrastStretch = true;              // show signal strength after contrast stretch?
     bShowCalibrated = false;               // show signal strength after calibration?
