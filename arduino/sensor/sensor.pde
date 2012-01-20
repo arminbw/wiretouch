@@ -43,6 +43,11 @@ void setup() {
     pinMode(horizontalShiftRegPins[i], OUTPUT);
   }
   pinMode(12, OUTPUT);
+  
+  pinMode(11, INPUT);
+  
+  //initialize SPI slave
+    SPCR = (1<<SPE);
 }
 
 void muxVertical(byte output) {
@@ -105,7 +110,7 @@ void muxHorizontal(byte output) {
   digitalWrite(horizontalShiftRegPins[0], HIGH);*/
 }
 
-unsigned int measure() {
+unsigned int measure_with_atmega_adc() {
   int val = 0;
   delayMicroseconds(50);
   for (int v=0; v<1; v++) {
@@ -115,6 +120,37 @@ unsigned int measure() {
   }
   return (val);
 }
+
+inline long SPI_SlaveReceive(void)
+{
+	while(!(SPSR & (1<<SPIF)));
+	return SPDR;
+}
+
+inline long read_pcm1308(void)
+{
+  long dummy, msb, csb, lsb;
+  
+  dummy = SPI_SlaveReceive(); //start clocking back bits after the last transmission 
+  msb = SPI_SlaveReceive(); //load msb first 
+  csb = SPI_SlaveReceive(); //load second 8 bit segment
+  lsb = SPI_SlaveReceive(); //load lsb last
+        
+  if (msb > 127)
+     msb = -255 + msb;
+  
+  return lsb | (csb << 8) | (msb << 16); //concatenate each 8 bit segment
+}
+
+unsigned int measure_with_pcm1308()
+{
+   while(!(PINB & (1 << PINB2)));//wait while LRCK is low
+   
+   return read_pcm1308() >> 16;
+}
+
+//#define measure measure_with_atmega_adc
+#define measure measure_with_pcm1308
 
 void send_packed10(uint16_t w16, byte flush_all)
 {
