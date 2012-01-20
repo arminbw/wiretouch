@@ -11,9 +11,9 @@
 #define NUM_SELECT 4
 
 const byte verticalShiftRegPins[] = {
-  9,              // latch / RCLK   PORTB.1  
-  8,              // clock / SRCLK    PORTB.0
-  10              // data  / SERs    PORTB.2
+  9,             // latch / RCLK     PORTB.1  
+  8,             // clock / SRCLK    PORTB.0
+  4              // data  / SERs     PORTD.4
 };
 
 const byte verticalPosLeft[] = { 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
@@ -32,10 +32,7 @@ const byte horizontalWires = 22;
 
 void setup() {
   Serial.begin(230400);
-  pinMode(13, OUTPUT);
-  // analogReference(EXTERNAL);
-  pinMode(12, INPUT);
-
+  
   // set prescale to 16
   sbi(ADCSRA,ADPS2);
   cbi(ADCSRA,ADPS1);
@@ -45,9 +42,7 @@ void setup() {
     pinMode(verticalShiftRegPins[i], OUTPUT);
     pinMode(horizontalShiftRegPins[i], OUTPUT);
   }
-
-  pinMode(8, OUTPUT);
-  pinMode(13, OUTPUT);
+  pinMode(12, OUTPUT);
 }
 
 void muxVertical(byte output) {
@@ -66,9 +61,9 @@ void muxVertical(byte output) {
   PORTB &= ~(1<<1);
   for (int i=7; i>=0; i--) {
     if ((bits >> i) & 1)
-      PORTB |= (1<<2);
+      PORTD |= (1<<4);
     else
-      PORTB &= ~(1<<2);
+      PORTD &= ~(1<<4);
     PORTB |= (1<<0);
     PORTB &= ~(1<<0);
   }
@@ -178,14 +173,14 @@ void loop() {
     for (byte l = 0; l < horizontalWires; l++) {
       muxHorizontal(l);
       //delay(500);
-      PORTB &= ~(1 << 5); // pin 13
+      PORTB &= ~(1 << 4); // pin 12
       // delayMicroseconds(40); // increase to deal with row-error!
       //sample = measure();
       sampleTaken = 0;
       attachInterrupt(1, measureInterrupt, FALLING);
       while(!sampleTaken);
       
-      PORTB |= 1 << 5;
+      PORTB |= 1 << 4;
       // delay(40);
       cnt++;
 
