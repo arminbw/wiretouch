@@ -42,12 +42,14 @@ void setup() {
     pinMode(verticalShiftRegPins[i], OUTPUT);
     pinMode(horizontalShiftRegPins[i], OUTPUT);
   }
-  pinMode(12, OUTPUT);
-  
+
+  pinMode(2, OUTPUT);
   pinMode(11, INPUT);
+  pinMode(A5, OUTPUT);  
   
-  //initialize SPI slave
-    SPCR = (1<<SPE);
+  // initialize SPI slave
+  // caution: don't forget pin 12...
+  SPCR = (1<<SPE);
 }
 
 void muxVertical(byte output) {
@@ -150,7 +152,10 @@ unsigned int measure_with_pcm1308()
    while((PINB & (1 << PINB2)));
    while(!(PINB & (1 << PINB2)));//wait while LRCK is low
    
-   return read_pcm1308() >> 14;
+   PORTD |= (1<<2);
+   int fut = read_pcm1308() >> 14;
+   PORTD &= ~(1 << 2);
+   return fut;
 }
 
 //#define measure measure_with_atmega_adc
@@ -207,20 +212,20 @@ void loop() {
   int cnt = 0;
   for (int k = 0; k < verticalWires; k++) {
     // muxVertical(k);
-    vmux = k;
+    vmux = 4;
     attachInterrupt(1, measureInterrupt, RISING);
     while (vmux > -1);
     for (byte l = 0; l < horizontalWires; l++) {
-      muxHorizontal(l);
+      muxHorizontal(4);
       //delay(500);
-      PORTB &= ~(1 << 4); // pin 12
+      PORTC &= ~(1 << 5); // analog pin 5
       // delayMicroseconds(40); // increase to deal with row-error!
-      //sample = measure();
+      // sample = measure();
       sampleTaken = 0;
       attachInterrupt(1, measureInterrupt, FALLING);
       while(!sampleTaken);
       
-      PORTB |= 1 << 4;
+      PORTC |= 1 << 5;
       // delay(40);
       cnt++;
 
