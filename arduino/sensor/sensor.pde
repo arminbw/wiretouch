@@ -23,7 +23,7 @@ const byte verticalWires = 30;
 const byte horizontalShiftRegPins[] = {
   6,              // latch / RCLK  PORTD.6
   5,              // clock / SRCLK   PORrTD.5
-  7               // data  / SER    PORTD.7  
+  7               // data  / SER    PORTD.7
 };
 
 const byte horizontalPosTop[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
@@ -45,7 +45,7 @@ void setup() {
 
   pinMode(2, OUTPUT);
   pinMode(11, INPUT);
-  pinMode(A5, OUTPUT);  
+  pinMode(A5, OUTPUT);
   
   // initialize SPI slave
   // caution: don't forget pin 12...
@@ -129,7 +129,7 @@ inline long SPI_SlaveReceive(void)
 	return SPDR;
 }
 
-inline long read_pcm1308(void)
+inline long read_pcm1803(void)
 {
   long dummy, msb, csb, lsb;
   
@@ -138,28 +138,28 @@ inline long read_pcm1308(void)
   csb = SPI_SlaveReceive(); //load second 8 bit segment
   lsb = SPI_SlaveReceive(); //load lsb last
         
-  if (msb > 127)
+  /*if (msb > 127)
      msb =  msb - 127;
   else
       msb += 128;
-  
-  return lsb | (csb << 8) | (msb << 16); //concatenate each 8 bit segment
+  */
+  return (dummy = (((lsb|(csb << 8 )|(msb << 16)) << 8 ) >> 8 ) + 8388608); //concatenate each 8 bit segment
 }
 
-unsigned int measure_with_pcm1308()
-{
-   delayMicroseconds(50);
-   while((PINB & (1 << PINB2)));
-   while(!(PINB & (1 << PINB2)));//wait while LRCK is low
-   
+unsigned int measure_with_pcm1803()
+{   
+  //delayMicroseconds(100);
    PORTD |= (1<<2);
-   int fut = read_pcm1308() >> 14;
+   while((PINB & (1 << PINB2)));
+   //while(!(PINB & (1 << PINB2)));//wait while LRCK is low
+   
+   unsigned long fut = read_pcm1803() >> 14;
    PORTD &= ~(1 << 2);
    return fut;
 }
 
 //#define measure measure_with_atmega_adc
-#define measure measure_with_pcm1308
+#define measure measure_with_pcm1803
 
 void send_packed10(uint16_t w16, byte flush_all)
 {
@@ -211,17 +211,19 @@ void loop() {
   
   int cnt = 0;
   for (int k = 0; k < verticalWires; k++) {
-    // muxVertical(k);
-    vmux = 4;
+    //muxVertical(k);
+    vmux = 9;
     attachInterrupt(1, measureInterrupt, RISING);
     while (vmux > -1);
     for (byte l = 0; l < horizontalWires; l++) {
-      muxHorizontal(4);
-      //delay(500);
+      muxHorizontal(2);
       PORTC &= ~(1 << 5); // analog pin 5
+      
+      //delay(500);
       // delayMicroseconds(40); // increase to deal with row-error!
-      // sample = measure();
+      //sample = measure();
       sampleTaken = 0;
+      delayMicroseconds(20);
       attachInterrupt(1, measureInterrupt, FALLING);
       while(!sampleTaken);
       
