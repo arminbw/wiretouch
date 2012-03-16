@@ -29,7 +29,7 @@ BlobManager blobManager;
 Configurator configurator;
 static final int verticalWires = 30;
 static final int horizontalWires = 22;
-static final int crosspointDistance=50; // 25; // how many pixels between 2 crosspoints
+static final int crosspointDistance=25; // 25; // how many pixels between 2 crosspoints
 static final int borderDistance=20; // how many pixel distance to the borderDistance
 static final int sketchWidth = (borderDistance*2)+((verticalWires-1)*crosspointDistance);
 static final int sketchHeight = (horizontalWires+1)*crosspointDistance+90;
@@ -48,7 +48,7 @@ float contrastLeft = 0.0;
 float contrastRight = 0.0;
 float blobThreshold = 0.73;
 
-int lastMillis, frames, packets, fps, pps;
+int lastMillis, frames, packets, fps, pps, skippedFrames, skippedFps;
 boolean bNewFrame; // only draw if there's new information (but at least every second)
 
 void setup() {
@@ -83,6 +83,8 @@ void draw() {
       frames = 0;
       packets = 0;
       bNewFrame = true;
+      skippedFps = skippedFrames;
+      skippedFrames = 0;
   } 
   if (bNewFrame) {
     frames++;
@@ -115,6 +117,10 @@ void draw() {
     text(textInformation, borderDistance, sketchHeight-60);
     text(fps+" fps", borderDistance, pictureHeight+(borderDistance*2));
     text(pps+" packets per second", 80, pictureHeight+(borderDistance*2));
+    text(skippedFps+" skipped frames", 250, pictureHeight+(borderDistance*2));
+  }
+  else {
+    skippedFrames++; 
   }
 }
 
@@ -169,25 +175,24 @@ void showHelpText() {
 }
 
 void initInterpolator() {
-  // testing GLGRAPHICS
   GLTextureParameters gp = new GLTextureParameters();
   gp.minFilter = GLConstants.NEAREST_SAMPLING;
   gp.magFilter = GLConstants.NEAREST_SAMPLING;
   picture = new GLTexture(this, (verticalWires - 1)*interpolationResolution, (horizontalWires - 1)*interpolationResolution, gp);    
   switch (interpType) {
-  case kInterpHermite:
-    interpolator = new HermiteInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, pictureWidth, pictureHeight);
-    break;
-  case kInterpCatmullRom:
-    interpolator = new CatmullRomInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, pictureWidth, pictureHeight);
-    break;
-  case kInterpCubic:
-    interpolator = new CubicInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, pictureWidth, pictureHeight);
-    break;
-  case kInterpCosine:
-    interpolator = new CosineInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, pictureWidth, pictureHeight);
-    break;
-  case kInterpLinear:
+    case kInterpHermite:
+      interpolator = new HermiteInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, pictureWidth, pictureHeight);
+      break;
+    case kInterpCatmullRom:
+      interpolator = new CatmullRomInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, pictureWidth, pictureHeight);
+      break;
+    case kInterpCubic:
+      interpolator = new CubicInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, pictureWidth, pictureHeight);
+      break;
+    case kInterpCosine:
+      interpolator = new CosineInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, pictureWidth, pictureHeight);
+      break;
+    case kInterpLinear:
   default:
     interpolator = new LinearInterpolator(verticalWires, horizontalWires, interpolationResolution, interpolationResolution, pictureWidth, pictureHeight);
     break;
