@@ -48,7 +48,9 @@ float contrastLeft = 0.0;
 float contrastRight = 0.0;
 float blobThreshold = 0.73;
 
-int lastMillis, frames, packets, fps, pps, skippedFrames, skippedFps;
+int lastMillis, frames, packets, fps, pps, skippedDrawCounter, skippedDraws;
+float milli, timeFuOld;
+String timeFu;
 boolean bNewFrame; // only draw if there's new information (but at least every second)
 
 void setup() {
@@ -82,11 +84,14 @@ void draw() {
       pps = packets;
       frames = 0;
       packets = 0;
-      bNewFrame = true;
-      skippedFps = skippedFrames;
-      skippedFrames = 0;
+      // bNewFrame = true;
+      skippedDraws = skippedDrawCounter;
+      skippedDrawCounter = 0;
+      println(timeFu);
+      timeFu = "";
   } 
   if (bNewFrame) {
+    timeFu = timeFu + " d ";
     frames++;
     bNewFrame = false;
     background(backgroundColor);
@@ -117,10 +122,11 @@ void draw() {
     text(textInformation, borderDistance, sketchHeight-60);
     text(fps+" fps", borderDistance, pictureHeight+(borderDistance*2));
     text(pps+" packets per second", 80, pictureHeight+(borderDistance*2));
-    text(skippedFps+" skipped frames", 250, pictureHeight+(borderDistance*2));
+    text(skippedDraws+" skipped redraws", 250, pictureHeight+(borderDistance*2));
   }
   else {
-    skippedFrames++; 
+    skippedDrawCounter++; 
+    timeFu = timeFu + " s ";
   }
 }
 
@@ -166,8 +172,11 @@ void initSerial() {
 
 void serialEvent(Serial p) {
   dataManager.consumeSerialBuffer(p);
-  packets++;
+  timeFuOld = millis() - timeFuOld; 
+  timeFu = timeFu + " " + timeFuOld;
+  timeFuOld = millis();
   bNewFrame = true;
+  packets++;
 }
 
 void showHelpText() {
