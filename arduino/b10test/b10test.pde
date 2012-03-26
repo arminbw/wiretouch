@@ -8,7 +8,7 @@ void send_packed10(uint16_t w16)
   p += 10;
   
   while (p >= 8) {
-    Serial.write((d16 & 0xff));
+    Serial.write((byte)(d16 & 0xff));
     p -= 8;
     d16 >>= 8;
   }
@@ -30,7 +30,7 @@ void loop()
     }
   }*/
   
-  static uint16_t b = 42;
+  static uint16_t b = 0;
   i++;
   send_packed10(b);
   b = ++b % 1024;

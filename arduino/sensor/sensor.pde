@@ -132,8 +132,7 @@ inline long SPI_SlaveReceive(void)
 inline long read_pcm1803(void)
 {
   long dummy, msb, csb, lsb;
-  
-  dummy = SPI_SlaveReceive(); //start clocking back bits after the last transmission 
+  // dummy = SPI_SlaveReceive();
   msb = SPI_SlaveReceive(); //load msb first 
   csb = SPI_SlaveReceive(); //load second 8 bit segment
   lsb = SPI_SlaveReceive(); //load lsb last
@@ -149,11 +148,11 @@ inline long read_pcm1803(void)
 unsigned int measure_with_pcm1803()
 {   
   //delayMicroseconds(100);
-   PORTD |= (1<<2);
-   while((PINB & (1 << PINB2)));
+   // while((PINB & (1 << PINB2)));
    //while(!(PINB & (1 << PINB2)));//wait while LRCK is low
+   PORTD |= (1<<2);
    
-   unsigned long fut = read_pcm1803() >> 14;
+   unsigned long fut = read_pcm1803() & 0x3ff;
    PORTD &= ~(1 << 2);
    return fut;
 }
@@ -186,16 +185,16 @@ volatile uint8_t sampleTaken = 1;
 volatile int8_t vmux = -1;
 
 void measureInterrupt()
-{
-  detachInterrupt(1);
-  
-  if (0 == sampleTaken) {
+{ 
+  if (0 == sampleTaken) { 
     sample = measure();
     sampleTaken = 1;
-  } else if (-1 < vmux) {
+    detachInterrupt(1);
+  } /*else if (-1 < vmux) {
     muxVertical(vmux);
     vmux = -1;
-  }
+    detachInterrupt(1);
+  }*/
 }
 
 void loop() {
@@ -211,12 +210,12 @@ void loop() {
   
   int cnt = 0;
   for (int k = 0; k < verticalWires; k++) {
-    //muxVertical(k);
-    vmux = 9;
+    muxVertical(k);
+    /*vmux = k;
     attachInterrupt(1, measureInterrupt, RISING);
-    while (vmux > -1);
+    while (vmux > -1);*/
     for (byte l = 0; l < horizontalWires; l++) {
-      muxHorizontal(2);
+      muxHorizontal(l);
       PORTC &= ~(1 << 5); // analog pin 5
       
       //delay(500);
@@ -224,7 +223,7 @@ void loop() {
       //sample = measure();
       sampleTaken = 0;
       delayMicroseconds(20);
-      attachInterrupt(1, measureInterrupt, FALLING);
+      attachInterrupt(1, measureInterrupt, CHANGE);
       while(!sampleTaken);
       
       PORTC |= 1 << 5;
