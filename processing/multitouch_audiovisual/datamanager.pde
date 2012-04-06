@@ -11,7 +11,7 @@ class DataManager {
     try {
       this.port.clear(); // // do we need this? (cargo cult programming)
       this.serBuffer = new byte[(horizontalWires * verticalWires * 10)/8];
-      this.port.buffer(serBuffer.length);
+      //this.port.buffer(serBuffer.length);
       delay(2000); // still needed?
       this.port.write('s');
       textInformation = "starting to calibrate";
@@ -32,11 +32,12 @@ class DataManager {
     return p < 0 ? 256+p : p;
   }
 
-  void consumeSerialBuffer(Serial p) {
-    p.readBytes(serBuffer);
+  void consumeSerialBuffer(byte[] b) {
+    byte[] buf = null != b ? b : serBuffer;
+    
     int bs = 0, br = 0, cnt = 0;
-    for (int i=0; i<serBuffer.length; i++) {
-      br |= sb2ub(serBuffer[i]) << bs;
+    for (int i=0; i<buf.length; i++) {
+      br |= sb2ub(buf[i]) << bs;
       bs += 8;
       while (bs >= 10) {          
         int sig = br & 0x3ff;

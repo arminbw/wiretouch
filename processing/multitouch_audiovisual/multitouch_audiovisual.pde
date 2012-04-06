@@ -77,7 +77,24 @@ void setup() {
   bNewFrame = true;
 }
 
+int count = 0;
+String georg = "start";
+
 void draw() {
+  if (null != dataManager && null != dataManager.port) {
+    //georg = georg + "Oh!";
+    while (dataManager.port.available() > 0) {
+      dataManager.serBuffer[count++] = (byte)dataManager.port.read();
+      if (count > 0 && 0 == count % dataManager.serBuffer.length) {
+        dataManager.consumeSerialBuffer(null);
+        count = 0;
+        bNewFrame = true;
+        packets++;
+      }
+      //georg = georg + "count: " + count;
+    }
+  }
+  
   if ((millis() - lastMillis) > 1000) {
       lastMillis = millis();
       fps = frames;
@@ -87,8 +104,10 @@ void draw() {
       // bNewFrame = true;
       skippedDraws = skippedDrawCounter;
       skippedDrawCounter = 0;
-      println(timeFu);
+      //println(timeFu);
       timeFu = "";
+      //println(georg);
+      georg = "";
   } 
   if (bNewFrame) {
     timeFu = timeFu + " d ";
@@ -170,14 +189,14 @@ void initSerial() {
   }
 }
 
-void serialEvent(Serial p) {
+/*void serialEvent(Serial p) {
   dataManager.consumeSerialBuffer(p);
   timeFuOld = millis() - timeFuOld; 
   timeFu = timeFu + " " + timeFuOld;
   timeFuOld = millis();
   bNewFrame = true;
   packets++;
-}
+}*/
 
 void showHelpText() {
   textInformation = configurator.helpText;
