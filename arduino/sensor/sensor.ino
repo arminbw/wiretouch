@@ -235,9 +235,7 @@ void send_packed10(uint16_t w16, byte flush_all)
   }
   
   if (flush_all || sbufpos >= SER_BUF_SIZE) {
-    for (uint16_t i=0; i<sbufpos; i++)
-      Serial.write(sbuf[i]);
-    
+    Serial.write(sbuf, sbufpos-1);
     sbufpos = 0;
   }
 }
