@@ -1,5 +1,8 @@
 #include <SPI.h>
 
+#define SER_BUF_SIZE    128
+#define PRINT_BINARY    1
+
 // defines for setting and clearing register bits
 #ifndef cbi
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
@@ -10,8 +13,6 @@
 
 #define DEBUG_PIN_UP()    PORTD |= (1<<2)
 #define DEBUG_PIN_DOWN()  PORTD &= ~(1 << 2)
-
-#define PRINT_BINARY    1
 
 #define NUM_SELECT 4
 
@@ -34,6 +35,9 @@ const byte horizontalShiftRegPins[] = {
 const byte horizontalPosTop[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 const byte horizontalPosBottom[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 const byte horizontalWires = 22;
+
+static uint8_t sbuf[SER_BUF_SIZE+1];
+static uint16_t sbufpos = 0;
 
 void setup() {
   Serial.begin(230400);
@@ -220,14 +224,21 @@ void send_packed10(uint16_t w16, byte flush_all)
   p += 10;
   
   while (p >= 8) {
-    Serial.write((byte)(d16 & 0xff));
+    sbuf[sbufpos++] = (d16 & 0xff);
     p -= 8;
     d16 >>= 8;
   }
   
   if (flush_all && p > 0) {
-    Serial.write((byte)(d16 & 0xff));
+    sbuf[sbufpos++] = (d16 & 0xff);
     p = 0; d16 = 0;
+  }
+  
+  if (flush_all || sbufpos >= SER_BUF_SIZE) {
+    for (uint16_t i=0; i<sbufpos; i++)
+      Serial.write(sbuf[i]);
+    
+    sbufpos = 0;
   }
 }
 
