@@ -1,6 +1,6 @@
 #include <SPI.h>
 
-#define SER_BUF_SIZE    128
+#define SER_BUF_SIZE    32
 #define PRINT_BINARY    1
 
 // defines for setting and clearing register bits
@@ -235,7 +235,7 @@ void send_packed10(uint16_t w16, byte flush_all)
   }
   
   if (flush_all || sbufpos >= SER_BUF_SIZE) {
-    Serial.write(sbuf, sbufpos-1);
+    Serial.write(sbuf, sbufpos);
     sbufpos = 0;
   }
 }

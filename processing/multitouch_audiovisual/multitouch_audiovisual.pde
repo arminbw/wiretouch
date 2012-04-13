@@ -80,73 +80,72 @@ void setup() {
 int count = 0;
 String georg = "start";
 
-void draw() {
-  if (null != dataManager && null != dataManager.port) {
-    //georg = georg + "Oh!";
-    while (dataManager.port.available() > 0) {
-      dataManager.serBuffer[count++] = (byte)dataManager.port.read();
-      if (count > 0 && 0 == count % dataManager.serBuffer.length) {
-        dataManager.consumeSerialBuffer(null);
-        count = 0;
-        bNewFrame = true;
-        packets++;
-      }
-      //georg = georg + "count: " + count;
+void drawFrame() {
+    switch (configurator.visualizationType) {
+      case 0:
+        interpolator.interpolate(crosspoints);
+        interpolator.drawPicture(borderDistance, borderDistance);
+        interpolator.drawHistogramFromPoint(sketchWidth-256-borderDistance, sketchHeight-30, 65);
+        histogramGUI.draw();
+        break;
+      case 1:
+        drawSignalCircles(true);
+        drawGrid();
+        break;
+      case 2:
+        interpolator.interpolate(crosspoints);
+        interpolator.drawPicture(borderDistance, borderDistance);
+        interpolator.drawHistogramFromPoint(sketchWidth-256-borderDistance, sketchHeight-30, 65);
+        histogramGUI.draw();
+        drawSignalCircles(true);
+        drawGrid();
+        break;
+      default:
+        break;
     }
-  }
-  
+    if (configurator.bShowBlobs) blobManager.drawBlobs();
+}
+
+void draw() {
+      timeFu = timeFu + " draw";
+      frames++;
+  background(backgroundColor);
   if ((millis() - lastMillis) > 1000) {
       lastMillis = millis();
       fps = frames;
       pps = packets;
       frames = 0;
       packets = 0;
-      // bNewFrame = true;
       skippedDraws = skippedDrawCounter;
       skippedDrawCounter = 0;
-      //println(timeFu);
-      timeFu = "";
-      //println(georg);
-      georg = "";
-  } 
-  if (bNewFrame) {
-    timeFu = timeFu + " d ";
-    frames++;
-    bNewFrame = false;
-    background(backgroundColor);
-    switch (configurator.visualizationType) {
-    case 0:
-      interpolator.interpolate(crosspoints);
-      interpolator.drawPicture(borderDistance, borderDistance);
-      interpolator.drawHistogramFromPoint(sketchWidth-256-borderDistance, sketchHeight-30, 65);
-      histogramGUI.draw();
-      break;
-    case 1:
-      drawSignalCircles(true);
-      drawGrid();
-      break;
-    case 2:
-      interpolator.interpolate(crosspoints);
-      interpolator.drawPicture(borderDistance, borderDistance);
-      interpolator.drawHistogramFromPoint(sketchWidth-256-borderDistance, sketchHeight-30, 65);
-      histogramGUI.draw();
-      drawSignalCircles(true);
-      drawGrid();
-      break;
-    default:
-      break;
+      println(timeFu);
+      timeFu="";
+  }
+  fill(textColor);
+  text(textInformation, borderDistance, sketchHeight-60);
+  text(fps+" fps", borderDistance, pictureHeight+(borderDistance*2));
+  text(pps+" packets per second", 80, pictureHeight+(borderDistance*2));
+  text(skippedDraws+" skipped redraws", 250, pictureHeight+(borderDistance*2));
+
+  if (null != dataManager && null != dataManager.port) {
+    if (dataManager.port.available() == 0) {
+      // no bytes available. just move on.
+      skippedDrawCounter++;
     }
-    if (configurator.bShowBlobs) blobManager.drawBlobs();
-    fill(textColor);
-    text(textInformation, borderDistance, sketchHeight-60);
-    text(fps+" fps", borderDistance, pictureHeight+(borderDistance*2));
-    text(pps+" packets per second", 80, pictureHeight+(borderDistance*2));
-    text(skippedDraws+" skipped redraws", 250, pictureHeight+(borderDistance*2));
+    else {
+      while (dataManager.port.available() > 0) {
+        dataManager.serBuffer[count++] = (byte)dataManager.port.read();
+        if (count > 0 && 0 == count % dataManager.serBuffer.length) {
+          dataManager.consumeSerialBuffer(null);
+          count = 0;
+          packets++;
+          timeFu = timeFu + " consumeBuffer";
+          break;
+        }
+      }
+    }
   }
-  else {
-    skippedDrawCounter++; 
-    timeFu = timeFu + " s ";
-  }
+  drawFrame();
 }
 
 void drawSignalCircles(boolean bDrawText) {
