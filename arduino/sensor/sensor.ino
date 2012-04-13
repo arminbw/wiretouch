@@ -1,3 +1,5 @@
+#include <SPI.h>
+
 // defines for setting and clearing register bits
 #ifndef cbi
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
@@ -5,6 +7,9 @@
 #ifndef sbi
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
+
+#define DEBUG_PIN_UP()    PORTD |= (1<<2)
+#define DEBUG_PIN_DOWN()  PORTD &= ~(1 << 2)
 
 #define PRINT_BINARY    1
 
@@ -52,7 +57,11 @@ void setup() {
   
   // initialize SPI slave
   // caution: don't forget pin 12...
-  SPCR = (1<<SPE);
+  //SPCR = (1<<SPE);
+  
+  SPI.setBitOrder(MSBFIRST);
+  SPI.setClockDivider(SPI_CLOCK_DIV4); 
+  SPI.begin(); 
 }
 
 void muxVertical(byte output) {
@@ -115,9 +124,43 @@ void muxHorizontal(byte output) {
   digitalWrite(horizontalShiftRegPins[0], HIGH);*/
 }
 
+void muxSPI(byte output, byte vertical) {
+  /*for (int i=0; i<NUM_SELECT; i++) {
+    digitalWrite(horizontalPins[i], ((output >> i) & 1) ? HIGH : LOW);
+  }*/
+  
+  byte mux_sel = (output > 15);
+  if (output > 15) output -= 16;
+  
+  byte bits = 0;
+  const byte* p = vertical ? (mux_sel ? verticalPosRight : verticalPosLeft) :
+                             (mux_sel ? horizontalPosBottom : horizontalPosTop);
+  bits = p[output] & 0x0f;
+  
+  bits |= ((mux_sel & 1) << 4);
+  bits |= (!(mux_sel & 1) << 5);
+  
+  if (vertical)
+    PORTB &= ~(1<<1);
+  else
+    PORTD &= ~(1<<6);
+  
+  SPDR = bits;
+  while (!(SPSR & _BV(SPIF)));
+  
+  if (vertical)
+    PORTB |= (1<<1);
+  else
+    PORTD |= (1<<6);
+  
+  /*digitalWrite(horizontalShiftRegPins[0], LOW);
+  shiftOut(horizontalShiftRegPins[2], horizontalShiftRegPins[1], MSBFIRST, bits);
+  digitalWrite(horizontalShiftRegPins[0], HIGH);*/
+}
+
 unsigned int measure_with_atmega_adc() {
   int val = 0;
-  delayMicroseconds(50);
+  //delayMicroseconds(50);
   for (int v=0; v<1; v++) {
     unsigned rd = analogRead(0);
    // if (rd > val)
@@ -165,8 +208,8 @@ unsigned int measure_with_pcm1803()
    return fut;
 }
 
-//#define measure measure_with_atmega_adc
-#define measure measure_with_pcm1803
+#define measure measure_with_atmega_adc
+//#define measure measure_with_pcm1803
 
 void send_packed10(uint16_t w16, byte flush_all)
 {
@@ -213,29 +256,32 @@ void loop() {
     if (Serial.available()) {
       byte c = Serial.read();
       isRunning = ('s' == c);
-      if (isRunning)
-        attachInterrupt(1, measureInterrupt, FALLING);
+      /*if (isRunning)
+        attachInterrupt(1, measureInterrupt, FALLING);*/
     }
   }
   
   int cnt = 0;
   for (int k = 0; k < verticalWires; k++) {
-    muxVertical(6);
+    //muxVertical(k);
+    muxSPI(k, 1);
     /*vmux = k;
     attachInterrupt(1, measureInterrupt, RISING);
     while (vmux > -1);*/
     for (byte l = 0; l < horizontalWires; l++) {
-      muxHorizontal(6);
+      //muxHorizontal(l);
+      muxSPI(l, 0);
       PORTC &= ~(1 << 5); // analog pin 5
       //PORTC |= 1 << 4;
       
       //delay(500);
       // delayMicroseconds(40); // increase to deal with row-error!
       //sample = measure();
-      delayMicroseconds(10);
-      sampleTaken = 0;
+      delayMicroseconds(15);
+      //sampleTaken = 0;
       //attachInterrupt(1, measureInterrupt, FALLING);
-      while(!sampleTaken);
+      //while(!sampleTaken);
+      sample = measure_with_atmega_adc();
       
       PORTC |= 1 << 5;
       //PORTC &= ~(1 << 4);
@@ -243,7 +289,9 @@ void loop() {
       cnt++;
 
 #if PRINT_BINARY
+      DEBUG_PIN_UP();
       send_packed10(sample, (cnt >= verticalWires*horizontalWires));
+      DEBUG_PIN_DOWN();
 #else
       Serial.print(sample, DEC);
       Serial.print(",");
