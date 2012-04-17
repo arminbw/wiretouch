@@ -1,4 +1,4 @@
-import processing.opengl.*;
+  import processing.opengl.*;
 import processing.serial.*;
 import java.text.DecimalFormat;
 import blobDetection.*;
@@ -49,7 +49,7 @@ float contrastRight = 0.0;
 float blobThreshold = 0.73;
 
 int lastMillis, frames, packets, fps, pps, skippedDrawCounter, skippedDraws;
-float milli, timeFuOld;
+float timeFuMillis, timeFuMillisOld;
 String timeFu;
 boolean bNewFrame; // only draw if there's new information (but at least every second)
 
@@ -80,7 +80,7 @@ void setup() {
 int count = 0;
 String georg = "start";
 
-void drawFrame() {
+void drawSignals() {
     switch (configurator.visualizationType) {
       case 0:
         interpolator.interpolate(crosspoints);
@@ -107,8 +107,8 @@ void drawFrame() {
 }
 
 void draw() {
-      timeFu = timeFu + " draw";
-      frames++;
+  timeFu = timeFu + ".";
+  frames++;
   background(backgroundColor);
   if ((millis() - lastMillis) > 1000) {
       lastMillis = millis();
@@ -139,13 +139,15 @@ void draw() {
           dataManager.consumeSerialBuffer(null);
           count = 0;
           packets++;
-          timeFu = timeFu + " consumeBuffer";
+          timeFuMillis = millis()-timeFuMillis;
+          timeFu = timeFu + " DATA("+timeFuMillis+") ";
+          timeFuMillis = millis();
           break;
         }
       }
     }
+    drawSignals();
   }
-  drawFrame();
 }
 
 void drawSignalCircles(boolean bDrawText) {
@@ -179,7 +181,7 @@ void drawGrid() {
 
 void initSerial() {
   try {
-    dataManager.calibrate(new Serial( this, Serial.list()[0], 230400 ));
+    dataManager.calibrate(new Serial( this, Serial.list()[0], 57600 ));
   }
   catch (Exception e) {
     textInformation = "error opening Serial connection: "+e;
