@@ -49,8 +49,7 @@ float contrastRight = 0.0;
 float blobThreshold = 0.73;
 
 int lastMillis, frames, packets, fps, pps, skippedDrawCounter, skippedDraws;
-float timeFuMillis, timeFuMillisOld;
-String timeFu;
+String serialDebugger, serialDebuggerText; // used to monitor the serial communication in relation to draw() invocations
 boolean bNewFrame; // only draw if there's new information (but at least every second)
 
 void setup() {
@@ -75,6 +74,8 @@ void setup() {
   blobManager = new BlobManager(interpolator.pixelWidth, interpolator.pixelHeight, blobThreshold);
   lastMillis = millis();
   bNewFrame = true;
+  serialDebugger = "";
+  serialDebuggerText = "";
 }
 
 int count = 0;
@@ -107,7 +108,7 @@ void drawSignals() {
 }
 
 void draw() {
-  timeFu = timeFu + ".";
+  serialDebugger = serialDebugger + ".";
   frames++;
   background(backgroundColor);
   if ((millis() - lastMillis) > 1000) {
@@ -118,14 +119,15 @@ void draw() {
       packets = 0;
       skippedDraws = skippedDrawCounter;
       skippedDrawCounter = 0;
-      println(timeFu);
-      timeFu="";
+      serialDebuggerText = serialDebugger;
+      serialDebugger="";
   }
   fill(textColor);
   text(textInformation, borderDistance, sketchHeight-60);
   text(fps+" fps", borderDistance, pictureHeight+(borderDistance*2));
   text(pps+" packets per second", 80, pictureHeight+(borderDistance*2));
   text(skippedDraws+" skipped redraws", 250, pictureHeight+(borderDistance*2));
+  text(serialDebuggerText, borderDistance, pictureHeight+(borderDistance*2)+20);
 
   if (null != dataManager && null != dataManager.port) {
     if (dataManager.port.available() == 0) {
@@ -139,9 +141,7 @@ void draw() {
           dataManager.consumeSerialBuffer(null);
           count = 0;
           packets++;
-          timeFuMillis = millis()-timeFuMillis;
-          timeFu = timeFu + " DATA("+timeFuMillis+") ";
-          timeFuMillis = millis();
+          serialDebugger = serialDebugger + "|";
           break;
         }
       }
@@ -180,24 +180,15 @@ void drawGrid() {
 }
 
 void initSerial() {
+  println(Serial.list());
   try {
     dataManager.calibrate(new Serial( this, Serial.list()[0], 57600 ));
   }
   catch (Exception e) {
     textInformation = "error opening Serial connection: "+e;
-    println(Serial.list());
     exit();
   }
 }
-
-/*void serialEvent(Serial p) {
-  dataManager.consumeSerialBuffer(p);
-  timeFuOld = millis() - timeFuOld; 
-  timeFu = timeFu + " " + timeFuOld;
-  timeFuOld = millis();
-  bNewFrame = true;
-  packets++;
-}*/
 
 void showHelpText() {
   textInformation = configurator.helpText;
@@ -254,4 +245,3 @@ void keyPressed() {
   configurator.changeConfiguration(key);
   bNewFrame = true;
 }
-
