@@ -1,4 +1,4 @@
-  import processing.opengl.*;
+import processing.opengl.*;
 import processing.serial.*;
 import java.text.DecimalFormat;
 import blobDetection.*;
@@ -41,12 +41,12 @@ final color guiColor = color(180, 180, 180);
 final color backgroundColor = color(240, 240, 240);
 final color histogramColor = color(239, 171, 233);
 final color signalColor = color(153, 233, 240);
-final color wireColor = color(0, 222, 255);      // also used for blobs and histogram GUI triangles
-static final int AVERAGESIGNALCOUNTERMAX = 10;
+final color wireColor = color(255, 0, 222);      // also used for blobs and histogram GUI triangles
+static final int AVERAGESIGNALCOUNTERMAX = 60;
 int averageSignalCounter = AVERAGESIGNALCOUNTERMAX;
 float contrastLeft = 0.0;
-float contrastRight = 0.0;
-float blobThreshold = 0.73;
+float contrastRight = 0.203125;
+float blobThreshold = 0.3125;
 
 int lastMillis, frames, packets, fps, pps, skippedDrawCounter, skippedDraws;
 String serialDebugger, serialDebuggerText; // used to monitor the serial communication in relation to draw() invocations
@@ -182,7 +182,7 @@ void drawGrid() {
 void initSerial() {
   println(Serial.list());
   try {
-    dataManager.calibrate(new Serial( this, Serial.list()[0], 57600 ));
+    dataManager.calibrate(new Serial( this, Serial.list()[0], 1000000 ));
   }
   catch (Exception e) {
     textInformation = "error opening Serial connection: "+e;
@@ -244,4 +244,10 @@ void mouseReleased() {
 void keyPressed() {
   configurator.changeConfiguration(key);
   bNewFrame = true;
+}
+
+void stop() {
+  dataManager.port.clear();
+  dataManager.port.stop();
+  super.stop(); 
 }

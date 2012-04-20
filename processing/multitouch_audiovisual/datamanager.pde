@@ -4,13 +4,13 @@ class DataManager {
   byte[] serBuffer = null;
 
   DataManager() {
+    this.serBuffer = new byte[(horizontalWires * verticalWires * 10)/8];
   }
 
   void calibrate(Serial port) {
     this.port = port;
     try {
       this.port.clear(); // // do we need this? (cargo cult programming)
-      this.serBuffer = new byte[(horizontalWires * verticalWires * 10)/8];
       //this.port.buffer(serBuffer.length);
       delay(2000); // still needed?
       this.port.write('s');

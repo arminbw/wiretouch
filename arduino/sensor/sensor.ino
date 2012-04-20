@@ -40,10 +40,10 @@ static uint8_t sbuf[SER_BUF_SIZE+1];
 static uint16_t sbufpos = 0;
 
 void setup() {
-  Serial.begin(230400);
+  Serial.begin(1000000);
   
   // set prescale to 16
-  sbi(ADCSRA,ADPS2);
+  cbi(ADCSRA,ADPS2);
   cbi(ADCSRA,ADPS1);
   cbi(ADCSRA,ADPS0);
   
@@ -165,11 +165,13 @@ void muxSPI(byte output, byte vertical) {
 unsigned int measure_with_atmega_adc() {
   int val = 0;
   //delayMicroseconds(50);
+  DEBUG_PIN_UP();
   for (int v=0; v<1; v++) {
     unsigned rd = analogRead(0);
    // if (rd > val)
       val = rd; // (val >> 1) + (rd >> 1);
   }
+  DEBUG_PIN_DOWN();
   return (val);
 }
 
@@ -286,11 +288,12 @@ void loop() {
       //delay(500);
       // delayMicroseconds(40); // increase to deal with row-error!
       //sample = measure();
-      delayMicroseconds(15);
+      delayMicroseconds(20);
       //sampleTaken = 0;
       //attachInterrupt(1, measureInterrupt, FALLING);
       //while(!sampleTaken);
       sample = measure_with_atmega_adc();
+      (15 == k || 16 == k || 23 == k || 24 == k) && (sample = min(sample+150, 1023));
       
       PORTC |= 1 << 5;
       //PORTC &= ~(1 << 4);
@@ -298,9 +301,7 @@ void loop() {
       cnt++;
 
 #if PRINT_BINARY
-      DEBUG_PIN_UP();
       send_packed10(sample, (cnt >= verticalWires*horizontalWires));
-      DEBUG_PIN_DOWN();
 #else
       Serial.print(sample, DEC);
       Serial.print(",");
