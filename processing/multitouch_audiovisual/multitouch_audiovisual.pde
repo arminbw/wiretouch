@@ -45,7 +45,8 @@ final color wireColor = color(255, 0, 222);      // also used for blobs and hist
 static final int AVERAGESIGNALCOUNTERMAX = 60;
 int averageSignalCounter = AVERAGESIGNALCOUNTERMAX;
 float contrastLeft = 0.0;
-float contrastRight = 0.203125;
+float contrastRight = 0.0;
+// float contrastRight = 0.203125;
 float blobThreshold = 0.3125;
 
 int lastMillis, frames, packets, fps, pps, skippedDrawCounter, skippedDraws;
