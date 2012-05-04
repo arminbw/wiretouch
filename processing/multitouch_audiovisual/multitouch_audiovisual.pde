@@ -3,6 +3,7 @@ import processing.serial.*;
 import java.text.DecimalFormat;
 import blobDetection.*;
 import codeanticode.glgraphics.*; // http://glgraphics.sourceforge.net
+import s373.flob.*; // http://s373.net/code/flob/flob.html
 
 DecimalFormat df = new DecimalFormat("#.###");
 
@@ -24,6 +25,7 @@ int interpolationResolution = 3;
 HistogramGUI histogramGUI;
 GLTexture picture;
 BlobManager blobManager;
+FlobManager flobManager;
 
 // configuration
 Configurator configurator;
@@ -73,6 +75,7 @@ void setup() {
   configurator.helpText = "[r]eceive real data   [f]ake data (static)";
   textInformation = configurator.helpText;
   blobManager = new BlobManager(interpolator.pixelWidth, interpolator.pixelHeight, blobThreshold);
+  flobManager = new FlobManager(this, interpolator.pixelWidth, interpolator.pixelHeight);
   lastMillis = millis();
   bNewFrame = true;
   serialDebugger = "";
@@ -105,7 +108,10 @@ void drawSignals() {
       default:
         break;
     }
-    if (configurator.bShowBlobs) blobManager.drawBlobs();
+    if (configurator.bShowBlobs) {
+      //blobManager.drawBlobs();
+      flobManager.drawFlobs();
+    }
 }
 
 void draw() {
@@ -220,6 +226,7 @@ void initInterpolator() {
   }
   interpolator.bContrastStretch = configurator.bContrastStretch;
   blobManager = new BlobManager(interpolator.pixelWidth, interpolator.pixelHeight, blobThreshold);
+  flobManager = new FlobManager(this, interpolator.pixelWidth, interpolator.pixelHeight);
 }
 
 void mousePressed() {
@@ -232,6 +239,7 @@ void mouseDragged() {
     contrastRight = histogramGUI.getValRight();
     blobThreshold = histogramGUI.getValBlob();
     blobManager.setThreshold(blobThreshold);
+    flobManager.setThreshold(blobThreshold);
     textInformation = "contrast stretch:   " + contrastLeft + "   " + contrastRight + "\nblob threshold: "+ blobThreshold + "\nback to the main [m]enu";
     bNewFrame = true;
   }
