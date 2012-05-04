@@ -38,6 +38,7 @@ class Configurator {
     case 'f':
       // use fake data
       dataManager.initFakeData();
+      bFakeData = true; 
       configurator.helpText = "[b]lobs(ON/OFF)   [c]alibration(ON/OFF)   [i]nterpolation\nthis [m]enu   [o]/[p] interpolation resolution\ncontrast [s]tretch(ON/OFF)   [v]isualization"; 
       textInformation = configurator.helpText;
       break;

@@ -86,6 +86,11 @@ int count = 0;
 String georg = "start";
 
 void drawSignals() {
+    if (configurator.bFakeData) {
+        interpolator.drawPicture(borderDistance, borderDistance);
+        interpolator.drawHistogramFromPoint(sketchWidth-256-borderDistance, sketchHeight-30, 65);
+        histogramGUI.draw();
+    } 
     switch (configurator.visualizationType) {
       case 0:
         interpolator.interpolate(crosspoints);
@@ -135,7 +140,10 @@ void draw() {
   text(pps+" packets per second", 80, pictureHeight+(borderDistance*2));
   text(skippedDraws+" skipped redraws", 250, pictureHeight+(borderDistance*2));
   text(serialDebuggerText, borderDistance, pictureHeight+(borderDistance*2)+20);
-
+  
+  if (configurator.bFakeData) {
+    drawSignals(); 
+  }
   if (null != dataManager && null != dataManager.port) {
     if (dataManager.port.available() == 0) {
       // no bytes available. just move on.
