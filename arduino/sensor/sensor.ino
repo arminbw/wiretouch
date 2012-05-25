@@ -1,4 +1,4 @@
-#include <SPI.h>
+ #include <SPI.h>
 
 #define SER_BUF_SIZE    32
 #define PRINT_BINARY    1
@@ -128,26 +128,36 @@ void muxHorizontal(byte output) {
   digitalWrite(horizontalShiftRegPins[0], HIGH);*/
 }
 
+
 void muxSPI(byte output, byte vertical) {
   /*for (int i=0; i<NUM_SELECT; i++) {
     digitalWrite(horizontalPins[i], ((output >> i) & 1) ? HIGH : LOW);
   }*/
   
-  byte mux_sel = (output > 15);
-  if (output > 15) output -= 16;
-  
-  byte bits = 0;
-  const byte* p = vertical ? (mux_sel ? verticalPosRight : verticalPosLeft) :
-                             (mux_sel ? horizontalPosBottom : horizontalPosTop);
-  bits = p[output] & 0x0f;
-  
-  bits |= ((mux_sel & 1) << 4);
-  bits |= (!(mux_sel & 1) << 5);
-  
-  if (vertical)
+   if (vertical)
     PORTB &= ~(1<<1);
   else
     PORTD &= ~(1<<6);
+  
+  byte bits = 0;
+  
+  if (vertical) {
+    bits = ((~(1 << ((output / 8)))) << 3) | ((15 < output) ? (output % 8) : (7 - (output % 8)));
+  } else {
+    bits = ((~(1 << ((output / 8)))) << 3) | (output % 8);
+  }
+  
+  /* else {
+    byte mux_sel = (output > 15);
+    if (output > 15) output -= 16;
+    
+    const byte* p = vertical ? (mux_sel ? verticalPosRight : verticalPosLeft) :
+                               (mux_sel ? horizontalPosBottom : horizontalPosTop);
+    bits = p[output] & 0x0f;
+    
+    bits |= ((mux_sel & 1) << 4);
+    bits |= (!(mux_sel & 1) << 5);
+  }*/
   
   SPDR = bits;
   while (!(SPSR & _BV(SPIF)));
@@ -293,7 +303,7 @@ void loop() {
       //attachInterrupt(1, measureInterrupt, FALLING);
       //while(!sampleTaken);
       sample = measure_with_atmega_adc();
-      (15 == k || 16 == k || 23 == k || 24 == k) && (sample = min(sample+150, 1023));
+      // (15 == k || 16 == k || 23 == k || 24 == k) && (sample = min(sample+150, 1023));
       
       PORTC |= 1 << 5;
       //PORTC &= ~(1 << 4);

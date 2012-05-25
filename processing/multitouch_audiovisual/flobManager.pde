@@ -18,14 +18,12 @@ class FlobManager {
   void drawFlobs() {
     float ws = (float)interpolator.resizedWidth/(float)interpolator.pixelWidth,
           hs = (float)interpolator.resizedHeight/(float)interpolator.pixelHeight;
-       //, borderDistance, borderDistance
-    
+        
     ArrayList blobs = flob.track(flob.binarize(picture));
     println(blobs.size());
-
-      strokeWeight(2);
-      stroke(wireColor);
-      noFill();
+    strokeWeight(2);
+    stroke(wireColor);
+    noFill();
     int numblobs = blobs.size();//flob.getNumBlobs();      
     for(int i = 0; i < numblobs; i++) {  
       ABlob ab = (ABlob)flob.getABlob(i);
