@@ -27,7 +27,7 @@ class Crosspoint {
     }
     fill(wireColor);
     if (bDrawText) {
-      text((df.format(measuredSignal)), x+4, y-4);
+      // text((df.format(measuredSignal)), x+4, y-4);
       // text((df.format(signalStrength)+"\n"+this.signalMax+"\n"+df.format(this.measuredSignalAverage)+"\n"+this.signalMin), x+4, y-4);
     }
   }
@@ -45,7 +45,7 @@ class Crosspoint {
 
   void accumulateAvgSig(int val) {
     this.measuredSignalAverage = this.measuredSignalAverage/2 + (val/2);
-  }  
+  }  S
 }
 
 
