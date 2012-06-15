@@ -1,6 +1,6 @@
 #include <SPI.h>
 
-#define SER_BUF_SIZE    64
+#define SER_BUF_SIZE    768
 #define PRINT_BINARY    1
 
 // defines for setting and clearing register bits
@@ -43,9 +43,10 @@ const byte horizontalWires = 22;
 static uint8_t sbuf[SER_BUF_SIZE+1];
 static uint16_t sbufpos = 0;
 
+
 void setup() {
   Serial.begin(1000000);
-
+  
   // set prescale to 16
   cbi(ADCSRA,ADPS2);
   cbi(ADCSRA,ADPS1);
@@ -133,7 +134,7 @@ void muxHorizontal(byte output) {
 }
 
 
-void muxSPI(byte output, byte vertical) {
+void muxSPI(byte output, byte vertical, byte off) {
   /*for (int i=0; i<NUM_SELECT; i++) {
    digitalWrite(horizontalPins[i], ((output >> i) & 1) ? HIGH : LOW);
    }*/
@@ -146,15 +147,22 @@ void muxSPI(byte output, byte vertical) {
   byte bits = 0;
 
   if (vertical) {
-    bits = ((~(1 << ((output / 8)))) << 3) | ((15 < output) ? (output % 8) : (7 - (output % 8)));
+    if (off)
+       bits = 0xff;
+    else
+       bits = ((~(1 << ((output / 8)))) << 3) | (output % 8);
+       //bits = ((~(1 << ((output / 8)))) << 3) | ((15 < output) ? (output % 8) : (7 - (output % 8)));
   } 
   else {
-    bits = ((~(1 << ((output / 8)))) << 3) | (output % 8);
+    if (off)
+       bits = 0xff;
+    else
+       bits = ((~(1 << ((output / 8)))) << 3) | (output % 8);
   }
 
   /* else {
    byte mux_sel = (output > 15);
-   if (output > 15) output -= 16;
+   if (output > 15) output -= 16;ooooooooooo
    
    const byte* p = vertical ? (mux_sel ? verticalPosRight : verticalPosLeft) :
    (mux_sel ? horizontalPosBottom : horizontalPosTop);
@@ -187,6 +195,7 @@ unsigned int measure_with_atmega_adc() {
     val = rd; // (val >> 1) + (rd >> 1);
   }
   //DEBUG_PIN_DOWN();
+  
   return (val);
 }
 
@@ -289,22 +298,23 @@ void loop() {
   }
 
   int cnt = 0;
-  for (int k = 0; k < verticalWires; k++) {
+  for (byte k = 0; k < verticalWires; k++) {
     //muxVertical(k);
-    muxSPI(k, 1);
+    //muxSPI(k, 1);
     /*vmux = k;
      attachInterrupt(1, measureInterrupt, RISING);
      while (vmux > -1);*/
     for (byte l = 0; l < horizontalWires; l++) {
       //muxHorizontal(l);
-      muxSPI(l, 0);
+      muxSPI(k, 1, 0);
+      muxSPI(l, 0, 0);
       PORTC &= ~(1 << 5); // analog pin 5
       //PORTC |= 1 << 4;
 
       //delay(500);
       // delayMicroseconds(40); // increase to deal with row-error!
       //sample = measure();
-      delayMicroseconds(20);
+   delayMicroseconds(12);
       //sampleTaken = 0;
       //attachInterrupt(1, measureInterrupt, FALLING);
       //while(!sampleTaken);
@@ -315,9 +325,15 @@ void loop() {
       //PORTC &= ~(1 << 4);
       // delay(40);
       cnt++;
+      
+      //delay(10);
+
+      //muxSPI(0, 1, 1);
+      //muxSPI(0, 0, 1);
 
 #if PRINT_BINARY
       send_packed10(sample, (cnt >= verticalWires*horizontalWires));
+      if (cnt >= verticalWires*horizontalWires) cnt = 0;
 #else
       Serial.print(sample, DEC);
       Serial.print(",");
