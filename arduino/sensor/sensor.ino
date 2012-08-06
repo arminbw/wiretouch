@@ -26,7 +26,7 @@ const byte verticalPosLeft[] = {
   15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
 const byte verticalPosRight[] = { 
   15, 14, 13, 12, 11, 10, 9, 8, 6, 5, 4, 3, 2, 1, 0, 7}; 
-const byte verticalWires = 30;
+const byte verticalWires = 32;
 
 const byte horizontalShiftRegPins[] = {
   6,              // latch / RCLK  PORTD.6
@@ -58,8 +58,8 @@ void setup() {
   }
 
   pinMode(2, OUTPUT);
-  pinMode(3, INPUT);
-  pinMode(10, OUTPUT);
+  pinMode(3, OUTPUT);
+  pinMode(7, OUTPUT);
   pinMode(11, INPUT);
   pinMode(A4, OUTPUT);
   pinMode(A5, OUTPUT);
@@ -70,7 +70,13 @@ void setup() {
 
   SPI.setBitOrder(MSBFIRST);
   SPI.setClockDivider(SPI_CLOCK_DIV2);
-  SPI.begin(); 
+  SPI.begin();
+  
+  pinMode(3, OUTPUT);
+  TCCR2A = B00100011;
+  TCCR2B = B11001;
+  OCR2A = 26;
+  OCR2B = 13;
 }
 
 void muxVertical(byte output) {
@@ -133,6 +139,7 @@ void muxHorizontal(byte output) {
    digitalWrite(horizontalShiftRegPins[0], HIGH);*/
 }
 
+volatile byte vmux_bits;
 
 void muxSPI(byte output, byte vertical, byte off) {
   /*for (int i=0; i<NUM_SELECT; i++) {
@@ -142,7 +149,7 @@ void muxSPI(byte output, byte vertical, byte off) {
   if (vertical)
     PORTB &= ~(1<<1);
   else
-    PORTD &= ~(1<<6);
+    PORTD &= ~(1<<7);
 
   byte bits = 0;
 
@@ -150,7 +157,8 @@ void muxSPI(byte output, byte vertical, byte off) {
     if (off)
        bits = 0xff;
     else
-       bits = ((~(1 << ((output / 8)))) << 3) | (output % 8);
+       bits = vmux_bits;
+       //bits = ((~(1 << ((output / 8)))) << 3) | (output % 8);
        //bits = ((~(1 << ((output / 8)))) << 3) | ((15 < output) ? (output % 8) : (7 - (output % 8)));
   } 
   else {
@@ -178,7 +186,7 @@ void muxSPI(byte output, byte vertical, byte off) {
   if (vertical) 
     PORTB |= (1<<1);
   else
-    PORTD |= (1<<6);
+    PORTD |= (1<<7);
 
   /*digitalWrite(horizontalShiftRegPins[0], LOW);
    shiftOut(horizontalShiftRegPins[2], horizontalShiftRegPins[1], MSBFIRST, bits);
@@ -284,6 +292,17 @@ void measureInterrupt()
    }*/
 }
 
+void vmux_irq (void)
+{
+  if (vmux >= 0) {
+    detachInterrupt(0);
+        
+    muxSPI(vmux, 1, 0);
+    
+    vmux = -1;
+  }
+}
+  
 void loop() {
   static boolean isRunning = 0;
   //uint16_t sample;
@@ -301,13 +320,20 @@ void loop() {
   for (byte k = 0; k < verticalWires; k++) {
     //muxVertical(k);
     //muxSPI(k, 1);
-    /*vmux = k;
-     attachInterrupt(1, measureInterrupt, RISING);
+    // vmux = k;
+    /* attachInterrupt(1, measureInterrupt, RISING);
      while (vmux > -1);*/
     for (byte l = 0; l < horizontalWires; l++) {
       //muxHorizontal(l);
-      muxSPI(k, 1, 0);
+      //k = 4;
+      // l = k;
+      //muxSPI(k, 1, 0);
       muxSPI(l, 0, 0);
+      vmux = k;
+      vmux_bits = ((~(1 << ((k / 8)))) << 3) | (k % 8);
+      attachInterrupt(0, vmux_irq, LOW);
+      while (vmux >= 0);
+      
       PORTC &= ~(1 << 5); // analog pin 5
       //PORTC |= 1 << 4;
 

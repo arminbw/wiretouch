@@ -29,7 +29,7 @@ FlobManager flobManager;
 
 // configuration
 Configurator configurator;
-static final int verticalWires = 30;
+static final int verticalWires = 32;
 static final int horizontalWires = 22;
 static final int crosspointDistance=25; // 25; // how many pixels between 2 crosspoints
 static final int borderDistance=20; // how many pixel distance to the borderDistance
