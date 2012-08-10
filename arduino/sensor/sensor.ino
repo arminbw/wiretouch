@@ -1,6 +1,7 @@
 #include <SPI.h>
 
-#define SER_BUF_SIZE    768
+#define SER_BUF_SIZE 704
+// 768
 #define PRINT_BINARY    1
 
 // defines for setting and clearing register bits
@@ -11,8 +12,8 @@
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
 
-#define DEBUG_PIN_UP()    PORTD |= (1<<2)
-#define DEBUG_PIN_DOWN()  PORTD &= ~(1 << 2)
+#define DEBUG_PIN_UP()    PORTD |= (1 << 4)
+#define DEBUG_PIN_DOWN()  PORTD &= ~(1 << 4)
 
 #define NUM_SELECT 4
 
@@ -303,13 +304,16 @@ void vmux_irq (void)
   }
 }
   
-void map_coords(int x, int y, int* mx, int* my)
+void map_coords(uint16_t x, uint16_t y, uint16_t* mx, uint16_t* my)
 {
-  int a = x * horizontalWires + y;
-  int b = (63*a + 13) % (horizontalWires*verticalWires);
+  uint16_t a = x * horizontalWires + y;
+  uint16_t b = (59*a + 13) % (horizontalWires*verticalWires);
   
   *mx = b / horizontalWires;
-  *my = b - *mx * horizontalWires;
+  *my = b - (*mx) * ((uint16_t)horizontalWires);
+  
+  /**mx = x;
+  *my = y;*/
 }
   
 void loop() {
@@ -326,22 +330,25 @@ void loop() {
   }
 
   int cnt = 0;
-  for (byte k = 0; k < verticalWires; k++) {
+  for (uint16_t k = 0; k < verticalWires; k++) {
     //muxVertical(k);
     //muxSPI(k, 1);
     // vmux = k;
     /* attachInterrupt(1, measureInterrupt, RISING);
      while (vmux > -1);*/
-    for (byte l = 0; l < horizontalWires; l++) {
+    for (uint16_t l = 0; l < horizontalWires; l++) {
       //muxHorizontal(l);
       //k = 4;
       // l = k;
       //muxSPI(k, 1, 0);
-      int xx, yy;
+      uint16_t xx, yy;
+       
       map_coords(k, l, &xx, &yy);
-      
+
+      vmux_bits = ((~(1 << ((xx / 8)))) << 3) | (xx % 8);
       muxSPI(xx, 1, 0);
       muxSPI(yy, 0, 0);
+      
       /*vmux = k;
       vmux_bits = ((~(1 << ((k / 8)))) << 3) | (k % 8);
       attachInterrupt(0, vmux_irq, LOW);

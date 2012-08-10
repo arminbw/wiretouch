@@ -40,11 +40,11 @@ class DataManager {
   Pt convertCoords(int x, int y) {
     Pt pt = new Pt();
   
-    int a = x * H + y;
-    int b = (63*a + 13) % (W*H);
+    int a = x * horizontalWires + y;
+    int b = (59*a + 13) % (verticalWires*horizontalWires);
   
-    pt.x = b / H;
-    pt.y = b - pt.x * H;
+    pt.x = b / horizontalWires;
+    pt.y = b - pt.x * horizontalWires;
   
     return pt;
   }
