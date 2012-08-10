@@ -303,6 +303,15 @@ void vmux_irq (void)
   }
 }
   
+void map_coords(int x, int y, int* mx, int* my)
+{
+  int a = x * horizontalWires + y;
+  int b = (63*a + 13) % (horizontalWires*verticalWires);
+  
+  *mx = b / horizontalWires;
+  *my = b - *mx * horizontalWires;
+}
+  
 void loop() {
   static boolean isRunning = 0;
   //uint16_t sample;
@@ -328,11 +337,15 @@ void loop() {
       //k = 4;
       // l = k;
       //muxSPI(k, 1, 0);
-      muxSPI(l, 0, 0);
-      vmux = k;
+      int xx, yy;
+      map_coords(k, l, &xx, &yy);
+      
+      muxSPI(xx, 1, 0);
+      muxSPI(yy, 0, 0);
+      /*vmux = k;
       vmux_bits = ((~(1 << ((k / 8)))) << 3) | (k % 8);
       attachInterrupt(0, vmux_irq, LOW);
-      while (vmux >= 0);
+      while (vmux >= 0);*/
       
       PORTC &= ~(1 << 5); // analog pin 5
       //PORTC |= 1 << 4;
