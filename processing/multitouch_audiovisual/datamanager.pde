@@ -1,3 +1,8 @@
+public class Pt {
+  int x;
+  int y;
+}
+
 class DataManager {
   Serial port;
   String fakeData;
@@ -32,6 +37,18 @@ class DataManager {
     return p < 0 ? 256+p : p;
   }
 
+  Pt convertCoords(int x, int y) {
+    Pt pt = new Pt();
+  
+    int a = x * H + y;
+    int b = (63*a + 13) % (W*H);
+  
+    pt.x = b / H;
+    pt.y = b - pt.x * H;
+  
+    return pt;
+  }
+
   void consumeSerialBuffer(byte[] b) {
     byte[] buf = null != b ? b : serBuffer;
     
@@ -43,13 +60,14 @@ class DataManager {
         int sig = br & 0x3ff;
         br >>= 10;
         bs -= 10;          
-        int px = cnt / horizontalWires, py = cnt % horizontalWires;  
+        int px = cnt / horizontalWires, py = cnt % horizontalWires;
+        Pt pt = convertCoords(px, py);
         if (averageSignalCounter > 0) {
           // calculate the average signal strength for every crosspoint
-          crosspoints[px][py].accumulateAvgSig(sig);
+          crosspoints[pt.x][pt.y].accumulateAvgSig(sig);
         }
         else {
-          crosspoints[px][py].setSignalStrength(sig);
+          crosspoints[pt.x][pt.y].setSignalStrength(sig);
         }
         cnt++;
       }
