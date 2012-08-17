@@ -65,10 +65,6 @@ void setup() {
   pinMode(A4, OUTPUT);
   pinMode(A5, OUTPUT);
 
-  // initialize SPI slave
-  // caution: don't forget pin 12...
-  //SPCR = (1<<SPE);
-
   SPI.setBitOrder(MSBFIRST);
   SPI.setClockDivider(SPI_CLOCK_DIV2);
   SPI.begin();
@@ -80,73 +76,7 @@ void setup() {
   OCR2B = 13;
 }
 
-void muxVertical(byte output) {
-  /*for (int i=0; i<NUM_SELECT; i++)
-   digitalWrite(verticalPins[i], ((output >> i) & 1) ? HIGH : LOW); */
-  byte mux_sel = (output > 15);
-  if (output > 15) output -= 16;
-
-  byte bits = 0;
-  const byte* p = mux_sel ? verticalPosRight : verticalPosLeft;
-  bits = p[output] & 0x0f;
-
-  bits |= ((mux_sel & 1) << 4);
-  bits |= (!(mux_sel & 1) << 5);
-
-  PORTB &= ~(1<<1);
-  for (int i=7; i>=0; i--) {
-    if ((bits >> i) & 1)
-      PORTD |= (1<<4);
-    else
-      PORTD &= ~(1<<4);
-    PORTB |= (1<<0);
-    PORTB &= ~(1<<0);
-  }
-  PORTB |= (1<<1);
-
-  /*digitalWrite(verticalShiftRegPins[0], LOW);
-   shiftOut(verticalShiftRegPins[2], verticalShiftRegPins[1], MSBFIRST, bits);
-   digitalWrite(verticalShiftRegPins[0], HIGH);*/
-}
-
-void muxHorizontal(byte output) {
-  /*for (int i=0; i<NUM_SELECT; i++) {
-   digitalWrite(horizontalPins[i], ((output >> i) & 1) ? HIGH : LOW);
-   }*/
-
-  byte mux_sel = (output > 15);
-  if (output > 15) output -= 16;
-
-  byte bits = 0;
-  const byte* p = mux_sel ? horizontalPosBottom : horizontalPosTop;
-  bits = p[output] & 0x0f;
-
-  bits |= ((mux_sel & 1) << 4);
-  bits |= (!(mux_sel & 1) << 5);
-
-  PORTD &= ~(1<<6);
-  for (int i=7; i>=0; i--) {
-    if ((bits >> i) & 1)
-      PORTD |= (1<<7);
-    else
-      PORTD &= ~(1<<7);
-    PORTD |= (1<<5);
-    PORTD &= ~(1<<5);
-  }
-  PORTD |= (1<<6);
-
-  /*digitalWrite(horizontalShiftRegPins[0], LOW);
-   shiftOut(horizontalShiftRegPins[2], horizontalShiftRegPins[1], MSBFIRST, bits);
-   digitalWrite(horizontalShiftRegPins[0], HIGH);*/
-}
-
-volatile byte vmux_bits;
-
 void muxSPI(byte output, byte vertical, byte off) {
-  /*for (int i=0; i<NUM_SELECT; i++) {
-   digitalWrite(horizontalPins[i], ((output >> i) & 1) ? HIGH : LOW);
-   }*/
-
   if (vertical)
     PORTB &= ~(1<<1);
   else
@@ -158,7 +88,7 @@ void muxSPI(byte output, byte vertical, byte off) {
     if (off)
        bits = 0xff;
     else
-       bits = vmux_bits;
+       bits = (~(1 << (output / 16))) << 4 | (output % 16);
        //bits = ((~(1 << ((output / 8)))) << 3) | (output % 8);
        //bits = ((~(1 << ((output / 8)))) << 3) | ((15 < output) ? (output % 8) : (7 - (output % 8)));
   } 
@@ -169,18 +99,6 @@ void muxSPI(byte output, byte vertical, byte off) {
        bits = ((~(1 << ((output / 8)))) << 3) | (output % 8);
   }
 
-  /* else {
-   byte mux_sel = (output > 15);
-   if (output > 15) output -= 16;ooooooooooo
-   
-   const byte* p = vertical ? (mux_sel ? verticalPosRight : verticalPosLeft) :
-   (mux_sel ? horizontalPosBottom : horizontalPosTop);
-   bits = p[output] & 0x0f;
-   
-   bits |= ((mux_sel & 1) << 4);
-   bits |= (!(mux_sel & 1) << 5);
-   }*/
-
   SPDR = bits;
   while (!(SPSR & _BV(SPIF)));
 
@@ -188,67 +106,21 @@ void muxSPI(byte output, byte vertical, byte off) {
     PORTB |= (1<<1);
   else
     PORTD |= (1<<7);
-
-  /*digitalWrite(horizontalShiftRegPins[0], LOW);
-   shiftOut(horizontalShiftRegPins[2], horizontalShiftRegPins[1], MSBFIRST, bits);
-   digitalWrite(horizontalShiftRegPins[0], HIGH);*/
 }
 
 unsigned int measure_with_atmega_adc() {
   int val = 0;
-  //delayMicroseconds(50);
-  //DEBUG_PIN_UP();
+
   for (int v=0; v<1; v++) {
     unsigned rd = analogRead(0);
     // if (rd > val)
     val = rd; // (val >> 1) + (rd >> 1);
   }
-  //DEBUG_PIN_DOWN();
   
   return (val);
 }
 
-inline long SPI_SlaveReceive(void)
-{
-  while(!(SPSR & (1<<SPIF)));
-  return SPDR & 0xff;
-}
-
-inline long read_pcm1803(void)
-{
-  long dummy, msb, csb, lsb;
-  while(!(PIND & (1 << PIND3)));
-  while((PIND & (1 << PIND3)));
-
-  PORTD |= (1<<2);
-  static int i =0;
-  dummy = SPI_SlaveReceive();
-  msb = SPI_SlaveReceive(); //load msb first 
-  csb = SPI_SlaveReceive(); //load second 8 bit segment
-  lsb = SPI_SlaveReceive(); //load lsb last
-  PORTD &= ~(1 << 2);
-
-  /*if (msb > 127)
-   msb =  msb - 127;
-   else
-   msb += 128;
-   */
-
-  return (dummy = (((lsb|(csb << 8 )|(msb << 16)) << 8 ) >> 8 ) + 8388608UL); //concatenate each 8 bit segment
-}
-
-unsigned int measure_with_pcm1803()
-{   
-  //delayMicroseconds(100);
-  // while((PINB & (1 << PINB2)));
-  //while(!(PINB & (1 << PINB2)));//wait while LRCK is low
-
-  unsigned long fut = read_pcm1803() >> 14;
-  return fut;
-}
-
 #define measure measure_with_atmega_adc
-//#define measure measure_with_pcm1803
 
 void send_packed10(uint16_t w16, byte flush_all)
 {
@@ -272,38 +144,11 @@ void send_packed10(uint16_t w16, byte flush_all)
 
   if (flush_all || sbufpos >= SER_BUF_SIZE) {
     Serial.write(sbuf, sbufpos);
+    Serial.flush();
     sbufpos = 0;
   }
 }
 
-volatile long sample;
-volatile uint8_t sampleTaken = 1;
-volatile int8_t vmux = -1;
-
-void measureInterrupt()
-{ 
-  //detachInterrupt(1);
-
-  if (0 == sampleTaken) { 
-    sample = measure();
-    sampleTaken = 1;
-  } /*else if (-1 < vmux) {
-   muxVertical(vmux);
-   vmux = -1;
-   }*/
-}
-
-void vmux_irq (void)
-{
-  if (vmux >= 0) {
-    detachInterrupt(0);
-        
-    muxSPI(vmux, 1, 0);
-    
-    vmux = -1;
-  }
-}
-  
 void map_coords(uint16_t x, uint16_t y, uint16_t* mx, uint16_t* my)
 {
   uint16_t a = x * horizontalWires + y;
@@ -311,14 +156,11 @@ void map_coords(uint16_t x, uint16_t y, uint16_t* mx, uint16_t* my)
   
   *mx = b / horizontalWires;
   *my = b - (*mx) * ((uint16_t)horizontalWires);
-  
-  /**mx = x;
-  *my = y;*/
 }
   
 void loop() {
   static boolean isRunning = 0;
-  //uint16_t sample;
+  uint16_t sample;
 
   while(!isRunning) {
     if (Serial.available()) {
@@ -331,52 +173,23 @@ void loop() {
 
   int cnt = 0;
   for (uint16_t k = 0; k < verticalWires; k++) {
-    //muxVertical(k);
-    //muxSPI(k, 1);
-    // vmux = k;
-    /* attachInterrupt(1, measureInterrupt, RISING);
-     while (vmux > -1);*/
     for (uint16_t l = 0; l < horizontalWires; l++) {
-      //muxHorizontal(l);
-      //k = 4;
-      // l = k;
-      //muxSPI(k, 1, 0);
       uint16_t xx, yy;
        
       map_coords(k, l, &xx, &yy);
 
-      vmux_bits = ((~(1 << ((xx / 8)))) << 3) | (xx % 8);
       muxSPI(xx, 1, 0);
       muxSPI(yy, 0, 0);
       
-      /*vmux = k;
-      vmux_bits = ((~(1 << ((k / 8)))) << 3) | (k % 8);
-      attachInterrupt(0, vmux_irq, LOW);
-      while (vmux >= 0);*/
-      
       PORTC &= ~(1 << 5); // analog pin 5
-      //PORTC |= 1 << 4;
 
-      //delay(500);
-      // delayMicroseconds(40); // increase to deal with row-error!
-      //sample = measure();
-   delayMicroseconds(12);
-      //sampleTaken = 0;
-      //attachInterrupt(1, measureInterrupt, FALLING);
-      //while(!sampleTaken);
+      delayMicroseconds(12);
+
       sample = measure_with_atmega_adc();
-      // (15 == k || 16 == k || 23 == k || 24 == k) && (sample = min(sample+150, 1023));
 
       PORTC |= 1 << 5;
-      //PORTC &= ~(1 << 4);
-      // delay(40);
+
       cnt++;
-      
-      //delay(10);
-
-      //muxSPI(0, 1, 1);
-      //muxSPI(0, 0, 1);
-
 #if PRINT_BINARY
       send_packed10(sample, (cnt >= verticalWires*horizontalWires));
       if (cnt >= verticalWires*horizontalWires) cnt = 0;
@@ -384,8 +197,6 @@ void loop() {
       Serial.print(sample, DEC);
       Serial.print(",");
 #endif
-
-      // Serial.flush();
     }
   }
 
