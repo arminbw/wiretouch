@@ -67,6 +67,7 @@ void setup() {
 
   SPI.setBitOrder(MSBFIRST);
   SPI.setClockDivider(SPI_CLOCK_DIV2);
+  SPI.setDataMode(SPI_MODE0);
   SPI.begin();
   
   pinMode(3, OUTPUT);
@@ -84,15 +85,14 @@ void muxSPI(byte output, byte vertical, byte off) {
 
   byte bits = 0;
 
-  if (vertical) {
+  if (vertical) {                                                                                                                    
     if (off)
        bits = 0xff;
     else
-       bits = (~(1 << (output / 16))) << 4 | (output % 16);
+       bits = ((~(1 << (output / 16))) << 4) | (output % 16);
        //bits = ((~(1 << ((output / 8)))) << 3) | (output % 8);
-       //bits = ((~(1 << ((output / 8)))) << 3) | ((15 < output) ? (output % 8) : (7 - (output % 8)));
-  } 
-  else {
+       //bits = ((~(1 << ((output / 8)))) << 3) | ((15 < output) ? (output % 8) : (7 - (output % 8)))                   ;
+  } else {
     if (off)
        bits = 0xff;
     else

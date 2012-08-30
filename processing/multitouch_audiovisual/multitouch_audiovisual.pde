@@ -51,7 +51,7 @@ float contrastRight = 0.0;
 // float contrastRight = 0.203125;
 float blobThreshold = 0.3125;
 
-int lastMillis, frames, packets, fps, pps, skippedDrawCounter, skippedDraws;
+int lastMillis, frames, packets, fps, pps;
 String serialDebugger, serialDebuggerText; // used to monitor the serial communication in relation to draw() invocations
 boolean bNewFrame; // only draw if there's new information (but at least every second)
 
@@ -120,42 +120,35 @@ void drawSignals() {
 }
 
 void draw() {
-  serialDebugger = serialDebugger + ".";
   frames++;
-  background(backgroundColor);
+  serialDebugger = serialDebugger + ".";
   if ((millis() - lastMillis) > 1000) {
       lastMillis = millis();
       fps = frames;
       pps = packets;
       frames = 0;
       packets = 0;
-      skippedDraws = skippedDrawCounter;
-      skippedDrawCounter = 0;
       serialDebuggerText = serialDebugger;
       serialDebugger="";
   }
+  background(backgroundColor);
   fill(textColor);
   text(textInformation, borderDistance, sketchHeight-60);
   text(fps+" fps", borderDistance, pictureHeight+(borderDistance*2));
   text(pps+" packets per second", 80, pictureHeight+(borderDistance*2));
-  text(skippedDraws+" skipped redraws", 250, pictureHeight+(borderDistance*2));
   text(serialDebuggerText, borderDistance, pictureHeight+(borderDistance*2)+20);
   
   if (configurator.bFakeData) {
     drawSignals(); 
   }
   if (null != dataManager && null != dataManager.port) {
-    if (dataManager.port.available() == 0) {
-      // no bytes available. just move on.
-      skippedDrawCounter++;
-    }
-    else {
+    if (dataManager.port.available() != 0) {
       while (dataManager.port.available() > 0) {
         dataManager.serBuffer[count++] = (byte)dataManager.port.read();
         if (count > 0 && 0 == count % dataManager.serBuffer.length) {
+          packets++;
           dataManager.consumeSerialBuffer(null);
           count = 0;
-          packets++;
           serialDebugger = serialDebugger + "|";
           break;
         }
