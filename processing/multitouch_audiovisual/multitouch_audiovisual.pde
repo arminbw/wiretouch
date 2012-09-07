@@ -49,7 +49,8 @@ int averageSignalCounter = AVERAGESIGNALCOUNTERMAX;
 float contrastLeft = 0.0;
 float contrastRight = 0.0;
 // float contrastRight = 0.203125;
-float blobThreshold = 0.3125;
+float blobThreshold = 0.0546875;
+float signalCutOff = 0.45;
 
 int lastMillis, frames, packets, fps, pps;
 String serialDebugger, serialDebuggerText; // used to monitor the serial communication in relation to draw() invocations
@@ -241,6 +242,8 @@ void mouseDragged() {
     contrastLeft = histogramGUI.getValLeft();
     contrastRight = histogramGUI.getValRight();
     blobThreshold = histogramGUI.getValBlob();
+    // signalCutOff = histogramGUI.getValBlob();
+      
     blobManager.setThreshold(blobThreshold);
     flobManager.setThreshold(blobThreshold);
     textInformation = "contrast stretch:   " + contrastLeft + "   " + contrastRight + "\nblob threshold: "+ blobThreshold + "\nback to the main [m]enu";

@@ -54,7 +54,7 @@ class Interpolator
   void updatePicture() {
     picture.loadPixels();
     for (int i=0; i<interpolPixels.length; i++) {
-      picture.pixels[i] = color((float)interpolPixels[i]*255.0);
+      picture.pixels[i] = color(255.0 - (float)interpolPixels[i]*255.0);
     }
     picture.loadTexture();
   }

@@ -8,39 +8,39 @@ class FlobManager {
      this.setThreshold(lumThreshold);    
      flob.setSrcImage(0);
      flob.setImage(0);
-     flob.setColorMode(flob.LUMAUSER); // TODO: invert
+     flob.setColorMode(flob.GREEN); // TODO: invert
+     flob.setMinNumPixels(3);
+     flob.setBlur(3);
+     // flob.setFade(128);
+     // flob.setOm(Flob.STATIC_DIFFERENCE);
      // flob.setCoordsMode
   }
 
   void drawFlobs() {    
-    ArrayList blobs = flob.track(flob.binarize(picture.pixels));
-    int numBlobs = flob.getNumBlobs(); // blobs.size();
-    // println("number of blobs: "+numBlobs);
-    
-    // calculate the scaling ratio (pixels of blown up image / pixels of interpolated image)
-    // float ws = (float)interpolator.resizedWidth/(float)interpolator.pixelWidth,
-    //      hs = (float)interpolator.resizedHeight/(float)interpolator.pixelHeight;
-          
-    // println("ws :"+ws+"   hs: "+hs);
-
+    ArrayList blobs = flob.track(flob.binarize(picture));
+    int numBlobs = flob.getNumTrackedBlobs(); // blobs.size();
     strokeWeight(2);
     stroke(wireColor);
     noFill();
     rectMode(CENTER); // don't forget this here or change variables below...
    
     for(int i = 0; i < numBlobs; i++) {  
-      ABlob ab = (ABlob)flob.getABlob(i);
-      // TODO: change to trackedBlob
-
-      float px = ab.cx + borderDistance;
-      float py = ab.cy + borderDistance;
-      rect(px,py,ab.dimx,ab.dimy);
-      String info = ""+ab.id+"("+px+" "+py+")";
+      trackedBlob blob = (trackedBlob)flob.getTrackedBlob(i);
+      float px = blob.cx + borderDistance;
+      float py = blob.cy + borderDistance;
+      rect(px,py,blob.dimx,blob.dimy);
+      String info = ""+blob.id+"("+px+" "+py+")";
       text(info,px,py);
-    }    
+    }
+    rectMode(CORNER);
   }
   
   void setThreshold(float lumThreshold) {
-     flob.setThresh((int)(lumThreshold*100));
+     flob.setThresh((int)(lumThreshold*255));
+     //flob.setFade((int)(lumThreshold*255));
+  }
+  
+  void updateBackgroundImage() {
+     flob.setBackground(picture); 
   }
 }

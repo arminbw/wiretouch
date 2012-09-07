@@ -16,6 +16,7 @@ class BlobManager {
   // some details have been changed
   void drawBlobsAndEdges(boolean drawBlobs, boolean drawEdges, int w, int h, int x, int y) {
     noFill();
+    rectMode(CORNER); 
     Blob b;
     EdgeVertex eA, eB;
     for (int n=0 ; n<blobDetection.getBlobNb(); n++) {

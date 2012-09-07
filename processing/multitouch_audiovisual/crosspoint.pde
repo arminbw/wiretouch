@@ -28,6 +28,8 @@ class Crosspoint {
     fill(wireColor);
     if (bDrawText) {
       // text((df.format(measuredSignal)), x+4, y-4);
+      text((df.format(signalStrength)), x+4, y-4);
+      
       // text((df.format(signalStrength)+"\n"+this.signalMax+"\n"+df.format(this.measuredSignalAverage)+"\n"+this.signalMin), x+4, y-4);
     }
   }
@@ -41,6 +43,11 @@ class Crosspoint {
     if (msr < this.signalMin) this.signalMin = msr;
     if (this.signalStrength > this.signalPMax) this.signalPMax = this.signalStrength;
     if (this.signalStrength < this.signalPMin) this.signalPMin = this.signalStrength;
+    // println("sigStrength: "+this.signalStrength+"   mesAv:"+this.measuredSignalAverage);
+    if (this.measuredSignal > this.measuredSignalAverage*signalCutOff) {
+      //println("sigStrength: "+this.signalStrength);
+      this.signalStrength = 1.0;
+    }
   }
 
   void accumulateAvgSig(int val) {
@@ -67,10 +74,10 @@ public class MyKalman {
   }
 
   public double update(double measurement){
-    measurementUpdate();
+    /*measurementUpdate();
     double result = X + (measurement - X) * K;
-    X = result;
-    return result;
+    X = result;*/
+    return measurement;
   }
 }
 

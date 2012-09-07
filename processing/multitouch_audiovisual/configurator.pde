@@ -11,7 +11,7 @@ class Configurator {
     bShowCalibrated = false;              // show signal strength after calibration?
     bFakeData = false;                    // use fake data for "offline" testing?
     bShowBlobs = false;                   // show blobs and edges
-    bShowFlobs = false;
+    bShowFlobs = true;
     helpText = "";
     this.dataManager = dataManager;
   }
@@ -23,13 +23,13 @@ class Configurator {
       if ((this.bShowBlobs == false) && (this.bShowFlobs == false)){
         this.bShowBlobs = true;
         this.bShowFlobs = false;
-        textInformation = "showing blobs now" + "\nback to the main [m]enu";
+        textInformation = "showing [b]lobs now" + "\nback to the main [m]enu";
         break;
       }
       if (this.bShowBlobs) {
         this.bShowBlobs = false;
         this.bShowFlobs = true;
-        textInformation = "showing flobs now" + "\nback to the main [m]enu";
+        textInformation = "showing [b]lobs now (FLOP library)" + "\nback to the main [m]enu";
         break;
       }
       if (this.bShowFlobs) {
