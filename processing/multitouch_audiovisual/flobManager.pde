@@ -1,6 +1,7 @@
 class FlobManager {
   // http://s373.net/code/flob
   Flob flob;
+  TuioServer tuioServer;
 
   FlobManager(PApplet parent, int pixelWidth, int pixelHeight, float lumThreshold) {
      // flob uses construtor to specify srcDimX, srcDimY, dstDimX, dstDimY
@@ -24,14 +25,31 @@ class FlobManager {
     noFill();
     rectMode(CENTER); // don't forget this here or change variables below...
    
+    this.tuioServer.beginTuioBundle();
+   
     for(int i = 0; i < numBlobs; i++) {  
       trackedBlob blob = (trackedBlob)flob.getTrackedBlob(i);
+      
+      PVector accel = new PVector(blob.velx - blob.prevelx, blob.vely - blob.prevely);
+      
+      this.tuioServer.addTuioCursor(
+        (int)blob.id,
+        (float)blob.cx / (float)interpolator.resizedWidth,
+        (float)blob.cy / (float)interpolator.resizedHeight,
+        (float)blob.velx / (float)interpolator.resizedWidth,
+        (float)blob.vely / (float)interpolator.resizedHeight,
+        accel.mag();
+      );
+      
       float px = blob.cx + borderDistance;
       float py = blob.cy + borderDistance;
       rect(px,py,blob.dimx,blob.dimy);
       String info = ""+blob.id+"("+px+" "+py+")";
       text(info,px,py);
     }
+    
+    this.tuioServer.finishTuioBundle();
+    
     rectMode(CORNER);
   }
   

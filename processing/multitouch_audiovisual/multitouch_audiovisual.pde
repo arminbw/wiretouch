@@ -4,6 +4,9 @@ import java.text.DecimalFormat;
 import blobDetection.*;
 import codeanticode.glgraphics.*; // http://glgraphics.sourceforge.net
 import s373.flob.*; // http://s373.net/code/flob/flob.html
+import oscP5.*;
+import netP5.*;
+
 
 DecimalFormat df = new DecimalFormat("#.###");
 
@@ -26,6 +29,7 @@ HistogramGUI histogramGUI;
 GLTexture picture;
 BlobManager blobManager;
 FlobManager flobManager;
+TuioServer tuioServer;
 
 // configuration
 Configurator configurator;
@@ -77,6 +81,7 @@ void setup() {
   textInformation = configurator.helpText;
   blobManager = new BlobManager(interpolator.pixelWidth, interpolator.pixelHeight, blobThreshold);
   flobManager = new FlobManager(this, interpolator.pixelWidth, interpolator.pixelHeight, blobThreshold);
+  tuioServer = new TuioServer(new NetAddress("127.0.0.1", 3333), 12000);
   lastMillis = millis();
   bNewFrame = true;
   serialDebugger = "";
@@ -118,6 +123,7 @@ void drawSignals() {
     blobManager.drawBlobs();
   }
   if (configurator.bShowFlobs) {
+    flobManager.tuioServer = this.tuioServer;
     flobManager.drawFlobs();
   }
 }
