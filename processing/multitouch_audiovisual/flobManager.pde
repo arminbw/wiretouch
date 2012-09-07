@@ -1,42 +1,46 @@
 class FlobManager {
+  // http://s373.net/code/flob
   Flob flob;
 
-  FlobManager(PApplet parent, int w, int h) {
-     flob = new Flob(w, h, w, h);
-     setThreshold(blobThreshold);
-     
+  FlobManager(PApplet parent, int pixelWidth, int pixelHeight, float lumThreshold) {
+     // flob uses construtor to specify srcDimX, srcDimY, dstDimX, dstDimY
+     flob = new Flob(pixelWidth, pixelHeight, interpolator.resizedWidth, interpolator.resizedHeight);
+     this.setThreshold(lumThreshold);    
      flob.setSrcImage(0);
      flob.setImage(0);
+     flob.setColorMode(flob.LUMAUSER); // TODO: invert
+     // flob.setCoordsMode
   }
 
-  void setThreshold(float tresh) {
-     int t = (int)(100*tresh);
-     flob.setTresh(t);  //set the new threshold to the binarize engine
-     flob.setThresh(40); //typo
-  }
-  
-  void drawFlobs() {
-    float ws = (float)interpolator.resizedWidth/(float)interpolator.pixelWidth,
-          hs = (float)interpolator.resizedHeight/(float)interpolator.pixelHeight;
-        
-    ArrayList blobs = flob.track(flob.binarize(picture));
-    println(blobs.size());
+  void drawFlobs() {    
+    ArrayList blobs = flob.track(flob.binarize(picture.pixels));
+    int numBlobs = flob.getNumBlobs(); // blobs.size();
+    // println("number of blobs: "+numBlobs);
+    
+    // calculate the scaling ratio (pixels of blown up image / pixels of interpolated image)
+    // float ws = (float)interpolator.resizedWidth/(float)interpolator.pixelWidth,
+    //      hs = (float)interpolator.resizedHeight/(float)interpolator.pixelHeight;
+          
+    // println("ws :"+ws+"   hs: "+hs);
+
     strokeWeight(2);
     stroke(wireColor);
     noFill();
-    int numblobs = blobs.size();//flob.getNumBlobs();      
-    for(int i = 0; i < numblobs; i++) {  
+    rectMode(CENTER); // don't forget this here or change variables below...
+   
+    for(int i = 0; i < numBlobs; i++) {  
       ABlob ab = (ABlob)flob.getABlob(i);
-      
-      float px = ab.cx*ws + borderDistance;
-      float py = ab.cy*hs + borderDistance;
-      //box
-      rect(px,py,ab.dimx*ws,ab.dimy*hs);
-      //centroid
-      //rect(ab.cx,ab.cy, 5, 5);
-      String info = ""+ab.id+" "+px+" "+py;
-      text(info,px,py+20);
+      // TODO: change to trackedBlob
+
+      float px = ab.cx + borderDistance;
+      float py = ab.cy + borderDistance;
+      rect(px,py,ab.dimx,ab.dimy);
+      String info = ""+ab.id+"("+px+" "+py+")";
+      text(info,px,py);
     }    
-    
+  }
+  
+  void setThreshold(float lumThreshold) {
+     flob.setThresh((int)(lumThreshold*100));
   }
 }

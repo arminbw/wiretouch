@@ -1,6 +1,6 @@
 class Configurator {
   int visualizationType;
-  boolean bShowBlobs, bDebug, bContrastStretch, bShowCalibrated, bFakeData;
+  boolean bShowBlobs, bShowFlobs, bDebug, bContrastStretch, bShowCalibrated, bFakeData;
   String helpText;
   DataManager dataManager;
 
@@ -11,6 +11,7 @@ class Configurator {
     bShowCalibrated = false;              // show signal strength after calibration?
     bFakeData = false;                    // use fake data for "offline" testing?
     bShowBlobs = false;                   // show blobs and edges
+    bShowFlobs = false;
     helpText = "";
     this.dataManager = dataManager;
   }
@@ -19,8 +20,24 @@ class Configurator {
   void changeConfiguration(char key) {
   switch(key) {
     case 'b':
-      this.bShowBlobs = !this.bShowBlobs;
-      textInformation = "[b]lobs: " + getOnOffString(this.bShowBlobs) + "\nback to the main [m]enu";
+      if ((this.bShowBlobs == false) && (this.bShowFlobs == false)){
+        this.bShowBlobs = true;
+        this.bShowFlobs = false;
+        textInformation = "showing blobs now" + "\nback to the main [m]enu";
+        break;
+      }
+      if (this.bShowBlobs) {
+        this.bShowBlobs = false;
+        this.bShowFlobs = true;
+        textInformation = "showing flobs now" + "\nback to the main [m]enu";
+        break;
+      }
+      if (this.bShowFlobs) {
+        this.bShowFlobs = false;
+        this.bShowBlobs = false;
+        textInformation = "[b]lobs: OFF" + "\nback to the main [m]enu";
+        break;
+      } 
       break;
     case 'r':
       if (averageSignalCounter == 0) {
@@ -32,14 +49,14 @@ class Configurator {
         averageSignalCounter=AVERAGESIGNALCOUNTERMAX;
         textInformation = "calibrating";
         initSerial();
-        configurator.helpText = "[b]lobs(ON/OFF)   [c]alibration(ON/OFF)   [d]ebug   [i]nterpolation\nthis [m]enu   [o]/[p] interpolation resolution\n[r]ecalibrate    contrast [s]tretch(ON/OFF)   [v]isualization";
+        configurator.helpText = "[b]lobs   [c]alibration(ON/OFF)   [d]ebug   [i]nterpolation\nthis [m]enu   [o]/[p] interpolation resolution\n[r]ecalibrate    contrast [s]tretch(ON/OFF)   [v]isualization";
       }
       break;
     case 'f':
       // use fake data
       dataManager.initFakeData();
       bFakeData = true; 
-      configurator.helpText = "[b]lobs(ON/OFF)   [c]alibration(ON/OFF)   [i]nterpolation\nthis [m]enu   [o]/[p] interpolation resolution\ncontrast [s]tretch(ON/OFF)   [v]isualization"; 
+      configurator.helpText = "[b]lobs   [c]alibration(ON/OFF)   [i]nterpolation\nthis [m]enu   [o]/[p] interpolation resolution\ncontrast [s]tretch(ON/OFF)   [v]isualization"; 
       textInformation = configurator.helpText;
       break;
     case 'm':

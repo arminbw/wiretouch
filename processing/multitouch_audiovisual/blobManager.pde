@@ -30,8 +30,8 @@ class BlobManager {
             eB = b.getEdgeVertexB(m);
             if (eA !=null && eB !=null)
               line(
-              x+ (eA.x*w), y+ (eA.y*h), 
-              x+ (eB.x*w), y+ (eB.y*h)
+              x+ (eA.x+w), y+ (eA.y+h), 
+              x+ (eB.x+w), y+ (eB.y+h)
                 );
           }
         }

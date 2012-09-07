@@ -5,9 +5,9 @@ class Interpolator
   boolean bContrastStretch; 
 
   int horizontalSamples, verticalSamples;
-  int pixelWidth, pixelHeight;   // the actual pixel count of the interpolated image
+  int pixelWidth, pixelHeight;                    // the actual pixel count of the interpolated image
   int horizontalMultiplier, verticalMultiplier;   // used to calculate pixelWidth and pixelHeight
-  int resizedWidth, resizedHeight;  // the resized, blown up image
+  int resizedWidth, resizedHeight;                // the resized, blown up image; the rendered picture in the sketch.
   float _fx, _fy;
   double[] interpolPixels;
   int[] _hist;
