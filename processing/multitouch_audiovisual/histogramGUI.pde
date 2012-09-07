@@ -1,7 +1,7 @@
 class HistogramGUI {
   private int x, y;
   private int width;
-  public GUITriangle triangleLeft, triangleRight, triangleBlob;
+  public GUITriangle triangleLeft, triangleRight, triangleBlob, triangleSignalCutOff;
 
   HistogramGUI (int x, int y, int width) {
     this.x = x;
@@ -10,31 +10,36 @@ class HistogramGUI {
     triangleLeft = new GUITriangle(this.x, this.y, guiColor);
     triangleRight = new GUITriangle(this.x+this.width, this.y, guiColor);
     triangleBlob = new GUITriangle(this.x, this.y+13, wireColor);
+    triangleSignalCutOff = new GUITriangle(this.x, this.y+13, color(34,209,217));
   }
 
   void mousePressed() {
     triangleLeft.mousePressed();
     triangleRight.mousePressed();
     triangleBlob.mousePressed();
+    triangleSignalCutOff.mousePressed();
   }
 
   boolean mouseDragged(int mX, int mY) {
     // return true if any triangle position has changed
     return (triangleLeft.mouseDragged(constrain(mX, this.x, triangleRight.x-13), mY) || 
             triangleRight.mouseDragged(constrain(mX, triangleLeft.x+13, this.x+this.width), mY) ||
-            triangleBlob.mouseDragged(constrain(mX, this.x, this.x+this.width), mY+13));
+            triangleBlob.mouseDragged(constrain(mX, this.x, this.x+this.width), mY+13) ||
+            triangleSignalCutOff.mouseDragged(constrain(mX, this.x, this.x+this.width), mY+13));
   }
 
   void mouseReleased() {
     triangleLeft.mouseReleased();
     triangleRight.mouseReleased();
     triangleBlob.mouseReleased();
+    triangleSignalCutOff.mouseReleased();
   }
 
   void draw() {        
     triangleLeft.draw();
     triangleRight.draw();
     triangleBlob.draw();
+    triangleSignalCutOff.draw();
   }
 
   void setMarkerPositions(float valLeft, float valRight, float valBlob) {
@@ -53,6 +58,10 @@ class HistogramGUI {
   
   float getValBlob() {
     return (float) (triangleBlob.x - this.x) / (float) this.width; 
+  }
+  
+  float getValSignalCutOff() {
+    return (float) (triangleSignalCutOff.x - this.x) / (float) this.width; 
   }
 }
 

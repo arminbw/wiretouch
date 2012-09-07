@@ -54,7 +54,7 @@ float contrastLeft = 0.0;
 float contrastRight = 0.0;
 // float contrastRight = 0.203125;
 float blobThreshold = 0.0546875;
-float signalCutOff = 0.45;
+float signalCutOff = 0.40;
 
 int lastMillis, frames, packets, fps, pps;
 String serialDebugger, serialDebuggerText; // used to monitor the serial communication in relation to draw() invocations
@@ -81,7 +81,7 @@ void setup() {
   textInformation = configurator.helpText;
   blobManager = new BlobManager(interpolator.pixelWidth, interpolator.pixelHeight, blobThreshold);
   flobManager = new FlobManager(this, interpolator.pixelWidth, interpolator.pixelHeight, blobThreshold);
-  tuioServer = new TuioServer(new NetAddress("127.0.0.1", 3333), 12000);
+  tuioServer = new TuioServer(new NetAddress("128.130.182.98", 3333), 12000);
   lastMillis = millis();
   bNewFrame = true;
   serialDebugger = "";
@@ -248,11 +248,11 @@ void mouseDragged() {
     contrastLeft = histogramGUI.getValLeft();
     contrastRight = histogramGUI.getValRight();
     blobThreshold = histogramGUI.getValBlob();
-    // signalCutOff = histogramGUI.getValBlob();
+    signalCutOff = histogramGUI.getValSignalCutOff();
       
     blobManager.setThreshold(blobThreshold);
     flobManager.setThreshold(blobThreshold);
-    textInformation = "contrast stretch:   " + contrastLeft + "   " + contrastRight + "\nblob threshold: "+ blobThreshold + "\nback to the main [m]enu";
+    textInformation = "contrast stretch:   " + contrastLeft + "   " + contrastRight + "\nblob threshold: "+ blobThreshold + "   signalCutOff: " + signalCutOff + "\nback to the main [m]enu";
     bNewFrame = true;
   }
 }

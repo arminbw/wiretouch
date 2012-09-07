@@ -2,6 +2,7 @@ class FlobManager {
   // http://s373.net/code/flob
   Flob flob;
   TuioServer tuioServer;
+  ArrayList oldBlobArray;
 
   FlobManager(PApplet parent, int pixelWidth, int pixelHeight, float lumThreshold) {
      // flob uses construtor to specify srcDimX, srcDimY, dstDimX, dstDimY
@@ -10,16 +11,19 @@ class FlobManager {
      flob.setSrcImage(0);
      flob.setImage(0);
      flob.setColorMode(flob.GREEN); // TODO: invert
-     flob.setMinNumPixels(3);
-     flob.setBlur(3);
+     flob.setMinNumPixels(12);
+     flob.setMaxNumPixels(1000);
+     flob.setBlur(0); 
+     
      // flob.setFade(128);
      // flob.setOm(Flob.STATIC_DIFFERENCE);
      // flob.setCoordsMode
   }
 
-  void drawFlobs() {    
+  void drawFlobs() {
+    ArrayList currentBlobs = new ArrayList();
     ArrayList blobs = flob.track(flob.binarize(picture));
-    int numBlobs = flob.getNumTrackedBlobs(); // blobs.size();
+    int numBlobs = flob.getNumBlobs();
     strokeWeight(2);
     stroke(wireColor);
     noFill();
@@ -28,28 +32,51 @@ class FlobManager {
     this.tuioServer.beginTuioBundle();
    
     for(int i = 0; i < numBlobs; i++) {  
-      trackedBlob blob = (trackedBlob)flob.getTrackedBlob(i);
+      // trackedBlob behaved weirdly so we take the simpler ABlob and calculate velocity ourselves
+      // TODO: calculate velocity correctly
+      ABlob blob = (ABlob) flob.getABlob(i);
+      ABlob prevBlob = null;
       
-      PVector accel = new PVector(blob.velx - blob.prevelx, blob.vely - blob.prevely);
+      if (null != this.oldBlobArray) {
+         for (int j = 0; j < this.oldBlobArray.size(); j++) {
+            if (blob.id == ((ABlob) this.oldBlobArray.get(j)).id) {
+              prevBlob = (ABlob) this.oldBlobArray.get(j);
+              break;
+            }
+         }
+      }
+      
+      PVector distance = new PVector(
+        (null != prevBlob ? (blob.cx - prevBlob.cx) : 0),
+        (null != prevBlob ? (blob.cy - prevBlob.cy) : 0)
+      );
+      
+      //(trackedBlob)flob.getTrackedBlob(i);
+      
+      // PVector accel = new PVector(blob.velx - blob.prevelx, blob.vely - blob.prevely);
       
       this.tuioServer.addTuioCursor(
         (int)blob.id,
         (float)blob.cx / (float)interpolator.resizedWidth,
         (float)blob.cy / (float)interpolator.resizedHeight,
-        (float)blob.velx / (float)interpolator.resizedWidth,
-        (float)blob.vely / (float)interpolator.resizedHeight,
-        accel.mag();
+        (float)distance.x,// / (float)interpolator.resizedWidth,
+        (float)distance.y,// / (float)interpolator.resizedHeight,
+        0
       );
+      
+      println("distance x " + distance.x);
       
       float px = blob.cx + borderDistance;
       float py = blob.cy + borderDistance;
       rect(px,py,blob.dimx,blob.dimy);
       String info = ""+blob.id+"("+px+" "+py+")";
       text(info,px,py);
+
+      currentBlobs.add(blob);
     }
     
     this.tuioServer.finishTuioBundle();
-    
+    this.oldBlobArray = currentBlobs;
     rectMode(CORNER);
   }
   

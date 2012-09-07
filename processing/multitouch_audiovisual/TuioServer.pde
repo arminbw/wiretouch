@@ -21,6 +21,8 @@ class TuioServer {
   }
   
   void addTuioCursor(int label, float x, float y, float dx, float dy, float accel) {
+    this.aliveMsg.add(label);
+    
     OscMessage setMessage = new OscMessage("/tuio/2Dcur");
     setMessage.add("set");
     setMessage.add(label);             // session ID
@@ -38,12 +40,12 @@ class TuioServer {
     fseqMessage.add("fseq");
     fseqMessage.add(this.fseq++);
     
-    this.tuioBundle.add(this.aliveMessage);
+    this.tuioBundle.add(this.aliveMsg);
     this.tuioBundle.add(fseqMessage);
     
     this.oscP5.send(this.tuioBundle, this.clientAddr);
     
     this.tuioBundle = null;
-    this.aliveMessage = null;
+    this.aliveMsg = null;
   }
 }
