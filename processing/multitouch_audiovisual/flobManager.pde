@@ -75,6 +75,19 @@ class FlobManager {
       currentBlobs.add(blob);
     }
     
+    int fsx = interpolator.resizedWidth / verticalWires;
+    int fsy = interpolator.resizedHeight / horizontalWires;
+    for (int x=0; x<verticalWires; x++)
+      outer: for (int y=0; y<horizontalWires; y++) {
+        for (int i=0; i<currentBlobs.size(); i++) {
+          ABlob b = currentBlobs.get(i);
+          if ((fsx*x) >= b.boxminx && (fsx*x) <= b.boxmaxx && (fsy*y) >= b.boxminy && (fsy*y) <= b.boxmaxy)
+            continue outer;
+          
+          crosspoints[x][y].measuredSignalAverage = crosspointes[x][y].measuredSignal;
+        }
+      }
+    
     this.tuioServer.finishTuioBundle();
     this.oldBlobArray = currentBlobs;
     rectMode(CORNER);
