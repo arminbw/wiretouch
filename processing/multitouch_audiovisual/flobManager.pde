@@ -3,6 +3,7 @@ class FlobManager {
   Flob flob;
   TuioServer tuioServer;
   ArrayList oldBlobArray;
+  long lastMillis;
 
   FlobManager(PApplet parent, int pixelWidth, int pixelHeight, float lumThreshold) {
      // flob uses construtor to specify srcDimX, srcDimY, dstDimX, dstDimY
@@ -15,12 +16,15 @@ class FlobManager {
      flob.setMaxNumPixels(1000);
      flob.setBlur(0); 
      
+     this.lastMillis = 1;
+     
      // flob.setFade(128);
      // flob.setOm(Flob.STATIC_DIFFERENCE);
      // flob.setCoordsMode
   }
 
   void drawFlobs() {
+    long now = millis();
     ArrayList currentBlobs = new ArrayList();
     ArrayList blobs = flob.track(flob.binarize(picture));
     int numBlobs = flob.getNumBlobs();
@@ -46,9 +50,10 @@ class FlobManager {
          }
       }
       
+      float dt = 1.0/((now-this.lastMillis)/1000.0);
       PVector distance = new PVector(
-        (null != prevBlob ? (blob.cx - prevBlob.cx) : 0),
-        (null != prevBlob ? (blob.cy - prevBlob.cy) : 0)
+        (null != prevBlob ? ((blob.cx - prevBlob.cx) / flob.worldwidth * dt) : 0),
+        (null != prevBlob ? ((blob.cy - prevBlob.cy) / flob.worldheight * dt) : 0)
       );
       
       //(trackedBlob)flob.getTrackedBlob(i);
@@ -64,8 +69,6 @@ class FlobManager {
         0
       );
       
-      println("distance x " + distance.x);
-      
       float px = blob.cx + borderDistance;
       float py = blob.cy + borderDistance;
       rect(px,py,blob.dimx,blob.dimy);
@@ -75,22 +78,24 @@ class FlobManager {
       currentBlobs.add(blob);
     }
     
-    int fsx = interpolator.resizedWidth / verticalWires;
-    int fsy = interpolator.resizedHeight / horizontalWires;
+    int fsx = interpolator.horizontalMultiplier;
+    int fsy = interpolator.verticalMultiplier;
     for (int x=0; x<verticalWires; x++)
       outer: for (int y=0; y<horizontalWires; y++) {
         for (int i=0; i<currentBlobs.size(); i++) {
-          ABlob b = currentBlobs.get(i);
-          if ((fsx*x) >= b.boxminx && (fsx*x) <= b.boxmaxx && (fsy*y) >= b.boxminy && (fsy*y) <= b.boxmaxy)
-            continue outer;
-          
-          crosspoints[x][y].measuredSignalAverage = crosspointes[x][y].measuredSignal;
+          ABlob b = (ABlob) currentBlobs.get(i);
+          if ((fsx*x) >= b.boxminx && (fsx*x) <= b.boxmaxx && (fsy*y) >= b.boxminy && (fsy*y) <= b.boxmaxy) {
+            continue outer;        
+          }
         }
+        crosspoints[x][y].accumulateAvgSig((int) crosspoints[x][y].measuredSignal);
       }
     
     this.tuioServer.finishTuioBundle();
     this.oldBlobArray = currentBlobs;
     rectMode(CORNER);
+    
+    this.lastMillis = now;
   }
   
   void setThreshold(float lumThreshold) {
