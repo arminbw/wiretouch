@@ -34,13 +34,12 @@ class Crosspoint {
 
   void setSignalStrength(int msr) {
     this.measuredSignal = msr;
+    this.signalStrength = (double) msr / (this.measuredSignalAverage + 1); 
     if (msr > this.signalMax) this.signalMax = msr;
     if (msr < this.signalMin) this.signalMin = msr;
     if (this.signalStrength > this.signalPMax) this.signalPMax = this.signalStrength;
     if (this.signalStrength < this.signalPMin) this.signalPMin = this.signalStrength;
-    // println("sigStrength: "+this.signalStrength+"   mesAv:"+this.measuredSignalAverage);
     if (this.measuredSignal > this.measuredSignalAverage*signalCutOff) {
-      //println("sigStrength: "+this.signalStrength);
       this.signalStrength = 1.0;
     }
   }
