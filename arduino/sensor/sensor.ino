@@ -89,7 +89,8 @@ void muxSPI(byte output, byte vertical, byte off) {
     if (off)
        bits = 0xff;
     else
-       bits = ((~(1 << (output / 16))) << 4) | (output % 16);
+       bits = ((output % 2) ? (1 << 4) : (1 << 5)) | ((output - (output%2)) >> 1);
+       // previous good one: bits = ((~(1 << (output / 16))) << 4) | (output % 16);
        //bits = ((~(1 << ((output / 8)))) << 3) | (output % 8);
        //bits = ((~(1 << ((output / 8)))) << 3) | ((15 < output) ? (output % 8) : (7 - (output % 8)))                   ;
   } else {
