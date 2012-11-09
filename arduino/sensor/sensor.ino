@@ -152,11 +152,13 @@ void send_packed10(uint16_t w16, byte flush_all)
 
 void map_coords(uint16_t x, uint16_t y, uint16_t* mx, uint16_t* my)
 {
-  uint16_t a = x * horizontalWires + y;
+  /*uint16_t a = x * horizontalWires + y;
   uint16_t b = (59*a + 13) % (horizontalWires*verticalWires);
   
   *mx = b / horizontalWires;
-  *my = b - (*mx) * ((uint16_t)horizontalWires);
+  *my = b - (*mx) * ((uint16_t)horizontalWires);*/
+  *mx = x;
+  *my = y;
 }
   
 void loop() {
