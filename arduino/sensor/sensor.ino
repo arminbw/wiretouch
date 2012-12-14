@@ -81,7 +81,7 @@ void muxSPI(byte output, byte vertical, byte off) {
   if (vertical)
     PORTB &= ~(1<<1);
   else
-    PORTD &= ~(1<<7);
+    PORTD &= ~(1<<6);
 
   byte bits = 0;
 
@@ -106,7 +106,7 @@ void muxSPI(byte output, byte vertical, byte off) {
   if (vertical) 
     PORTB |= (1<<1);
   else
-    PORTD |= (1<<7);
+    PORTD |= (1<<6);
 }
 
 unsigned int measure_with_atmega_adc() {
@@ -184,13 +184,13 @@ void loop() {
       muxSPI(xx, 1, 0);
       muxSPI(yy, 0, 0);
       
-      PORTC &= ~(1 << 5); // analog pin 5
+      PORTC &= ~(1 << 1); // analog pin 1
 
       delayMicroseconds(12);
 
       sample = measure_with_atmega_adc();
 
-      PORTC |= 1 << 5;
+      PORTC |= 1 << 1;
 
       cnt++;
 #if PRINT_BINARY
