@@ -50,7 +50,7 @@ void setup() {
   
   // set prescale to 16
   cbi(ADCSRA,ADPS2);
-  cbi(ADCSRA,ADPS1);
+  sbi(ADCSRA,ADPS1);
   cbi(ADCSRA,ADPS0);
 
   for (int i=0; i<3; i++) {

@@ -7,7 +7,7 @@ class FlobManager {
 
   FlobManager(PApplet parent, int pixelWidth, int pixelHeight, float lumThreshold) {
      // flob uses construtor to specify srcDimX, srcDimY, dstDimX, dstDimY
-     flob = new Flob(pixelWidth, pixelHeight, interpolator.resizedWidth, interpolator.resizedHeight);
+     flob = new Flob(parent, pixelWidth, pixelHeight, interpolator.resizedWidth, interpolator.resizedHeight);
      this.setThreshold(lumThreshold);    
      flob.setSrcImage(0);
      flob.setImage(0);
