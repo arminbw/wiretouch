@@ -24,7 +24,11 @@ class GUIEqualizer {
   
   boolean mouseDragged(int mX, int mY) {
     for (int i = 0; i < numberOfSliders; i++) {  
-      if (guiSlider[i].mouseDragged(mX, mY)) return true;
+      if (guiSlider[i].mouseDragged(mX, mY)) {
+        dataManager.writeColumnCorrectionData(i, guiSlider[i].normalizedValue);
+        
+        return true;
+      }
     }
     return false;
   }
@@ -57,7 +61,7 @@ class GUISlider {
   boolean mouseDragged(int mX, int mY) {
     // return true if any triangle position has changed
     if (guiTriangle.mouseDragged(constrain(mX, this.x, this.x+width), mY)) {
-       this.normalizedValue = round(255*((this.guiTriangle.x - this.x) / (float) this.width));
+       this.normalizedValue = 200+round(50*((this.guiTriangle.x - this.x) / (float) this.width));
        textInformation = "value: "+this.normalizedValue;
        return true;
     }

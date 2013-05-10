@@ -116,5 +116,9 @@ class DataManager {
     }
     println(myString);
   }
+  
+  void writeColumnCorrectionData(int column, int value) {
+    this.port.write("e"+column+","+value+"\n");
+  }
 }
 

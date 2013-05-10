@@ -4,6 +4,8 @@
 // 768
 #define PRINT_BINARY    1
 
+#define IBUF_LEN        12
+
 // defines for setting and clearing register bits
 #ifndef cbi
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
@@ -17,7 +19,7 @@
 
 #define NUM_SELECT 4
 
-const byte potValues[] = {
+byte potValues[] = {
   210, 210, 210, 210, 210, 210, 210, 210,
   210, 210, 210, 210, 210, 210, 210, 210,
   210, 210, 210, 210, 210, 210, 210, 210,
@@ -182,9 +184,34 @@ void map_coords(uint16_t x, uint16_t y, uint16_t* mx, uint16_t* my)
   *mx = x;
   *my = y; // (y % 2) ? 8 : 9;//y | 1;//y & ~1;//(y % 2) ? 8 : 9;
 }
-  
+
+void process_cmd(char* cmd) {
+  switch (*cmd++) {
+    case 'e': {
+      byte column = 0, value = 0;
+      
+      while(',' != *cmd)
+        column = column * 10 + (*cmd++ - '0');
+      
+      cmd++;    // skip the ,
+      
+      while('\n' != *cmd)
+        value = value * 10 + (*cmd++ - '0');
+      
+      potValues[column] = value;
+      
+      break;
+    }
+    
+    default:
+      break;
+  }
+}
+
 void loop() {
   static boolean isRunning = 0;
+  static byte ibuf_pos = 0;
+  static char ibuf[IBUF_LEN];
   uint16_t sample;
 
   while(!isRunning) {
@@ -193,6 +220,20 @@ void loop() {
       isRunning = ('s' == c);
       /*if (isRunning)
        attachInterrupt(1, measureInterrupt, FALLING);*/
+    }
+  }
+  
+  while (Serial.available()) {
+    byte c = Serial.read();
+    
+    if (ibuf_pos < IBUF_LEN) {
+      ibuf[ibuf_pos++] = c;
+    } else
+      ibuf_pos = 0;
+    
+    if ('\n' == c) {
+      process_cmd(ibuf);
+      ibuf_pos = 0;
     }
   }
 
