@@ -1,6 +1,6 @@
 class Configurator {
   int visualizationType;
-  boolean bShowBlobs, bShowFlobs, bDebug, bContrastStretch, bShowCalibrated, bFakeData;
+  boolean bShowBlobs, bShowFlobs, bDebug, bContrastStretch, bShowCalibrated, bFakeData, bShowEqualizer;
   String helpText;
   DataManager dataManager;
 
@@ -12,6 +12,7 @@ class Configurator {
     bFakeData = false;                    // use fake data for "offline" testing?
     bShowBlobs = false;                   // show blobs and edges
     bShowFlobs = true;
+    bShowEqualizer = true;                   // show digital Pot "equalizer"
     helpText = "";
     this.dataManager = dataManager;
   }
@@ -49,7 +50,7 @@ class Configurator {
         averageSignalCounter=AVERAGESIGNALCOUNTERMAX;
         textInformation = "calibrating";
         initSerial();
-        configurator.helpText = "[b]lobs   [c]alibration(ON/OFF)   [d]ebug   [i]nterpolation\nthis [m]enu   [o]/[p] interpolation resolution\n[r]ecalibrate    contrast [s]tretch(ON/OFF)   [v]isualization";
+        configurator.helpText = "[b]lobs   [c]alibration(ON/OFF)   [d]ebug   [e]qualizer [i]nterpolation\nthis [m]enu   [o]/[p] interpolation resolution\n[r]ecalibrate    contrast [s]tretch(ON/OFF)   [v]isualization";
       }
       break;
     case 'f':
@@ -124,6 +125,10 @@ class Configurator {
     case 'c':
       this.bShowCalibrated = !this.bShowCalibrated;
       textInformation = "[c]alibrate: " + getOnOffString(this.bShowCalibrated) + "\nback to the main [m]enu";
+      break;
+    case 'e':
+      textInformation = "\nback to the main [m]enu";
+      this.bShowEqualizer = !this.bShowEqualizer;
       break;
     default:
       break;

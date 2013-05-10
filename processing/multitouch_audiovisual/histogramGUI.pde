@@ -65,43 +65,4 @@ class HistogramGUI {
   }
 }
 
-class GUITriangle {
-  // a triangle inside a 13x12 pixel rectangle
-  int x, y;  // the position of the edge pointing to the histogram
-  boolean bTracked;
-  color fillColor;
-
-  GUITriangle (int x, int y, color fillColor) {
-    this.x = x;
-    this.y = y;
-    this.bTracked = false;
-    this.fillColor = fillColor;
-  }
-
-  void draw() {
-    fill(fillColor);
-    noStroke();
-    triangle(this.x-6, this.y+12, this.x, this.y, this.x+6, this.y+12);
-  }
-
-  boolean isInside(int x, int y) {
-    return ((x > this.x - 6) && (x < this.x + 6) && (y > this.y) && (y < this.y + 12));
-  }
-
-  void mousePressed() {
-    this.bTracked = this.isInside(mouseX, mouseY);
-  }
-
-  boolean mouseDragged(int mX, int mY) {
-    if (this.bTracked) {
-      this.x = mX;
-      return(true);
-    }
-    return(false);
-  }
-
-  void mouseReleased() {
-    this.bTracked = false;
-  }
-}
 

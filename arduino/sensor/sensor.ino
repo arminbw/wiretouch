@@ -12,10 +12,17 @@
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
 
-#define DEBUG_PIN_UP()    PORTD |= (1 << 4)
-#define DEBUG_PIN_DOWN()  PORTD &= ~(1 << 4)
+//#define DEBUG_PIN_UP()    PORTD |= (1 << 4)
+//#define DEBUG_PIN_DOWN()  PORTD &= ~(1 << 4)
 
 #define NUM_SELECT 4
+
+const byte potValues[] = {
+  210, 210, 210, 210, 210, 210, 210, 210,
+  210, 210, 210, 210, 210, 210, 210, 210,
+  210, 210, 210, 210, 210, 210, 210, 210,
+  210, 210, 210, 210, 210, 210, 210, 210
+};
 
 const byte verticalShiftRegPins[] = {
   9,             // latch / RCLK     PORTB.1  
@@ -60,6 +67,7 @@ void setup() {
 
   pinMode(2, OUTPUT);
   pinMode(3, OUTPUT);
+  pinMode(4, OUTPUT);
   pinMode(7, OUTPUT);
   pinMode(11, INPUT);
   pinMode(A1, OUTPUT);
@@ -75,6 +83,8 @@ void setup() {
   TCCR2B = B11001;
   OCR2A = 26;//26;
   OCR2B = 13;//13;
+  
+  PORTD |= (1 << 2);
 }
 
 void muxSPI(byte output, byte vertical, byte off) {
@@ -88,11 +98,12 @@ void muxSPI(byte output, byte vertical, byte off) {
   if (vertical) {                                                                                                                    
     if (off)
        bits = 0xff;
-    else
-       bits = ((output % 2) ? (1 << 4) : (1 << 5)) | (output >> 1);
-       // previous good one: bits = ((~(1 << (output / 16))) << 4) | (output % 16);
-       //bits = ((~(1 << ((output / 8)))) << 3) | (output % 8);
-       //bits = ((~(1 << ((output / 8)))) << 3) | ((15 < output) ? (output % 8) : (7 - (output % 8)))                   ;
+    else {
+      bits = ((output % 2) ? (1 << 4) : (1 << 5)) | (output >> 1);
+      // previous good one: bits = ((~(1 << (output / 16))) << 4) | (output % 16);
+      //bits = ((~(1 << ((output / 8)))) << 3) | (output % 8);
+      //bits = ((~(1 << ((output / 8)))) << 3) | ((15 < output) ? (output % 8) : (7 - (output % 8)))                   ;
+    }
   } else {
     if (off)
        bits = 0xff;
@@ -107,6 +118,17 @@ void muxSPI(byte output, byte vertical, byte off) {
     PORTB |= (1<<1);
   else
     PORTD |= (1<<6);
+  
+  if (vertical) {
+     byte val = potValues[output];
+     
+     PORTD &= ~(1<<2);
+     SPDR = 0;
+     while (!(SPSR & _BV(SPIF)));
+     SPDR = val;
+     while (!(SPSR & _BV(SPIF)));
+     PORTD |= (1<<2);
+  }
 }
 
 unsigned int measure_with_atmega_adc() {

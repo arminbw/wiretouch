@@ -25,6 +25,7 @@ static final int kNumInterp = 5;
 int interpType = kInterpCatmullRom;
 int interpolationResolution = 3;
 HistogramGUI histogramGUI;
+GUIEqualizer guiEqualizer;
 GLTexture picture;
 BlobManager blobManager;
 FlobManager flobManager;
@@ -36,7 +37,7 @@ static final int verticalWires = 32;
 static final int horizontalWires = 22;
 static final int crosspointDistance=25; // 25; // how many pixels between 2 crosspoints
 static final int borderDistance=20; // how many pixel distance to the borderDistance
-static final int sketchWidth = (borderDistance*2)+((verticalWires-1)*crosspointDistance);
+static final int sketchWidth = (borderDistance*2)+((verticalWires-1)*crosspointDistance) + 200 + borderDistance;
 static final int sketchHeight = (horizontalWires+1)*crosspointDistance+90;
 static final int pictureWidth = (verticalWires-1)*crosspointDistance;
 static final int pictureHeight = (horizontalWires-1)*crosspointDistance;
@@ -46,7 +47,7 @@ final color guiColor = color(180, 180, 180);
 final color backgroundColor = color(240, 240, 240);
 final color histogramColor = color(239, 171, 233);
 final color signalColor = color(153, 233, 240);
-final color wireColor = color(255, 0, 222);      // also used for blobs and histogram GUI triangles
+final color wireColor = color(255, 0, 222);      // also used for blobs and histogram GUI fs
 static final int AVERAGESIGNALCOUNTERMAX = 40;
 int averageSignalCounter = AVERAGESIGNALCOUNTERMAX;
 float contrastLeft = 0.0;
@@ -76,6 +77,7 @@ void setup() {
   initInterpolator();
   histogramGUI = new HistogramGUI(sketchWidth-256-borderDistance, sketchHeight-30, 256);
   histogramGUI.setMarkerPositions(contrastLeft, contrastRight, blobThreshold);
+  guiEqualizer = new GUIEqualizer((borderDistance*2)+pictureWidth, borderDistance, verticalWires);
   configurator.helpText = "[r]eceive real data   [f]ake data (static)";
   textInformation = configurator.helpText;
   blobManager = new BlobManager(interpolator.pixelWidth, interpolator.pixelHeight, blobThreshold);
@@ -164,6 +166,9 @@ void draw() {
     }
     drawSignals();
   }
+  if (configurator.bShowEqualizer) {
+    guiEqualizer.draw();
+  }
 }
 
 void drawSignalCircles(boolean bDrawText) {
@@ -240,6 +245,7 @@ void initInterpolator() {
 
 void mousePressed() {
   histogramGUI.mousePressed();
+  guiEqualizer.mousePressed();
 }
 
 void mouseDragged() {
@@ -254,10 +260,14 @@ void mouseDragged() {
     textInformation = "contrast stretch:   " + contrastLeft + "   " + contrastRight + "\nblob threshold: "+ blobThreshold + "   signalCutOff: " + signalCutOff + "\nback to the main [m]enu";
     bNewFrame = true;
   }
+  if (guiEqualizer.mouseDragged(mouseX, mouseY) == true) {
+     // do magic stuff
+  }
 }
 
 void mouseReleased() {
   histogramGUI.mouseReleased();
+  guiEqualizer.mouseReleased();
   bNewFrame = true;
 }
 
