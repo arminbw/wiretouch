@@ -62,7 +62,7 @@ void setup() {
   pinMode(3, OUTPUT);
   pinMode(7, OUTPUT);
   pinMode(11, INPUT);
-  pinMode(A4, OUTPUT);
+  pinMode(A1, OUTPUT);
   pinMode(A5, OUTPUT);
 
   SPI.setBitOrder(MSBFIRST);
@@ -73,8 +73,8 @@ void setup() {
   pinMode(3, OUTPUT);
   TCCR2A = B00100011;
   TCCR2B = B11001;
-  OCR2A = 26;
-  OCR2B = 13;
+  OCR2A = 26;//26;
+  OCR2B = 13;//13;
 }
 
 void muxSPI(byte output, byte vertical, byte off) {
@@ -89,7 +89,7 @@ void muxSPI(byte output, byte vertical, byte off) {
     if (off)
        bits = 0xff;
     else
-       bits = ((output % 2) ? (1 << 4) : (1 << 5)) | ((output - (output%2)) >> 1);
+       bits = ((output % 2) ? (1 << 4) : (1 << 5)) | (output >> 1);
        // previous good one: bits = ((~(1 << (output / 16))) << 4) | (output % 16);
        //bits = ((~(1 << ((output / 8)))) << 3) | (output % 8);
        //bits = ((~(1 << ((output / 8)))) << 3) | ((15 < output) ? (output % 8) : (7 - (output % 8)))                   ;
@@ -158,7 +158,7 @@ void map_coords(uint16_t x, uint16_t y, uint16_t* mx, uint16_t* my)
   *mx = b / horizontalWires;
   *my = b - (*mx) * ((uint16_t)horizontalWires);*/
   *mx = x;
-  *my = y;
+  *my = y; // (y % 2) ? 8 : 9;//y | 1;//y & ~1;//(y % 2) ? 8 : 9;
 }
   
 void loop() {
@@ -175,7 +175,7 @@ void loop() {
   }
 
   int cnt = 0;
-  for (uint16_t k = 0; k < verticalWires; k++) {
+  for (uint16_t k = 0; k < verticalWires; k++) {    
     for (uint16_t l = 0; l < horizontalWires; l++) {
       uint16_t xx, yy;
        
@@ -186,7 +186,7 @@ void loop() {
       
       PORTC &= ~(1 << 1); // analog pin 1
 
-      delayMicroseconds(12);
+      //delayMicroseconds(100);
 
       sample = measure_with_atmega_adc();
 

@@ -7,7 +7,6 @@ import s373.flob.*; // http://s373.net/code/flob/flob.html
 import oscP5.*;
 import netP5.*;
 
-
 DecimalFormat df = new DecimalFormat("#.###");
 
 Crosspoint[][] crosspoints;
