@@ -1,8 +1,12 @@
 #include <SPI.h>
 
-#define SERIAL_BAUD     1000000   // serial baud rate
-#define SER_BUF_SIZE    256       // serial buffer for sending
-#define IBUF_LEN        12        // serial buffer for incoming commands
+#define SERIAL_BAUD         1000000   // serial baud rate
+#define SER_BUF_SIZE        256       // serial buffer for sending
+#define IBUF_LEN            12        // serial buffer for incoming commands
+
+#define HALFWAVE_POT_VALUE          211
+#define OUTPUT_AMP_POT_VALUE        200
+#define OUTPUT_AMP_POT_TUNE_DEFAULT 16
 
 #define ORDER_MEASURE_UNORDERED   0
 #define PRINT_BINARY              1
@@ -15,18 +19,13 @@
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
 
-byte potValues[] = {
-  210, 210, 210, 210, 210, 210, 210, 210,
-  210, 210, 210, 210, 210, 210, 210, 210,
-  210, 210, 210, 210, 210, 210, 210, 210,
-  210, 210, 210, 210, 210, 210, 210, 210
-};
-
 const byte verticalWires = 32;
 const byte horizontalWires = 22;
 
 static uint8_t sbuf[SER_BUF_SIZE+1];
 static uint16_t sbufpos = 0;
+
+static byte outputAmpPotTune[(verticalWires*horizontalWires)>>1+1];
 
 void
 setup()
@@ -38,26 +37,44 @@ setup()
   sbi(ADCSRA,ADPS1);
   cbi(ADCSRA,ADPS0);
 
-  pinMode(2, OUTPUT);
-  pinMode(3, OUTPUT);
-  pinMode(4, OUTPUT);
-  pinMode(7, OUTPUT);
-  pinMode(11, INPUT);
-  pinMode(A1, OUTPUT);
-  pinMode(A5, OUTPUT);
+  pinMode(2, OUTPUT);     // CS for SPI pot 1 (halfwave splitting)        PD2
+  pinMode(3, OUTPUT);     // reference signal OUT                         PD3
+  pinMode(4, OUTPUT);     // CS for SPI pot 2 (output amplifier)          PD4
+  pinMode(6, OUTPUT);     // horizontal lines (sensor) shift reg latch    PD6
+  pinMode(9, OUTPUT);     // vertical lines (signal) shift reg latch      PB1  
+  pinMode(A1, OUTPUT);    // maximum "sample and hold" RESET switch       PC1
 
   SPI.setBitOrder(MSBFIRST);
   SPI.setClockDivider(SPI_CLOCK_DIV2);
   SPI.setDataMode(SPI_MODE0);
   SPI.begin();
   
-  pinMode(3, OUTPUT);
   TCCR2A = B00100011;
   TCCR2B = B11001;
   OCR2A = 26;
   OCR2B = 13;
   
-  PORTD |= (1 << 2);
+  PORTD |= (1 << 2) | (1 << 4);
+  
+  set_halfwave_pot(HALFWAVE_POT_VALUE);
+  
+  for (int i=0; i<sizeof(outputAmpPotTune); i++)
+    outputAmpPotTune[i] =
+      (OUTPUT_AMP_POT_TUNE_DEFAULT) | (OUTPUT_AMP_POT_TUNE_DEFAULT << 4);
+}
+
+byte output_amp_tuning_for_point(byte x, byte y)
+{
+  uint16_t pt = y * horizontalWires + x;
+  return (outputAmpPotTune[pt] >> (4 * (pt & 1))) & 0xf;
+}
+
+byte set_output_amp_tuning_for_point(byte x, byte y, byte val)
+{
+   uint16_t pt = y * horizontalWires + x;
+   outputAmpPotTune[pt] =
+      (outputAmpPotTune[pt] & ((pt & 1) ? 0xf0 : 0x0f)) |
+        ((val & 0x0f) << 4 * (pt & 1));
 }
 
 inline void
@@ -90,17 +107,28 @@ muxSPI(byte output, byte vertical, byte off)
     PORTB |= (1<<1);
   else
     PORTD |= (1<<6);
-  
-  if (vertical) {
-     byte val = potValues[output];
-     
-     PORTD &= ~(1<<2);
-     SPDR = 0;
-     while (!(SPSR & _BV(SPIF)));
-     SPDR = val;
-     while (!(SPSR & _BV(SPIF)));
-     PORTD |= (1<<2);
-  }
+}
+
+inline void
+set_halfwave_pot(uint16_t value)
+{
+  PORTD &= ~(1<<2);
+  SPDR = (value >> 8) & 0xff;
+  while (!(SPSR & _BV(SPIF)));
+  SPDR = (value & 0xff);
+  while (!(SPSR & _BV(SPIF)));
+  PORTD |= (1<<2);
+}
+
+inline void
+set_output_amp_pot(uint16_t value)
+{
+  PORTD &= ~(1<<4);
+  SPDR = (value >> 8) & 0xff;
+  while (!(SPSR & _BV(SPIF)));
+  SPDR = (value & 0xff);
+  while (!(SPSR & _BV(SPIF)));
+  PORTD |= (1<<4);
 }
 
 inline unsigned int
@@ -157,17 +185,22 @@ process_cmd(char* cmd)
 {
   switch (*cmd++) {
     case 'e': {
-      byte column = 0, value = 0;
+      byte x = 0, y = 0, value = 0;
       
       while(',' != *cmd)
-        column = column * 10 + (*cmd++ - '0');
+        x = x * 10 + (*cmd++ - '0');
+      
+      cmd++;    // skip the ,
+      
+      while(',' != *cmd)
+        y = y * 10 + (*cmd++ - '0');
       
       cmd++;    // skip the ,
       
       while('\n' != *cmd)
         value = value * 10 + (*cmd++ - '0');
-      
-      potValues[column] = value;
+            
+      set_output_amp_tuning_for_point(x, y, value);
       
       break;
     }
@@ -213,8 +246,10 @@ loop()
        
       map_coords(k, l, &xx, &yy);
 
-      muxSPI(xx, 1, 0); // TODO: move out of loop
+      muxSPI(xx, 1, 0);
       muxSPI(yy, 0, 0);
+      
+      set_output_amp_pot(OUTPUT_AMP_POT_VALUE + output_amp_tuning_for_point(xx, yy));
       
       PORTC &= ~(1 << 1);
 
