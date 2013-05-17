@@ -1,45 +1,3 @@
-class GUIEqualizer {
-  GUISlider[] guiSlider;
-  int numberOfSliders;
-  
-  GUIEqualizer(int x, int y, int verticalLines) {
-    numberOfSliders = verticalLines;
-    guiSlider = new GUISlider[numberOfSliders];
-    for (int i = 0; i < numberOfSliders; i++) {
-       guiSlider[i] = new GUISlider(x, y+(i*20), 200);
-    }
-  }
-  
-  void draw() {  
-    for (int i = 0; i < numberOfSliders; i++) {  
-      guiSlider[i].draw();
-    }
-  }
-  
-  void mousePressed() {
-    for (int i = 0; i < numberOfSliders; i++) {  
-      guiSlider[i].mousePressed();
-    }
-  }
-  
-  boolean mouseDragged(int mX, int mY) {
-    for (int i = 0; i < numberOfSliders; i++) {  
-      if (guiSlider[i].mouseDragged(mX, mY)) {
-        dataManager.writeColumnCorrectionData(i, guiSlider[i].normalizedValue);
-        
-        return true;
-      }
-    }
-    return false;
-  }
-  
-  void mouseReleased() {
-    for (int i = 0; i < numberOfSliders; i++) {  
-      guiSlider[i].mouseReleased();
-    }
-  }
-}
-
 class GUISlider {
   private int x, y;
   private int width;
@@ -54,14 +12,14 @@ class GUISlider {
     guiTriangle = new GUITriangle(this.x, this.y, guiColor);
   }  
 
-  void mousePressed() {
-    guiTriangle.mousePressed();
+  boolean mousePressed() {
+    return guiTriangle.mousePressed();
   }
 
   boolean mouseDragged(int mX, int mY) {
     // return true if any triangle position has changed
     if (guiTriangle.mouseDragged(constrain(mX, this.x, this.x+width), mY)) {
-       this.normalizedValue = 200+round(50*((this.guiTriangle.x - this.x) / (float) this.width));
+       this.normalizedValue = 200+round(50  *((this.guiTriangle.x - this.x) / (float) this.width));
        textInformation = "value: "+this.normalizedValue;
        return true;
     }
@@ -73,9 +31,14 @@ class GUISlider {
   }
   
   void draw() {
+    strokeWeight(1);
+    stroke(textColor);
+    fill(backgroundColor);
+    rect(x-20, y-20, 240, 40);
     stroke(wireColor);
     line(x, y, x+this.width, y); 
     this.guiTriangle.draw();
+    noStroke();
   }
 }
 
@@ -102,8 +65,12 @@ class GUITriangle {
     return ((x > this.x - 6) && (x < this.x + 6) && (y > this.y) && (y < this.y + 12));
   }
 
-  void mousePressed() {
-    this.bTracked = this.isInside(mouseX, mouseY);
+  boolean mousePressed() {
+    if (this.isInside(mouseX, mouseY)) {
+      this.bTracked = true;
+      return true;
+    }
+    return false;
   }
 
   boolean mouseDragged(int mX, int mY) {

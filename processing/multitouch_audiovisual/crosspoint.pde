@@ -5,6 +5,7 @@ class Crosspoint {
   double signalStrength;          // the calculated signal strength (ca. 0.0-1.0)
   double signalMin = 1000000000, signalMax = -1000;
   double signalPMin = 1000000000, signalPMax = -1000;
+  GUISlider guiSlider;
 
   Crosspoint (int x, int y) {
     this.x = x;
@@ -12,6 +13,14 @@ class Crosspoint {
     this.measuredSignal = 1;
     this.measuredSignalAverage = 0;
     this.signalStrength = 1;
+    int sliderPosX = 0;
+    if (this.x > sketchWidth - 240) {
+      sliderPosX = sketchWidth - 240;
+    }
+    else {
+      sliderPosX = this.x - 10;
+    } 
+    this.guiSlider = new GUISlider(sliderPosX, y+40, 200); // every crosspoint gets its own slider for the digital pot
   }
 
   void draw(boolean bDrawText) {
@@ -26,8 +35,7 @@ class Crosspoint {
     fill(wireColor);
     if (bDrawText) {
       // text((df.format(measuredSignal)), x+4, y-4);
-      // text((df.format(signalStrength)), x+4, y-4);
-      
+      // text((df.format(signalStrength)), x+4, y-4);      
       // text((df.format(signalStrength)+"\n"+this.signalMax+"\n"+df.format(this.measuredSignalAverage)+"\n"+this.signalMin), x+4, y-4);
     }
   }
@@ -46,6 +54,10 @@ class Crosspoint {
 
   void accumulateAvgSig(int val) {
     this.measuredSignalAverage = this.measuredSignalAverage/2 + (val/2);
+  }
+  
+  boolean isInside(int x, int y) {
+    return ((x > this.x -12) && (x < this.x + 12) && (y > this.y-12) && (y < this.y + 12));
   }
 }
 

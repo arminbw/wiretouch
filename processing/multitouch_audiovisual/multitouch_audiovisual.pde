@@ -25,11 +25,12 @@ static final int kNumInterp = 5;
 int interpType = kInterpCatmullRom;
 int interpolationResolution = 3;
 HistogramGUI histogramGUI;
-GUIEqualizer guiEqualizer;
 GLTexture picture;
 BlobManager blobManager;
 FlobManager flobManager;
 TuioServer tuioServer;
+
+GUISlider gridSlider;
 
 // configuration
 Configurator configurator;
@@ -37,8 +38,8 @@ static final int verticalWires = 32;
 static final int horizontalWires = 22;
 static final int crosspointDistance=25; // 25; // how many pixels between 2 crosspoints
 static final int borderDistance=20; // how many pixel distance to the borderDistance
-static final int sketchWidth = (borderDistance*2)+((verticalWires-1)*crosspointDistance) + 200 + borderDistance;
-static final int sketchHeight = (horizontalWires+1)*crosspointDistance+90;
+static final int sketchWidth = (borderDistance*2)+((verticalWires-1)*crosspointDistance);
+static final int sketchHeight = (horizontalWires+1)*crosspointDistance+120;
 static final int pictureWidth = (verticalWires-1)*crosspointDistance;
 static final int pictureHeight = (horizontalWires-1)*crosspointDistance;
 static final float signalPixelRatio = 0.02*1024; // (see crosspoint.pde)
@@ -46,8 +47,8 @@ final color textColor = color(60, 60, 60);
 final color guiColor = color(180, 180, 180);
 final color backgroundColor = color(240, 240, 240);
 final color histogramColor = color(239, 171, 233);
-final color signalColor = color(153, 233, 240);
-final color wireColor = color(255, 0, 222);      // also used for blobs and histogram GUI fs
+final color signalColor = color(255, 0, 222);
+final color wireColor = color(153, 233, 240);      // also used for blobs and histogram GUI fs
 static final int AVERAGESIGNALCOUNTERMAX = 40;
 int averageSignalCounter = AVERAGESIGNALCOUNTERMAX;
 float contrastLeft = 0.0;
@@ -55,6 +56,9 @@ float contrastRight = 0.0;
 // float contrastRight = 0.203125;
 float blobThreshold = 0.0546875;
 float signalCutOff = 0.40;
+
+int gridCrosspointX, gridCrosspointY;
+
 
 int lastMillis, frames, packets, fps, pps;
 String serialDebugger, serialDebuggerText; // used to monitor the serial communication in relation to draw() invocations
@@ -77,7 +81,7 @@ void setup() {
   initInterpolator();
   histogramGUI = new HistogramGUI(sketchWidth-256-borderDistance, sketchHeight-30, 256);
   histogramGUI.setMarkerPositions(contrastLeft, contrastRight, blobThreshold);
-  guiEqualizer = new GUIEqualizer((borderDistance*2)+pictureWidth, borderDistance, verticalWires);
+  // guiEqualizer = new GUIEqualizer((borderDistance*2)+pictureWidth, borderDistance, verticalWires);
   configurator.helpText = "[r]eceive real data   [f]ake data (static)";
   textInformation = configurator.helpText;
   blobManager = new BlobManager(interpolator.pixelWidth, interpolator.pixelHeight, blobThreshold);
@@ -87,6 +91,9 @@ void setup() {
   bNewFrame = true;
   serialDebugger = "";
   serialDebuggerText = "";
+  gridSlider = null;
+  gridCrosspointX = 0;
+  gridCrosspointY = 0;
 }
 
 int count = 0;
@@ -106,10 +113,6 @@ void drawSignals() {
     histogramGUI.draw();
     break;
   case 1:
-    drawSignalCircles(true);
-    drawGrid();
-    break;
-  case 2:
     interpolator.interpolate(crosspoints);
     interpolator.drawPicture(borderDistance, borderDistance);
     interpolator.drawHistogramFromPoint(sketchWidth-256-borderDistance, sketchHeight-30, 65);
@@ -166,8 +169,9 @@ void draw() {
     }
     drawSignals();
   }
-  if (configurator.bShowEqualizer) {
-    guiEqualizer.draw();
+  if (gridSlider != null) {
+    gridSlider.draw();
+    
   }
 }
 
@@ -188,12 +192,24 @@ void drawGrid() {
   fill(wireColor);
   textAlign(RIGHT);
   for (int i = 0; i < horizontalWires; i++) {
+    if (gridCrosspointX == i) {
+      stroke(signalColor); 
+    }
     line(borderDistance, borderDistance+(crosspointDistance*i), borderDistance+(crosspointDistance*(verticalWires-1)), borderDistance+(crosspointDistance*i));
+    if (gridCrosspointX == i) {
+      stroke(wireColor);
+    }
     text(i+1, borderDistance-4, borderDistance+(crosspointDistance*i)+4);
   }
   textAlign(CENTER);
   for (int j = 0; j < verticalWires; j++) {
+    if (gridCrosspointY == j) {
+      stroke(signalColor); 
+    }
     line(borderDistance+(crosspointDistance*j), borderDistance, borderDistance+(crosspointDistance*j), borderDistance+(crosspointDistance*(horizontalWires-1)));
+    if (gridCrosspointY == j) {
+      stroke(wireColor);
+    }
     text(j+1, borderDistance+(crosspointDistance*j), borderDistance-4);
   }
   textAlign(LEFT);
@@ -245,10 +261,27 @@ void initInterpolator() {
 
 void mousePressed() {
   histogramGUI.mousePressed();
-  guiEqualizer.mousePressed();
+  if (gridSlider != null) {
+    if (gridSlider.mousePressed()) return;
+  }
+  if (averageSignalCounter == 0) {
+    for (int i = 0; i < verticalWires; i++) {
+      for (int j = 0; j < horizontalWires; j++) {
+        if (crosspoints[i][j].isInside(mouseX, mouseY)) {
+          textInformation = "digital pot for crosspoint: "+(i+1)+" "+(j+1);
+          gridSlider = crosspoints[i][j].guiSlider;
+          gridCrosspointX = j;
+          gridCrosspointY = i;
+        }
+      }
+    }
+  }
 }
 
 void mouseDragged() {
+  if (gridSlider != null) {
+    gridSlider.mouseDragged(mouseX, mouseY); 
+  }
   if (histogramGUI.mouseDragged(mouseX, mouseY) == true) {
     contrastLeft = histogramGUI.getValLeft();
     contrastRight = histogramGUI.getValRight();
@@ -260,14 +293,14 @@ void mouseDragged() {
     textInformation = "contrast stretch:   " + contrastLeft + "   " + contrastRight + "\nblob threshold: "+ blobThreshold + "   signalCutOff: " + signalCutOff + "\nback to the main [m]enu";
     bNewFrame = true;
   }
-  if (guiEqualizer.mouseDragged(mouseX, mouseY) == true) {
+  /* if (guiEqualizer.mouseDragged(mouseX, mouseY) == true) {
      // do magic stuff
-  }
+  }*/
 }
 
 void mouseReleased() {
   histogramGUI.mouseReleased();
-  guiEqualizer.mouseReleased();
+  // guiEqualizer.mouseReleased();
   bNewFrame = true;
 }
 

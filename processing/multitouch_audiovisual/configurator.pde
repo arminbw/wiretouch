@@ -77,7 +77,7 @@ class Configurator {
       break;
     case 'v':
       // change the type of visualization
-      visualizationType = (visualizationType+1)%3;
+      visualizationType = (visualizationType+1)%2;
       break;
     case 's':
       this.bContrastStretch = !this.bContrastStretch;
