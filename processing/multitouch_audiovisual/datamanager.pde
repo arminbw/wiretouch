@@ -18,7 +18,7 @@ class DataManager {
       this.port.clear(); // // do we need this? (cargo cult programming)
       //this.port.buffer(serBuffer.length);
       delay(2000); // still needed?
-      this.port.write('s');
+      this.port.write("c\ns\n");
       textInformation = "starting to calibrate";
     } 
     catch (Exception e) {

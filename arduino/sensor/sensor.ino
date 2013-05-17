@@ -4,12 +4,12 @@
 #define SER_BUF_SIZE        256       // serial buffer for sending
 #define IBUF_LEN            12        // serial buffer for incoming commands
 
-#define HALFWAVE_POT_VALUE          211
-#define OUTPUT_AMP_POT_VALUE        10
+#define HALFWAVE_POT_VALUE          205
+#define OUTPUT_AMP_POT_VALUE        0
 #define OUTPUT_AMP_POT_TUNE_DEFAULT 8
 
 #define CALIB_NUM_MEASURE   8
-#define CALIB_THRESHOLD     1020
+#define CALIB_THRESHOLD     900
 
 #define ORDER_MEASURE_UNORDERED   0
 #define PRINT_BINARY              1
@@ -73,13 +73,13 @@ setup()
 
 byte output_amp_tuning_for_point(byte x, byte y)
 {
-  uint16_t pt = x * horizontalWires + y;
+  uint16_t pt = y * verticalWires + x;
   return (outputAmpPotTune[pt >> 1] >> (4 * (pt & 1))) & 0xf;
 }
 
 void set_output_amp_tuning_for_point(byte x, byte y, byte val)
 {
-   uint16_t pt = y * horizontalWires + x;
+   uint16_t pt = y * verticalWires + x;
    outputAmpPotTune[pt >> 1] =
       (outputAmpPotTune[pt >> 1] & ((pt & 1) ? 0x0f : 0xf0)) |
         ((val & 0x0f) << (4 * (pt & 1)));
@@ -229,6 +229,17 @@ auto_tune_output_amp()
       }
     }
   }
+  
+  /*for (int i=0; i<sizeof(outputAmpPotTune); i++) {
+    Serial.print(2*i);
+    Serial.print(" : ");
+    Serial.print(outputAmpPotTune[i] & 0xf);
+    Serial.print(", ");
+    Serial.print(2*i+1);
+    Serial.print(" : ");
+    Serial.print((outputAmpPotTune[i] >> 4) & 0xf);
+    Serial.println();
+  }*/
 }
 
 void
