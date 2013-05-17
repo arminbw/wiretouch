@@ -8,6 +8,9 @@
 #define OUTPUT_AMP_POT_VALUE        10
 #define OUTPUT_AMP_POT_TUNE_DEFAULT 8
 
+#define CALIB_NUM_MEASURE   8
+#define CALIB_THRESHOLD     1020
+
 #define ORDER_MEASURE_UNORDERED   0
 #define PRINT_BINARY              1
 #define measure                   measure_with_atmega_adc
@@ -29,6 +32,8 @@ static byte halfwavePotBase   = HALFWAVE_POT_VALUE;
 static byte outputAmpPotBase  = OUTPUT_AMP_POT_VALUE;
 
 static byte outputAmpPotTune[((verticalWires*horizontalWires)>>1)+1];
+
+static byte isRunning;
 
 void
 setup()
@@ -183,6 +188,49 @@ map_coords(uint16_t x, uint16_t y, uint16_t* mx, uint16_t* my)
 #endif
 }
 
+uint16_t
+measure_one(uint16_t x, uint16_t y)
+{
+  uint16_t xx, yy, sample;
+   
+  map_coords(x, y, &xx, &yy);
+  
+  set_output_amp_pot(outputAmpPotBase + output_amp_tuning_for_point(xx, yy));
+  
+  muxSPI(xx, 1, 0);
+  muxSPI(yy, 0, 0);
+  
+  PORTC &= ~(1 << 1);
+  
+  sample = measure_with_atmega_adc();
+  
+  PORTC |= 1 << 1;
+  
+  return sample;
+}
+
+void
+auto_tune_output_amp()
+{
+  for (uint16_t k = 0; k < verticalWires; k++) {    
+    for (uint16_t l = 0; l < horizontalWires; l++) {
+      for (byte amp_tune=0; amp_tune<16; amp_tune++) {
+        uint16_t avg_sample = 0, s;
+        
+        set_output_amp_tuning_for_point(k, l, amp_tune);
+        
+        for (uint16_t m=0; m<CALIB_NUM_MEASURE; m++) {
+          s = measure_one(k, l);
+          avg_sample = (avg_sample > 0) ? ((avg_sample + s) >> 1) : s;
+        }
+        
+        if (avg_sample < CALIB_THRESHOLD)
+          break;
+      }
+    }
+  }
+}
+
 void
 process_cmd(char* cmd)
 {
@@ -230,6 +278,16 @@ process_cmd(char* cmd)
       break;
     }
     
+    case 's': {
+      isRunning = 1;
+      break;
+    }
+    
+    case 'c': {
+      auto_tune_output_amp();
+      break;
+    }
+    
     default:
       break;
   }
@@ -238,17 +296,9 @@ process_cmd(char* cmd)
 void
 loop()
 {
-  static boolean isRunning = 0;
   static byte ibuf_pos = 0;
   static char ibuf[IBUF_LEN];
   uint16_t sample;
-
-  while(!isRunning) {
-    if (Serial.available()) {
-      byte c = Serial.read();
-      isRunning = ('s' == c);
-    }
-  }
   
   while (Serial.available()) {
     byte c = Serial.read();
@@ -263,24 +313,14 @@ loop()
       ibuf_pos = 0;
     }
   }
+  
+  if (!isRunning)
+      return;
 
   int cnt = 0;
   for (uint16_t k = 0; k < verticalWires; k++) {    
     for (uint16_t l = 0; l < horizontalWires; l++) {
-      uint16_t xx, yy;
-       
-      map_coords(k, l, &xx, &yy);
-
-      set_output_amp_pot(outputAmpPotBase + output_amp_tuning_for_point(xx, yy));
-
-      muxSPI(xx, 1, 0);
-      muxSPI(yy, 0, 0);
-      
-      PORTC &= ~(1 << 1);
-
-      sample = measure_with_atmega_adc();
-
-      PORTC |= 1 << 1;
+      sample = measure_one(k, l);
 
       cnt++;
 #if PRINT_BINARY
