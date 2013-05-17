@@ -3,13 +3,16 @@ class GUISlider {
   private int width;
   public GUITriangle guiTriangle;
   int normalizedValue;
+  int minValue, maxValue;
   
-  GUISlider (int x, int y, int width) {
+  GUISlider (int x, int y, int width, int minValue, int maxValue) {
     this.x = x;
     this.y = y;
     this.width = width;
-    this.normalizedValue = 0;
+    this.minValue = minValue;
+    this.maxValue = maxValue;
     guiTriangle = new GUITriangle(this.x, this.y, guiColor);
+    this.setValue(minValue);
   }  
 
   boolean mousePressed() {
@@ -19,7 +22,7 @@ class GUISlider {
   boolean mouseDragged(int mX, int mY) {
     // return true if any triangle position has changed
     if (guiTriangle.mouseDragged(constrain(mX, this.x, this.x+width), mY)) {
-       this.normalizedValue = 200+round(50  *((this.guiTriangle.x - this.x) / (float) this.width));
+       this.normalizedValue = this.minValue+round((this.maxValue - this.minValue) * ((this.guiTriangle.x - this.x) / (float) this.width));
        textInformation = "value: "+this.normalizedValue;
        return true;
     }
@@ -28,6 +31,11 @@ class GUISlider {
   
   void mouseReleased() {
     guiTriangle.mouseReleased(); 
+  }
+  
+  void setValue(int v) {
+    this.normalizedValue = v;
+    this.guiTriangle.x = this.x + round(this.width/15)*this.normalizedValue;
   }
   
   void draw() {

@@ -30,8 +30,6 @@ BlobManager blobManager;
 FlobManager flobManager;
 TuioServer tuioServer;
 
-GUISlider gridSlider;
-
 // configuration
 Configurator configurator;
 static final int verticalWires = 32;
@@ -39,7 +37,7 @@ static final int horizontalWires = 22;
 static final int crosspointDistance=25; // 25; // how many pixels between 2 crosspoints
 static final int borderDistance=20; // how many pixel distance to the borderDistance
 static final int sketchWidth = (borderDistance*2)+((verticalWires-1)*crosspointDistance);
-static final int sketchHeight = (horizontalWires+1)*crosspointDistance+120;
+static final int sketchHeight = ((horizontalWires+1)*crosspointDistance)+220;
 static final int pictureWidth = (verticalWires-1)*crosspointDistance;
 static final int pictureHeight = (horizontalWires-1)*crosspointDistance;
 static final float signalPixelRatio = 0.02*1024; // (see crosspoint.pde)
@@ -58,6 +56,8 @@ float blobThreshold = 0.0546875;
 float signalCutOff = 0.40;
 
 int gridCrosspointX, gridCrosspointY;
+GUIExtraSliders guiExtraSliders;
+GUISlider gridSlider;
 
 
 int lastMillis, frames, packets, fps, pps;
@@ -94,6 +94,7 @@ void setup() {
   gridSlider = null;
   gridCrosspointX = 0;
   gridCrosspointY = 0;
+  guiExtraSliders = new GUIExtraSliders(560, 620, 200);
 }
 
 int count = 0;
@@ -169,9 +170,9 @@ void draw() {
     }
     drawSignals();
   }
+  guiExtraSliders.draw();
   if (gridSlider != null) {
     gridSlider.draw();
-    
   }
 }
 
@@ -261,6 +262,7 @@ void initInterpolator() {
 
 void mousePressed() {
   histogramGUI.mousePressed();
+  guiExtraSliders.mousePressed();
   if (gridSlider != null) {
     if (gridSlider.mousePressed()) return;
   }
@@ -280,7 +282,8 @@ void mousePressed() {
 
 void mouseDragged() {
   if (gridSlider != null) {
-    gridSlider.mouseDragged(mouseX, mouseY); 
+    gridSlider.mouseDragged(mouseX, mouseY);
+    dataManager.sendDotMatrixCorrectionData(gridCrosspointX, gridCrosspointY, gridSlider.normalizedValue);
   }
   if (histogramGUI.mouseDragged(mouseX, mouseY) == true) {
     contrastLeft = histogramGUI.getValLeft();
@@ -293,15 +296,15 @@ void mouseDragged() {
     textInformation = "contrast stretch:   " + contrastLeft + "   " + contrastRight + "\nblob threshold: "+ blobThreshold + "   signalCutOff: " + signalCutOff + "\nback to the main [m]enu";
     bNewFrame = true;
   }
-  /* if (guiEqualizer.mouseDragged(mouseX, mouseY) == true) {
-     // do magic stuff
-  }*/
+  guiExtraSliders.mouseDragged(mouseX, mouseY);
 }
 
 void mouseReleased() {
   histogramGUI.mouseReleased();
+  guiExtraSliders.mouseReleased();
   // guiEqualizer.mouseReleased();
   bNewFrame = true;
+  dataManager.savePotValues();
 }
 
 void keyPressed() {

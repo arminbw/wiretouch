@@ -117,8 +117,40 @@ class DataManager {
     println(myString);
   }
   
-  void writeColumnCorrectionData(int column, int value) {
-    this.port.write("e"+column+","+value+"\n");
+  void sendDotMatrixCorrectionData(int x, int y, int value) {
+    textInformation = "e"+x+","+y+","+value+"\n";
+    this.port.write("e"+x+","+y+","+value+"\n");
+  }
+  
+  void sendHalfwaveValue(int value) {
+    textInformation = "halfwave: "+value;
+    this.port.write("h"+value+"\n");
+  }
+
+  void sendOutputampValue(int value) {
+    textInformation = "outputamp: "+value;
+    this.port.write("o"+value+"\n");
+  }
+  
+  // save the values for the digital potentiometer
+  void savePotValues() {
+    String[] lines = new String[verticalWires*horizontalWires];
+    for (int i = 0; i < verticalWires; i++) {
+      for (int j = 0; j < horizontalWires; j++) {
+        lines[(i*horizontalWires)+j] = ""+crosspoints[i][j].guiSlider.normalizedValue;
+      }
+    }
+    saveStrings("data/potvalues.txt", lines);
+  }
+  
+  void loadPotValues() {
+    String[] lines = new String[verticalWires*horizontalWires];
+    lines = loadStrings("data/potvalues.txt");
+    for (int i = 0; i < verticalWires; i++) {
+      for (int j = 0; j < horizontalWires; j++) {
+        lines[(i*horizontalWires)+j] = ""+crosspoints[i][j].guiSlider.normalizedValue;
+      }
+    }  
   }
 }
 

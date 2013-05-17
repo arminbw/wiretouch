@@ -20,18 +20,19 @@ class Crosspoint {
     else {
       sliderPosX = this.x - 10;
     } 
-    this.guiSlider = new GUISlider(sliderPosX, y+40, 200); // every crosspoint gets its own slider for the digital pot
+    this.guiSlider = new GUISlider(sliderPosX, y+40, 200, 0, 15); // every crosspoint gets its own slider for the digital pot
+    this.guiSlider.setValue(8);
   }
 
   void draw(boolean bDrawText) {
     noFill();
     stroke(signalColor);
-    if (configurator.bShowCalibrated) {
+    /*if (configurator.bShowCalibrated) {
       ellipse(x, y, (float)signalStrength*signalPixelRatio, (float)signalStrength*signalPixelRatio);
     }
     else {
       ellipse(x, y, (float)(measuredSignal/1024)*signalPixelRatio, (float)(measuredSignal/1024)*signalPixelRatio);
-    }
+    }*/
     fill(wireColor);
     if (bDrawText) {
       // text((df.format(measuredSignal)), x+4, y-4);

@@ -1,6 +1,6 @@
 class Configurator {
   int visualizationType;
-  boolean bShowBlobs, bShowFlobs, bDebug, bContrastStretch, bShowCalibrated, bFakeData, bShowEqualizer;
+  boolean bShowBlobs, bShowFlobs, bDebug, bContrastStretch, bShowCalibrated, bFakeData;
   String helpText;
   DataManager dataManager;
 
@@ -11,8 +11,7 @@ class Configurator {
     bShowCalibrated = false;              // show signal strength after calibration?
     bFakeData = false;                    // use fake data for "offline" testing?
     bShowBlobs = false;                   // show blobs and edges
-    bShowFlobs = true;
-    bShowEqualizer = true;                   // show digital Pot "equalizer"
+    bShowFlobs = false;
     helpText = "";
     this.dataManager = dataManager;
   }
@@ -75,10 +74,6 @@ class Configurator {
         textInformation = helpText;
       }
       break;
-    case 'v':
-      // change the type of visualization
-      visualizationType = (visualizationType+1)%2;
-      break;
     case 's':
       this.bContrastStretch = !this.bContrastStretch;
       interpolator.bContrastStretch = this.bContrastStretch;
@@ -126,9 +121,9 @@ class Configurator {
       this.bShowCalibrated = !this.bShowCalibrated;
       textInformation = "[c]alibrate: " + getOnOffString(this.bShowCalibrated) + "\nback to the main [m]enu";
       break;
-    case 'e':
-      textInformation = "\nback to the main [m]enu";
-      this.bShowEqualizer = !this.bShowEqualizer;
+    case 'v':
+      // change the type of visualization
+      visualizationType = (visualizationType+1)%2;
       break;
     default:
       break;

@@ -5,8 +5,8 @@
 #define IBUF_LEN            12        // serial buffer for incoming commands
 
 #define HALFWAVE_POT_VALUE          211
-#define OUTPUT_AMP_POT_VALUE        200
-#define OUTPUT_AMP_POT_TUNE_DEFAULT 16
+#define OUTPUT_AMP_POT_VALUE        10
+#define OUTPUT_AMP_POT_TUNE_DEFAULT 8
 
 #define ORDER_MEASURE_UNORDERED   0
 #define PRINT_BINARY              1
@@ -25,7 +25,10 @@ const byte horizontalWires = 22;
 static uint8_t sbuf[SER_BUF_SIZE+1];
 static uint16_t sbufpos = 0;
 
-static byte outputAmpPotTune[(verticalWires*horizontalWires)>>1+1];
+static byte halfwavePotBase   = HALFWAVE_POT_VALUE;
+static byte outputAmpPotBase  = OUTPUT_AMP_POT_VALUE;
+
+static byte outputAmpPotTune[((verticalWires*horizontalWires)>>1)+1];
 
 void
 setup()
@@ -56,7 +59,7 @@ setup()
   
   PORTD |= (1 << 2) | (1 << 4);
   
-  set_halfwave_pot(HALFWAVE_POT_VALUE);
+  set_halfwave_pot(halfwavePotBase);
   
   for (int i=0; i<sizeof(outputAmpPotTune); i++)
     outputAmpPotTune[i] =
@@ -65,16 +68,16 @@ setup()
 
 byte output_amp_tuning_for_point(byte x, byte y)
 {
-  uint16_t pt = y * horizontalWires + x;
-  return (outputAmpPotTune[pt] >> (4 * (pt & 1))) & 0xf;
+  uint16_t pt = x * horizontalWires + y;
+  return (outputAmpPotTune[pt >> 1] >> (4 * (pt & 1))) & 0xf;
 }
 
-byte set_output_amp_tuning_for_point(byte x, byte y, byte val)
+void set_output_amp_tuning_for_point(byte x, byte y, byte val)
 {
    uint16_t pt = y * horizontalWires + x;
-   outputAmpPotTune[pt] =
-      (outputAmpPotTune[pt] & ((pt & 1) ? 0xf0 : 0x0f)) |
-        ((val & 0x0f) << 4 * (pt & 1));
+   outputAmpPotTune[pt >> 1] =
+      (outputAmpPotTune[pt >> 1] & ((pt & 1) ? 0x0f : 0xf0)) |
+        ((val & 0x0f) << (4 * (pt & 1)));
 }
 
 inline void
@@ -205,6 +208,28 @@ process_cmd(char* cmd)
       break;
     }
     
+    case 'o': {
+      byte value = 0;
+      
+      while('\n' != *cmd)
+        value = value * 10 + (*cmd++ - '0');
+            
+      outputAmpPotBase = value;
+      
+      break;
+    }
+    
+    case 'h': {
+      byte value = 0;
+      
+      while('\n' != *cmd)
+        value = value * 10 + (*cmd++ - '0');
+            
+       set_halfwave_pot((halfwavePotBase = value));
+      
+      break;
+    }
+    
     default:
       break;
   }
@@ -246,10 +271,10 @@ loop()
        
       map_coords(k, l, &xx, &yy);
 
+      set_output_amp_pot(outputAmpPotBase + output_amp_tuning_for_point(xx, yy));
+
       muxSPI(xx, 1, 0);
       muxSPI(yy, 0, 0);
-      
-      set_output_amp_pot(OUTPUT_AMP_POT_VALUE + output_amp_tuning_for_point(xx, yy));
       
       PORTC &= ~(1 << 1);
 
