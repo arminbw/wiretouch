@@ -7,6 +7,8 @@ class DataManager {
   Serial port;
   String fakeData;
   byte[] serBuffer = null;
+  String settingsJson;
+  boolean receivingSettings;
 
   DataManager() {
     this.serBuffer = new byte[(horizontalWires * verticalWires * 10)/8];
@@ -18,8 +20,13 @@ class DataManager {
       this.port.clear(); // // do we need this? (cargo cult programming)
       //this.port.buffer(serBuffer.length);
       delay(2000); // still needed?
-      this.port.write("c\ns\n");
-      textInformation = "starting to calibrate";
+      textInformation = "firmware calibration";
+      this.port.write("c\n");  // calibrate
+      this.port.write("i\n");  // get the port values
+      this.receivingSettings = true;
+      this.settingsJson = new String();    
+      this.port.write("s\n");  // start
+
     } 
     catch (Exception e) {
       textInformation = "error with Serial connection: "+e;
@@ -131,7 +138,7 @@ class DataManager {
     String[] lines = new String[verticalWires*horizontalWires];
     for (int i = 0; i < verticalWires; i++) {
       for (int j = 0; j < horizontalWires; j++) {
-        lines[(i*horizontalWires)+j] = ""+crosspoints[i][j].guiSlider.normalizedValue;
+        lines[(i*horizontalWires)+j] = ""+crosspoints[i][j].guiSlider.value;
       }
     }
     saveStrings("data/potvalues.txt", lines);
@@ -142,9 +149,35 @@ class DataManager {
     lines = loadStrings("data/potvalues.txt");
     for (int i = 0; i < verticalWires; i++) {
       for (int j = 0; j < horizontalWires; j++) {
-        lines[(i*horizontalWires)+j] = ""+crosspoints[i][j].guiSlider.normalizedValue;
+        lines[(i*horizontalWires)+j] = ""+crosspoints[i][j].guiSlider.value;
       }
     }  
   }
+  
+  void appendPotValues(String aString) {
+    this.settingsJson += aString;
+  }
+  
+  // getting the autocalibration values from the mt motherboard
+  void receivePotValues() {    
+    JSON jsonObject = JSON.parse(this.settingsJson);
+    guiExtraSliders.halfwave.setValue(int(jsonObject.getString("halfwave_amp")));
+    guiExtraSliders.outputamp.setValue(int(jsonObject.getString("output_amp")));
+    guiExtraSliders.delaySlider.setValue(int(jsonObject.getString("delay")));
+    guiExtraSliders.waveFrequency.setValue(int(jsonObject.getString("freq")));
+    
+    firmwareVersion = jsonObject.getString("version");
+    
+    this.receivingSettings = false;
+    this.settingsJson = null;
+    
+    for (int i = 0; i < verticalWires; i++) {
+      for (int j = 0; j < horizontalWires; j++) {
+         String crosspt = "tune_" + i + "_" + j;
+         crosspoints[i][j].guiSlider.setValue(int(jsonObject.getString(crosspt)));
+      }
+    }
+    this.savePotValues();
+  } 
 }
 

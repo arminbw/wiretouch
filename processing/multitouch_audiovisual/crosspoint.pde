@@ -22,6 +22,7 @@ class Crosspoint {
     } 
     this.guiSlider = new GUISlider(sliderPosX, y+40, 200, 0, 15); // every crosspoint gets its own slider for the digital pot
     this.guiSlider.setValue(8);
+    this.guiSlider.drawsBorder = true;
   }
 
   void draw(boolean bDrawText) {

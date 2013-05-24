@@ -1,17 +1,20 @@
 #include <SPI.h>
 
+#define FIRMWARE_VERSION    "1.0b1"
+
 #define SERIAL_BAUD         1000000   // serial baud rate
 #define SER_BUF_SIZE        256       // serial buffer for sending
 #define IBUF_LEN            12        // serial buffer for incoming commands
 
 #define DEFAULT_MEASURE_DELAY       14
-
 #define HALFWAVE_POT_VALUE          205
 #define OUTPUT_AMP_POT_VALUE        8
 #define OUTPUT_AMP_POT_TUNE_DEFAULT 8
+#define WAVE_FREQUENCY              13
 
-#define CALIB_NUM_MEASURE   16
-#define CALIB_THRESHOLD     980
+#define CALIB_NUM_TARGET_MEASURE    128
+#define CALIB_NUM_MEASURE           16
+#define CALIB_THRESHOLD             250
 
 #define ORDER_MEASURE_UNORDERED   0
 #define PRINT_BINARY              1
@@ -32,10 +35,10 @@ static uint16_t sbufpos = 0;
 
 static byte halfwavePotBase   = HALFWAVE_POT_VALUE;
 static byte outputAmpPotBase  = OUTPUT_AMP_POT_VALUE;
+static byte waveFrequency     = WAVE_FREQUENCY;
+static uint16_t measureDelay  = DEFAULT_MEASURE_DELAY;
 
 static byte outputAmpPotTune[((verticalWires*horizontalWires)>>1)+1];
-
-static uint16_t measureDelay  = DEFAULT_MEASURE_DELAY;
 
 static byte isRunning;
 
@@ -61,12 +64,9 @@ setup()
   SPI.setDataMode(SPI_MODE0);
   SPI.begin();
   
-  TCCR2A = B00100011;
-  TCCR2B = B11001;
-  OCR2A = 26;
-  OCR2B = 13;
-  
   PORTD |= (1 << 2) | (1 << 4);
+  
+  set_wave_frequency(waveFrequency);
   
   set_halfwave_pot(halfwavePotBase);
   
@@ -75,18 +75,29 @@ setup()
       (OUTPUT_AMP_POT_TUNE_DEFAULT) | (OUTPUT_AMP_POT_TUNE_DEFAULT << 4);
 }
 
-byte output_amp_tuning_for_point(byte x, byte y)
+byte
+output_amp_tuning_for_point(byte x, byte y)
 {
   uint16_t pt = y * verticalWires + x;
   return (outputAmpPotTune[pt >> 1] >> (4 * (pt & 1))) & 0xf;
 }
 
-void set_output_amp_tuning_for_point(byte x, byte y, byte val)
+void
+set_output_amp_tuning_for_point(byte x, byte y, byte val)
 {
    uint16_t pt = y * verticalWires + x;
    outputAmpPotTune[pt >> 1] =
       (outputAmpPotTune[pt >> 1] & ((pt & 1) ? 0x0f : 0xf0)) |
         ((val & 0x0f) << (4 * (pt & 1)));
+}
+
+void
+set_wave_frequency(byte freq)
+{
+  TCCR2A = B00100011;
+  TCCR2B = B11001;
+  OCR2A = freq << 1;
+  OCR2B = freq;
 }
 
 inline void
@@ -215,43 +226,77 @@ measure_one(uint16_t x, uint16_t y)
   return sample;
 }
 
+uint16_t
+measure_one_avg(uint16_t x, uint16_t y, uint16_t passes)
+{
+  uint16_t s, avg_sample = 0;
+  
+  while(passes-- > 0) {
+     s = measure_one(x, y);
+     avg_sample = (avg_sample > 0) ? ((avg_sample + s) >> 1) : s;
+  }
+  
+  return avg_sample;
+}
+
 void
 auto_tune_output_amp()
-{
+{  
+  uint16_t targetValue = 0;
+  byte mid_x = verticalWires >> 1, mid_y = horizontalWires >> 1;
+  
+  for (byte hwbase = 0; hwbase < 256; hwbase++) {
+     set_halfwave_pot(hwbase);
+     
+     if ((targetValue = measure_one_avg(mid_x, mid_y, CALIB_NUM_TARGET_MEASURE)) < CALIB_THRESHOLD)
+       break;
+  }
+  
   for (uint16_t k = 0; k < verticalWires; k++) {    
     for (uint16_t l = 0; l < horizontalWires; l++) {
-      uint16_t avg_sample = 0, s;
+      uint16_t minDiff = 0xffff, tune_val = 0;
       
       for (byte amp_tune=0; amp_tune<16; amp_tune++) {
-        //uint16_t avg_sample = 0, s;
-        
         set_output_amp_tuning_for_point(k, l, amp_tune);
+
+        uint16_t val = measure_one_avg(k, l, CALIB_NUM_MEASURE);
+        uint16_t diff = (uint16_t)abs((int)val - (int)targetValue);
         
-        for (uint16_t m=0; m<CALIB_NUM_MEASURE; m++) {
-          s = measure_one(k, l);
-          avg_sample = (avg_sample > 0) ? ((avg_sample + s) >> 1) : s;
+        if (diff < minDiff) {
+          minDiff = diff;
+          tune_val = amp_tune;
         }
-        
-        if (avg_sample < CALIB_THRESHOLD)
-          break;
       }
       
-      /*char buf[96];
-      sprintf(buf, "x: %d, y: %d, val: %u, setting: %u", k, l, avg_sample, output_amp_tuning_for_point(k, l));
-      Serial.println(buf);*/
+      set_output_amp_tuning_for_point(k, l, tune_val);
     }
   }
   
-  /*for (int i=0; i<sizeof(outputAmpPotTune); i++) {
-    Serial.print(2*i);
-    Serial.print(" : ");
-    Serial.print(outputAmpPotTune[i] & 0xf);
-    Serial.print(", ");
-    Serial.print(2*i+1);
-    Serial.print(" : ");
-    Serial.print((outputAmpPotTune[i] >> 4) & 0xf);
-    Serial.println();
-  }*/
+  set_halfwave_pot(halfwavePotBase);
+}
+
+void
+print_configuration_info()
+{
+   char buf[96];
+   
+   sprintf(buf, "{ \"halfwave_amp\":\"%d\", \"output_amp\":\"%d\", "
+     "\"delay\":\"%d\", \"freq\":\"%d\",",
+     halfwavePotBase, outputAmpPotBase, measureDelay, waveFrequency);
+   Serial.print(buf);
+   
+   for (uint16_t k = 0; k < verticalWires; k++) {    
+     for (uint16_t l = 0; l < horizontalWires; l++) {
+        sprintf(buf, "\"tune_%d_%d\":\"%d\",",
+          k, l, output_amp_tuning_for_point(k, l));
+        Serial.print(buf);
+     }
+   }
+   
+   sprintf(buf, "\"version\":\"%s\"", FIRMWARE_VERSION);
+   Serial.print(buf);
+   
+   Serial.println("}");
 }
 
 void
@@ -312,6 +357,17 @@ process_cmd(char* cmd)
       break;
     }
     
+    case 'f': {
+      uint16_t value = 0;
+      
+      while('\n' != *cmd)
+        value = value * 10 + (*cmd++ - '0');
+      
+      set_wave_frequency(waveFrequency = value);
+      
+      break;
+    }
+    
     case 's': {
       isRunning = 1;
       break;
@@ -319,7 +375,11 @@ process_cmd(char* cmd)
     
     case 'c': {
       auto_tune_output_amp();
-      //delay(10000000);
+      break;
+    }
+    
+    case 'i': {
+      print_configuration_info();
       break;
     }
     

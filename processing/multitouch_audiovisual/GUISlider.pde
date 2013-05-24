@@ -2,9 +2,16 @@ class GUISlider {
   private int x, y;
   private int width;
   public GUITriangle guiTriangle;
-  int normalizedValue;
+  int value;
   int minValue, maxValue;
-  
+  String name;
+  boolean drawsBorder;
+
+  GUISlider (int x, int y, int w, int minValue, int maxValue, String name) {
+     this(x, y, w, minValue, maxValue);
+     this.name = name;
+  }
+    
   GUISlider (int x, int y, int width, int minValue, int maxValue) {
     this.x = x;
     this.y = y;
@@ -13,6 +20,7 @@ class GUISlider {
     this.maxValue = maxValue;
     guiTriangle = new GUITriangle(this.x, this.y, guiColor);
     this.setValue(minValue);
+    this.name = null;
   }  
 
   boolean mousePressed() {
@@ -22,8 +30,8 @@ class GUISlider {
   boolean mouseDragged(int mX, int mY) {
     // return true if any triangle position has changed
     if (guiTriangle.mouseDragged(constrain(mX, this.x, this.x+width), mY)) {
-       this.normalizedValue = this.minValue+round((this.maxValue - this.minValue) * ((this.guiTriangle.x - this.x) / (float) this.width));
-       textInformation = "value: "+this.normalizedValue;
+       this.value = this.minValue+round((this.maxValue - this.minValue) * ((this.guiTriangle.x - this.x) / (float) this.width));
+       textInformation = "value: "+this.value;
        return true;
     }
     return false;
@@ -34,19 +42,33 @@ class GUISlider {
   }
   
   void setValue(int v) {
-    this.normalizedValue = v;
-    this.guiTriangle.x = this.x + round(this.width/15)*this.normalizedValue;
+    this.value = v;
+    this.guiTriangle.x = this.x + round((float)this.width/(float)(this.maxValue-this.minValue)*this.value);
   }
   
   void draw() {
     strokeWeight(1);
-    stroke(textColor);
+    if (this.drawsBorder)
+      stroke(textColor);
+    else
+      noStroke();
     fill(backgroundColor);
     rect(x-20, y-20, 240, 40);
     stroke(wireColor);
     line(x, y, x+this.width, y); 
     this.guiTriangle.draw();
     noStroke();
+    if (name!=null) {
+      drawText();
+    } 
+  }
+  
+  void drawText() {
+    fill(textColor);
+    text(name, this.x, this.y-10);
+    textAlign(RIGHT);
+    text(value, this.x+this.width, this.y-10);
+    textAlign(LEFT);
   }
 }
 

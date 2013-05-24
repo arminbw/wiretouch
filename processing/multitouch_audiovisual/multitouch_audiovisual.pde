@@ -1,3 +1,4 @@
+import org.json.*;
 import processing.opengl.*;
 import processing.serial.*;
 import java.text.DecimalFormat;
@@ -6,6 +7,8 @@ import codeanticode.glgraphics.*; // http://glgraphics.sourceforge.net
 import s373.flob.*; // http://s373.net/code/flob/flob.html
 import oscP5.*;
 import netP5.*;
+
+String firmwareVersion;
 
 DecimalFormat df = new DecimalFormat("#.###");
 
@@ -37,7 +40,7 @@ static final int horizontalWires = 22;
 static final int crosspointDistance=25; // 25; // how many pixels between 2 crosspoints
 static final int borderDistance=20; // how many pixel distance to the borderDistance
 static final int sketchWidth = (borderDistance*2)+((verticalWires-1)*crosspointDistance);
-static final int sketchHeight = ((horizontalWires+1)*crosspointDistance)+220;
+static final int sketchHeight = ((horizontalWires+1)*crosspointDistance)+300;
 static final int pictureWidth = (verticalWires-1)*crosspointDistance;
 static final int pictureHeight = (horizontalWires-1)*crosspointDistance;
 static final float signalPixelRatio = 0.02*1024; // (see crosspoint.pde)
@@ -52,8 +55,8 @@ int averageSignalCounter = AVERAGESIGNALCOUNTERMAX;
 float contrastLeft = 0.0;
 float contrastRight = 0.0;
 // float contrastRight = 0.203125;
-float blobThreshold = 0.0546875;
-float signalCutOff = 0.40;
+float blobThreshold = 0.535156;
+float signalCutOff = 0.0;
 
 int gridCrosspointX, gridCrosspointY;
 GUIExtraSliders guiExtraSliders;
@@ -76,6 +79,7 @@ void setup() {
       crosspoints[i][j] = new Crosspoint(borderDistance+(crosspointDistance*i), borderDistance+(crosspointDistance*j));
     }
   }
+  firmwareVersion = "unknown";
   dataManager = new DataManager();
   configurator = new Configurator(dataManager);
   initInterpolator();
@@ -86,7 +90,7 @@ void setup() {
   textInformation = configurator.helpText;
   blobManager = new BlobManager(interpolator.pixelWidth, interpolator.pixelHeight, blobThreshold);
   flobManager = new FlobManager(this, interpolator.pixelWidth, interpolator.pixelHeight, blobThreshold);
-  tuioServer = new TuioServer(new NetAddress("128.131.208.146", 3333), 12000);
+  tuioServer = new TuioServer(new NetAddress("128.130.182.86", 3333), 12000);
   lastMillis = millis();
   bNewFrame = true;
   serialDebugger = "";
@@ -94,7 +98,7 @@ void setup() {
   selectedCrosspoint = null;
   gridCrosspointX = 0;
   gridCrosspointY = 0;
-  guiExtraSliders = new GUIExtraSliders(560, 620, 200);
+  guiExtraSliders = new GUIExtraSliders(560, 620, 220);
 }
 
 int count = 0;
@@ -151,7 +155,9 @@ void draw() {
   text(fps+" fps", borderDistance, pictureHeight+(borderDistance*2));
   text(pps+" packets per second", 80, pictureHeight+(borderDistance*2));
   text(serialDebuggerText, borderDistance, pictureHeight+(borderDistance*2)+20);
-
+  textAlign(RIGHT);
+  text("firmware version: " + firmwareVersion, sketchWidth-borderDistance, pictureHeight+(borderDistance*2));
+  textAlign(LEFT);
   if (configurator.bFakeData) {
     drawSignals();
   }
@@ -159,12 +165,25 @@ void draw() {
     if (dataManager.port.available() != 0) {
       while (dataManager.port.available () > 0) {
         dataManager.serBuffer[count++] = (byte)dataManager.port.read();
-        if (count > 0 && 0 == count % dataManager.serBuffer.length) {
-          packets++;
-          dataManager.consumeSerialBuffer(null);
-          count = 0;
-          serialDebugger = serialDebugger + "|";
-          break;
+        
+        if (dataManager.receivingSettings) {
+          if ('\n' == dataManager.serBuffer[count-1]) {
+            dataManager.appendPotValues(new String(dataManager.serBuffer, 0, count-2));
+            dataManager.receivePotValues();
+            count = 0;
+            break;
+          } else if (count > 0 && 0 == count % dataManager.serBuffer.length) {
+            dataManager.appendPotValues(new String(dataManager.serBuffer, 0, count));
+            count = 0;
+          }
+        } else {
+          if (count > 0 && 0 == count % dataManager.serBuffer.length) {
+            packets++;
+            dataManager.consumeSerialBuffer(null);
+            count = 0;
+            serialDebugger = serialDebugger + "|";
+            break;
+          }
         }
       }
     }
@@ -200,24 +219,12 @@ void drawGrid() {
   fill(wireColor);
   textAlign(RIGHT);
   for (int i = 0; i < horizontalWires; i++) {
-    if (gridCrosspointX == i) {
-      stroke(signalColor); 
-    }
     line(borderDistance, borderDistance+(crosspointDistance*i), borderDistance+(crosspointDistance*(verticalWires-1)), borderDistance+(crosspointDistance*i));
-    if (gridCrosspointX == i) {
-      stroke(wireColor);
-    }
     text(i+1, borderDistance-4, borderDistance+(crosspointDistance*i)+4);
   }
   textAlign(CENTER);
   for (int j = 0; j < verticalWires; j++) {
-    if (gridCrosspointY == j) {
-      stroke(signalColor); 
-    }
     line(borderDistance+(crosspointDistance*j), borderDistance, borderDistance+(crosspointDistance*j), borderDistance+(crosspointDistance*(horizontalWires-1)));
-    if (gridCrosspointY == j) {
-      stroke(wireColor);
-    }
     text(j+1, borderDistance+(crosspointDistance*j), borderDistance-4);
   }
   textAlign(LEFT);
@@ -284,8 +291,8 @@ void mousePressed() {
         if (crosspoints[i][j].isInside(mouseX, mouseY)) {
           textInformation = "digital pot for crosspoint: "+(i+1)+" "+(j+1);
           selectedCrosspoint = crosspoints[i][j];
-          gridCrosspointX = j;
-          gridCrosspointY = i;
+          gridCrosspointX = i;
+          gridCrosspointY = j;
         }
       }
     }
@@ -295,7 +302,7 @@ void mousePressed() {
 void mouseDragged() {
   if (selectedCrosspoint != null) {
     selectedCrosspoint.guiSlider.mouseDragged(mouseX, mouseY);
-    dataManager.sendDotMatrixCorrectionData(gridCrosspointX, gridCrosspointY, selectedCrosspoint.guiSlider.normalizedValue);
+    dataManager.sendDotMatrixCorrectionData(gridCrosspointX, gridCrosspointY, selectedCrosspoint.guiSlider.value);
   }
   if (histogramGUI.mouseDragged(mouseX, mouseY) == true) {
     contrastLeft = histogramGUI.getValLeft();
