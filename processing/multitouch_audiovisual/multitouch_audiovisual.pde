@@ -57,7 +57,7 @@ float signalCutOff = 0.40;
 
 int gridCrosspointX, gridCrosspointY;
 GUIExtraSliders guiExtraSliders;
-GUISlider gridSlider;
+Crosspoint selectedCrosspoint;
 
 
 int lastMillis, frames, packets, fps, pps;
@@ -91,7 +91,7 @@ void setup() {
   bNewFrame = true;
   serialDebugger = "";
   serialDebuggerText = "";
-  gridSlider = null;
+  selectedCrosspoint = null;
   gridCrosspointX = 0;
   gridCrosspointY = 0;
   guiExtraSliders = new GUIExtraSliders(560, 620, 200);
@@ -171,8 +171,15 @@ void draw() {
     drawSignals();
   }
   guiExtraSliders.draw();
-  if (gridSlider != null) {
-    gridSlider.draw();
+  // draw the selected crosspoint
+  if (selectedCrosspoint != null) {
+    selectedCrosspoint.guiSlider.draw();
+    stroke(signalColor);
+    fill(signalColor);
+    line(borderDistance, selectedCrosspoint.y, borderDistance+(crosspointDistance*(verticalWires-1)), selectedCrosspoint.y);
+    line(selectedCrosspoint.x, borderDistance, selectedCrosspoint.x, borderDistance+(crosspointDistance*(horizontalWires-1)));    
+    selectedCrosspoint.drawText();
+    noStroke();
   }
 }
 
@@ -261,17 +268,22 @@ void initInterpolator() {
 }
 
 void mousePressed() {
+  if (selectedCrosspoint != null) {
+    if (selectedCrosspoint.guiSlider.mousePressed()) {
+      return;
+    }
+    else {
+      selectedCrosspoint = null; 
+    }
+  }
   histogramGUI.mousePressed();
   guiExtraSliders.mousePressed();
-  if (gridSlider != null) {
-    if (gridSlider.mousePressed()) return;
-  }
   if (averageSignalCounter == 0) {
     for (int i = 0; i < verticalWires; i++) {
       for (int j = 0; j < horizontalWires; j++) {
         if (crosspoints[i][j].isInside(mouseX, mouseY)) {
           textInformation = "digital pot for crosspoint: "+(i+1)+" "+(j+1);
-          gridSlider = crosspoints[i][j].guiSlider;
+          selectedCrosspoint = crosspoints[i][j];
           gridCrosspointX = j;
           gridCrosspointY = i;
         }
@@ -281,9 +293,9 @@ void mousePressed() {
 }
 
 void mouseDragged() {
-  if (gridSlider != null) {
-    gridSlider.mouseDragged(mouseX, mouseY);
-    dataManager.sendDotMatrixCorrectionData(gridCrosspointX, gridCrosspointY, gridSlider.normalizedValue);
+  if (selectedCrosspoint != null) {
+    selectedCrosspoint.guiSlider.mouseDragged(mouseX, mouseY);
+    dataManager.sendDotMatrixCorrectionData(gridCrosspointX, gridCrosspointY, selectedCrosspoint.guiSlider.normalizedValue);
   }
   if (histogramGUI.mouseDragged(mouseX, mouseY) == true) {
     contrastLeft = histogramGUI.getValLeft();

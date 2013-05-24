@@ -4,12 +4,14 @@
 #define SER_BUF_SIZE        256       // serial buffer for sending
 #define IBUF_LEN            12        // serial buffer for incoming commands
 
+#define DEFAULT_MEASURE_DELAY       14
+
 #define HALFWAVE_POT_VALUE          205
-#define OUTPUT_AMP_POT_VALUE        0
+#define OUTPUT_AMP_POT_VALUE        8
 #define OUTPUT_AMP_POT_TUNE_DEFAULT 8
 
-#define CALIB_NUM_MEASURE   8
-#define CALIB_THRESHOLD     900
+#define CALIB_NUM_MEASURE   16
+#define CALIB_THRESHOLD     980
 
 #define ORDER_MEASURE_UNORDERED   0
 #define PRINT_BINARY              1
@@ -32,6 +34,8 @@ static byte halfwavePotBase   = HALFWAVE_POT_VALUE;
 static byte outputAmpPotBase  = OUTPUT_AMP_POT_VALUE;
 
 static byte outputAmpPotTune[((verticalWires*horizontalWires)>>1)+1];
+
+static uint16_t measureDelay  = DEFAULT_MEASURE_DELAY;
 
 static byte isRunning;
 
@@ -202,6 +206,8 @@ measure_one(uint16_t x, uint16_t y)
   
   PORTC &= ~(1 << 1);
   
+  delayMicroseconds(measureDelay);
+  
   sample = measure_with_atmega_adc();
   
   PORTC |= 1 << 1;
@@ -214,8 +220,10 @@ auto_tune_output_amp()
 {
   for (uint16_t k = 0; k < verticalWires; k++) {    
     for (uint16_t l = 0; l < horizontalWires; l++) {
+      uint16_t avg_sample = 0, s;
+      
       for (byte amp_tune=0; amp_tune<16; amp_tune++) {
-        uint16_t avg_sample = 0, s;
+        //uint16_t avg_sample = 0, s;
         
         set_output_amp_tuning_for_point(k, l, amp_tune);
         
@@ -227,6 +235,10 @@ auto_tune_output_amp()
         if (avg_sample < CALIB_THRESHOLD)
           break;
       }
+      
+      /*char buf[96];
+      sprintf(buf, "x: %d, y: %d, val: %u, setting: %u", k, l, avg_sample, output_amp_tuning_for_point(k, l));
+      Serial.println(buf);*/
     }
   }
   
@@ -289,6 +301,17 @@ process_cmd(char* cmd)
       break;
     }
     
+    case 'd': {
+      uint16_t value = 0;
+      
+      while('\n' != *cmd)
+        value = value * 10 + (*cmd++ - '0');
+      
+      measureDelay = value;
+      
+      break;
+    }
+    
     case 's': {
       isRunning = 1;
       break;
@@ -296,6 +319,7 @@ process_cmd(char* cmd)
     
     case 'c': {
       auto_tune_output_amp();
+      //delay(10000000);
       break;
     }
     

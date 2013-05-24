@@ -122,14 +122,8 @@ class DataManager {
     this.port.write("e"+x+","+y+","+value+"\n");
   }
   
-  void sendHalfwaveValue(int value) {
-    textInformation = "halfwave: "+value;
-    this.port.write("h"+value+"\n");
-  }
-
-  void sendOutputampValue(int value) {
-    textInformation = "outputamp: "+value;
-    this.port.write("o"+value+"\n");
+  void sendValue(String command, int value) {
+    this.port.write(command+""+value+"\n");
   }
   
   // save the values for the digital potentiometer

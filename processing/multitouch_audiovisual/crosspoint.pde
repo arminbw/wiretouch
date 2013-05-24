@@ -35,10 +35,14 @@ class Crosspoint {
     }*/
     fill(wireColor);
     if (bDrawText) {
-      text((df.format(measuredSignal)), x+4, y-4);
-      // text((df.format(signalStrength)), x+4, y-4);      
-      // text((df.format(signalStrength)+"\n"+this.signalMax+"\n"+df.format(this.measuredSignalAverage)+"\n"+this.signalMin), x+4, y-4);
+      drawText();
     }
+  }
+  
+  void drawText() {
+      text((df.format(measuredSignal)), x+4, y-4);
+      text((df.format(signalStrength)), x+4, y+12);      
+      // text((df.format(signalStrength)+"\n"+this.signalMax+"\n"+df.format(this.measuredSignalAverage)+"\n"+this.signalMin), x+4, y-4);
   }
 
   void setSignalStrength(int msr) {
@@ -58,7 +62,7 @@ class Crosspoint {
   }
   
   boolean isInside(int x, int y) {
-    return ((x > this.x -12) && (x < this.x + 12) && (y > this.y-12) && (y < this.y + 12));
+    return ((x > this.x -13) && (x < this.x + 123) && (y > this.y-13) && (y < this.y + 13));
   }
 }
 
