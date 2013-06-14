@@ -1,4 +1,3 @@
-import org.json.*;
 import processing.opengl.*;
 import processing.serial.*;
 import java.text.DecimalFormat;
@@ -7,6 +6,7 @@ import codeanticode.glgraphics.*; // http://glgraphics.sourceforge.net
 import s373.flob.*; // http://s373.net/code/flob/flob.html
 import oscP5.*;
 import netP5.*;
+import org.json.*;
 
 String firmwareVersion;
 
@@ -83,7 +83,7 @@ void setup() {
   dataManager = new DataManager();
   configurator = new Configurator(dataManager);
   initInterpolator();
-  histogramGUI = new HistogramGUI(sketchWidth-256-borderDistance, sketchHeight-30, 256);
+  histogramGUI = new HistogramGUI(borderDistance, sketchHeight-160, 256);
   histogramGUI.setMarkerPositions(contrastLeft, contrastRight, blobThreshold);
   // guiEqualizer = new GUIEqualizer((borderDistance*2)+pictureWidth, borderDistance, verticalWires);
   configurator.helpText = "[r]eceive real data   [f]ake data (static)";
@@ -114,13 +114,13 @@ void drawSignals() {
   case 0:
     interpolator.interpolate(crosspoints);
     interpolator.drawPicture(borderDistance, borderDistance);
-    interpolator.drawHistogramFromPoint(sketchWidth-256-borderDistance, sketchHeight-30, 65);
+    interpolator.drawHistogramFromPoint(borderDistance, sketchHeight-160, 65);
     histogramGUI.draw();
     break;
   case 1:
     interpolator.interpolate(crosspoints);
     interpolator.drawPicture(borderDistance, borderDistance);
-    interpolator.drawHistogramFromPoint(sketchWidth-256-borderDistance, sketchHeight-30, 65);
+    interpolator.drawHistogramFromPoint(borderDistance, sketchHeight-160, 65);
     histogramGUI.draw();
     drawSignalCircles(true);
     drawGrid();
