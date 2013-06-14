@@ -25,7 +25,10 @@ class GUIExtraSliders {
   }
       
   boolean mousePressed() {
-    return (halfwave.mousePressed() || outputamp.mousePressed() || delaySlider.mousePressed() || waveFrequency.mousePressed());
+    return (halfwave.mousePressed() ||
+            outputamp.mousePressed() ||
+            delaySlider.mousePressed() ||
+            waveFrequency.mousePressed());
   }  
     
   boolean mouseDragged(int mX, int mY) {

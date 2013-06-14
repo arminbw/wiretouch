@@ -13,11 +13,11 @@ class HistogramGUI {
     triangleSignalCutOff = new GUITriangle(this.x, this.y+13, color(34,209,217));
   }
 
-  void mousePressed() {
-    triangleLeft.mousePressed();
-    triangleRight.mousePressed();
-    triangleBlob.mousePressed();
-    triangleSignalCutOff.mousePressed();
+  boolean mousePressed() {
+    return (triangleLeft.mousePressed() || 
+            triangleRight.mousePressed() ||
+            triangleBlob.mousePressed() ||
+            triangleSignalCutOff.mousePressed());
   }
 
   boolean mouseDragged(int mX, int mY) {

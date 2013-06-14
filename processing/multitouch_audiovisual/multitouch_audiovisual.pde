@@ -276,15 +276,12 @@ void initInterpolator() {
 
 void mousePressed() {
   if (selectedCrosspoint != null) {
-    if (selectedCrosspoint.guiSlider.mousePressed()) {
-      return;
-    }
-    else {
+    if (selectedCrosspoint.guiSlider.mousePressed() == false) {
       selectedCrosspoint = null; 
     }
   }
-  histogramGUI.mousePressed();
-  guiExtraSliders.mousePressed();
+  if (histogramGUI.mousePressed()) return;
+  if (guiExtraSliders.mousePressed()) return;
   if (averageSignalCounter == 0) {
     for (int i = 0; i < verticalWires; i++) {
       for (int j = 0; j < horizontalWires; j++) {
@@ -300,11 +297,7 @@ void mousePressed() {
 }
 
 void mouseDragged() {
-  if (selectedCrosspoint != null) {
-    selectedCrosspoint.guiSlider.mouseDragged(mouseX, mouseY);
-    dataManager.sendDotMatrixCorrectionData(gridCrosspointX, gridCrosspointY, selectedCrosspoint.guiSlider.value);
-  }
-  if (histogramGUI.mouseDragged(mouseX, mouseY) == true) {
+  if (histogramGUI.mouseDragged(mouseX, mouseY)) {
     contrastLeft = histogramGUI.getValLeft();
     contrastRight = histogramGUI.getValRight();
     blobThreshold = histogramGUI.getValBlob();
@@ -314,16 +307,27 @@ void mouseDragged() {
     flobManager.setThreshold(blobThreshold);
     textInformation = "contrast stretch:   " + contrastLeft + "   " + contrastRight + "\nblob threshold: "+ blobThreshold + "   signalCutOff: " + signalCutOff + "\nback to the main [m]enu";
     bNewFrame = true;
+    return;
   }
-  guiExtraSliders.mouseDragged(mouseX, mouseY);
+  if (guiExtraSliders.mouseDragged(mouseX, mouseY)) {
+    bNewFrame = true;
+    return; 
+  }
+  if (selectedCrosspoint != null) {
+    if (selectedCrosspoint.guiSlider.mouseDragged(mouseX, mouseY)) {
+      dataManager.sendDotMatrixCorrectionData(gridCrosspointX, gridCrosspointY, selectedCrosspoint.guiSlider.value);
+      dataManager.bPotValueHasChanged = true;
+    }
+    bNewFrame = true;
+    return;
+  }
 }
 
 void mouseReleased() {
   histogramGUI.mouseReleased();
   guiExtraSliders.mouseReleased();
-  // guiEqualizer.mouseReleased();
+  dataManager.mouseReleased(); // storing pot values
   bNewFrame = true;
-  dataManager.savePotValues();
 }
 
 void keyPressed() {

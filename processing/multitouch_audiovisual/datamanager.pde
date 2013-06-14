@@ -9,6 +9,7 @@ class DataManager {
   byte[] serBuffer = null;
   String settingsJson;
   boolean receivingSettings;
+  boolean bPotValueHasChanged;
 
   DataManager() {
     this.serBuffer = new byte[(horizontalWires * verticalWires * 10)/8];
@@ -32,6 +33,7 @@ class DataManager {
       textInformation = "error with Serial connection: "+e;
       println(Serial.list());
     }
+    bPotValueHasChanged = false;
   }
 
   void initFakeData() {
@@ -105,6 +107,7 @@ class DataManager {
     }
   }
 
+  // output data on console for debugging
   void printData() {
     println("measured signals:");
     String myString = "";
@@ -158,7 +161,7 @@ class DataManager {
     this.settingsJson += aString;
   }
   
-  // getting the autocalibration values from the mt motherboard
+  // getting the autocalibration values from the motherboard
   void receivePotValues() {    
     JSON jsonObject = JSON.parse(this.settingsJson);
     guiExtraSliders.halfwave.setValue(int(jsonObject.getString("halfwave_amp")));
@@ -178,6 +181,13 @@ class DataManager {
       }
     }
     this.savePotValues();
-  } 
+  }
+  
+  void mouseReleased() {
+    if (this.bPotValueHasChanged) {
+      this.savePotValues();
+      this.bPotValueHasChanged = false;
+    }
+  }
 }
 
