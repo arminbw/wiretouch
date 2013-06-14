@@ -241,7 +241,7 @@ measure_one_avg(uint16_t x, uint16_t y, uint16_t passes)
 
 void
 auto_tune_output_amp()
-{  
+{   
   uint16_t targetValue = 0;
   byte mid_x = verticalWires >> 1, mid_y = horizontalWires >> 1;
   
