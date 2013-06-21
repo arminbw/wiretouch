@@ -1,6 +1,6 @@
 #include <SPI.h>
 
-#define FIRMWARE_VERSION    "1.0b1"
+#define FIRMWARE_VERSION    "1.0b2"
 
 #define SERIAL_BAUD         1000000   // serial baud rate
 #define SER_BUF_SIZE        256       // serial buffer for sending
@@ -14,7 +14,9 @@
 
 #define CALIB_NUM_TARGET_MEASURE    128
 #define CALIB_NUM_MEASURE           16
-#define CALIB_THRESHOLD             250
+#define CALIB_THRESHOLD             500
+#define CALIB_THRESHOLD2            1010
+#define CALIB_OUTPUT_BLIND_DELTA    4
 
 #define ORDER_MEASURE_UNORDERED   0
 #define PRINT_BINARY              1
@@ -229,14 +231,13 @@ measure_one(uint16_t x, uint16_t y)
 uint16_t
 measure_one_avg(uint16_t x, uint16_t y, uint16_t passes)
 {
-  uint16_t s, avg_sample = 0;
+  uint16_t p = passes;
+  uint32_t avg_sample = 0;
   
-  while(passes-- > 0) {
-     s = measure_one(x, y);
-     avg_sample = (avg_sample > 0) ? ((avg_sample + s) >> 1) : s;
-  }
+  while(p-- > 0)
+     avg_sample += measure_one(x, y);
   
-  return avg_sample;
+  return (avg_sample / passes);
 }
 
 void
@@ -245,13 +246,15 @@ auto_tune_output_amp()
   uint16_t targetValue = 0;
   byte mid_x = verticalWires >> 1, mid_y = horizontalWires >> 1;
   
-  for (byte hwbase = 0; hwbase < 256; hwbase++) {
-     set_halfwave_pot(hwbase);
+  for (uint16_t oabase = 255; oabase > 0; oabase--) {
+     outputAmpPotBase = oabase;
+    
+     set_output_amp_pot(oabase);
      
-     if ((targetValue = measure_one_avg(mid_x, mid_y, CALIB_NUM_TARGET_MEASURE)) < CALIB_THRESHOLD)
+     if ((targetValue = measure_one_avg(mid_x, mid_y, CALIB_NUM_TARGET_MEASURE)) > CALIB_THRESHOLD)
        break;
   }
-  
+    
   for (uint16_t k = 0; k < verticalWires; k++) {    
     for (uint16_t l = 0; l < horizontalWires; l++) {
       uint16_t minDiff = 0xffff, tune_val = 0;
@@ -272,7 +275,16 @@ auto_tune_output_amp()
     }
   }
   
-  set_halfwave_pot(halfwavePotBase);
+  for (uint16_t oabase = outputAmpPotBase; oabase > 0; oabase--) {
+     outputAmpPotBase = oabase;
+    
+     set_output_amp_pot(oabase);
+     
+     if ((targetValue = measure_one_avg(mid_x, mid_y, CALIB_NUM_TARGET_MEASURE)) > CALIB_THRESHOLD2) {
+       outputAmpPotBase -= CALIB_OUTPUT_BLIND_DELTA;
+       break;
+     }
+  }
 }
 
 void
