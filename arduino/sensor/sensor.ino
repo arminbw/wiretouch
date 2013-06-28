@@ -2,7 +2,7 @@
 
 #define FIRMWARE_VERSION    "1.0b2"
 
-#define SERIAL_BAUD         1000000   // serial baud rate
+#define SERIAL_BAUD         500000    // serial baud rate
 #define SER_BUF_SIZE        256       // serial buffer for sending
 #define IBUF_LEN            12        // serial buffer for incoming commands
 

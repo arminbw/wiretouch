@@ -26,9 +26,9 @@ class wtmApp : public ofBaseApp {
     
         ofSerial serial;
         int didSend;
-    
         unsigned char* recvBuffer;
-        unsigned recvPos;
+        float lastRecvFrameTime;
     
         ofTexture texture;
+    
 };

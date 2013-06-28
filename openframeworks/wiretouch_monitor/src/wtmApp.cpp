@@ -8,7 +8,6 @@ void wtmApp::setup()
 	
     this->bytesPerFrame = (sensorColumns*sensorRows*10)/8;
     this->recvBuffer = (unsigned char*)malloc(this->bytesPerFrame * sizeof(unsigned char));
-    this->recvPos = 0;
     
     ofSetVerticalSync(true);
 	
@@ -18,7 +17,7 @@ void wtmApp::setup()
 	// this should be set to whatever com port your serial device is connected to.
 	// (ie, COM4 on a pc, /dev/tty.... on linux, /dev/tty... on a mac)
 	// arduino users check in arduino app....
-	int baud = 230400;
+	int baud = 300;
 	serial.setup(0, baud);
     sleep(5);
 }
@@ -33,14 +32,21 @@ void wtmApp::update()
             serial.writeByte('s');
             serial.writeByte('\n');
         }
-    } else {
-        while (serial.available()) {
-            if (this->recvPos >= this->bytesPerFrame) {
-                this->recvPos = 0;
+    } else {        
+        if (serial.available() >= this->bytesPerFrame) {
+            int len = serial.readBytes(this->recvBuffer, this->bytesPerFrame);
+            
+            if (len == this->bytesPerFrame) {
+                if (0 != this->lastRecvFrameTime) {
+                    float now = ofGetElapsedTimef();
+                    
+                    ofLog() << (1.0/(now - this->lastRecvFrameTime)) << " pkts/sec, dt: " << (now - this->lastRecvFrameTime);
+                    
+                    this->lastRecvFrameTime = now;
+                } else
+                    this->lastRecvFrameTime = ofGetElapsedTimef();
                 
                 this->makeTexture();
-            } else {
-                this->recvBuffer[this->recvPos++] = serial.readByte();
             }
         }
     }
