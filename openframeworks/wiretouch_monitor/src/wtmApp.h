@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
+#include ofxUI.h
 
 class wtmApp : public ofBaseApp {
 

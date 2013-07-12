@@ -28,10 +28,10 @@ void wtmApp::update()
     if (!didSend) {
         didSend = 1;
         
-        for (int i=0; i<100; i++) {
+        //for (int i=0; i<100; i++) {
             serial.writeByte('s');
             serial.writeByte('\n');
-        }
+        //}
     } else {        
         if (serial.available() >= this->bytesPerFrame) {
             int len = serial.readBytes(this->recvBuffer, this->bytesPerFrame);
