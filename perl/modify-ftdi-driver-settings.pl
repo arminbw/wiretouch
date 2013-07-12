@@ -2,9 +2,15 @@
 
 my($targetPID, $targetVID) = (24577, 1027);
 my($plistpath) = "/System/Library/Extensions/FTDIUSBSerialDriver.kext/Contents/Info.plist";
+my($kext_loaded) = `kextfind -loaded -bundle-id -substring 'com.FTDI'` =~ /FTDIUSBSerialDriver/;
 
 $> eq 0 or die "Use sudo to run this script.";
 (-e $plistpath) or die "The FTDI driver configuration file $plistpath is missing!";
+
+if ($kext_loaded) {
+   print "Please disconnect all FTDI devices and press any key to continue: ";
+   chomp(my $key = <STDIN>);
+}
 
 print "patching $plistpath...\n";
 
@@ -63,9 +69,11 @@ open (FILE, ">$plistpath") or die "Failed to open $plistpath for writing.";
 print FILE @out;
 close FILE;
 
-print "finished writing Info.plist, re-loading kext now...\n";
-
-system("kextunload -b com.FTDI.driver.FTDIUSBSerialDriver");
-system("kextload -b com.FTDI.driver.FTDIUSBSerialDriver");
+if ($kext_loaded) {
+   print "finished writing Info.plist, re-loading kext now...\n";
+   
+   system("kextunload -b com.FTDI.driver.FTDIUSBSerialDriver");
+   system("kextload -b com.FTDI.driver.FTDIUSBSerialDriver");
+}
 
 print "done.";
