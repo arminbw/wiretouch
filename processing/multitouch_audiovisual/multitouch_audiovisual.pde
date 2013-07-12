@@ -234,7 +234,7 @@ void drawGrid() {
 void initSerial() {
   println(Serial.list());
   try {
-    dataManager.calibrate(new Serial( this, Serial.list()[0], 1000000 ));
+    dataManager.calibrate(new Serial( this, Serial.list()[5], 300 ));
   }
   catch (Exception e) {
     textInformation = "error opening Serial connection: "+e;
