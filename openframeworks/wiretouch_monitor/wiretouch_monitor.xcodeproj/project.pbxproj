@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6E9E57271790858C0031D95D /* interpolator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E9E57251790858B0031D95D /* interpolator.cpp */; };
+		6E9E572A17908EA20031D95D /* interpolator2x2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E9E572817908EA20031D95D /* interpolator2x2.cpp */; };
+		6E9E572D1790903D0031D95D /* interpolator4x4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E9E572B1790903D0031D95D /* interpolator4x4.cpp */; };
 		BBAB23CB13894F3D00AA2426 /* GLUT.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = BBAB23BE13894E4700AA2426 /* GLUT.framework */; };
 		C6ED285B179049B800D47DF0 /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C6ED2854179049B800D47DF0 /* tinyxml.cpp */; };
 		C6ED285C179049B800D47DF0 /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C6ED2856179049B800D47DF0 /* tinyxmlerror.cpp */; };
@@ -64,6 +67,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		6E9E57251790858B0031D95D /* interpolator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = interpolator.cpp; sourceTree = "<group>"; };
+		6E9E57261790858B0031D95D /* interpolator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = interpolator.h; sourceTree = "<group>"; };
+		6E9E572817908EA20031D95D /* interpolator2x2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = interpolator2x2.cpp; sourceTree = "<group>"; };
+		6E9E572917908EA20031D95D /* interpolator2x2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = interpolator2x2.h; sourceTree = "<group>"; };
+		6E9E572B1790903D0031D95D /* interpolator4x4.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = interpolator4x4.cpp; sourceTree = "<group>"; };
+		6E9E572C1790903D0031D95D /* interpolator4x4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = interpolator4x4.h; sourceTree = "<group>"; };
 		BBAB23BE13894E4700AA2426 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = ../../../libs/glut/lib/osx/GLUT.framework; sourceTree = "<group>"; };
 		C6ED28231790497600D47DF0 /* ofxUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxUI.h; sourceTree = "<group>"; };
 		C6ED28241790497600D47DF0 /* ofxUI2DGraph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxUI2DGraph.h; sourceTree = "<group>"; };
@@ -331,6 +340,12 @@
 				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
 				E4B69E1F0A3A1BDC003C02F2 /* wtmApp.h */,
 				E4B69E1E0A3A1BDC003C02F2 /* wtmApp.cpp */,
+				6E9E57261790858B0031D95D /* interpolator.h */,
+				6E9E57251790858B0031D95D /* interpolator.cpp */,
+				6E9E572917908EA20031D95D /* interpolator2x2.h */,
+				6E9E572817908EA20031D95D /* interpolator2x2.cpp */,
+				6E9E572C1790903D0031D95D /* interpolator4x4.h */,
+				6E9E572B1790903D0031D95D /* interpolator4x4.cpp */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -434,6 +449,9 @@
 				C6ED285C179049B800D47DF0 /* tinyxmlerror.cpp in Sources */,
 				C6ED285D179049B800D47DF0 /* tinyxmlparser.cpp in Sources */,
 				C6ED285E179049B800D47DF0 /* ofxXmlSettings.cpp in Sources */,
+				6E9E57271790858C0031D95D /* interpolator.cpp in Sources */,
+				6E9E572A17908EA20031D95D /* interpolator2x2.cpp in Sources */,
+				6E9E572D1790903D0031D95D /* interpolator4x4.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

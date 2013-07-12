@@ -9,6 +9,8 @@ void wtmApp::setup()
     this->bytesPerFrame = (sensorColumns*sensorRows*10)/8;
     this->recvBuffer = (unsigned char*)malloc(this->bytesPerFrame * sizeof(unsigned char));
     
+    this->capGridValues = (uint16_t*)malloc(sensorColumns * sensorRows * sizeof(uint16_t));
+    
     ofSetVerticalSync(true);
 	ofBackground(255);
 	ofSetLogLevel(OF_LOG_VERBOSE);
@@ -68,7 +70,7 @@ void wtmApp::update()
                 } else
                     this->lastRecvFrameTime = ofGetElapsedTimef();
                 
-                this->makeTexture();
+                this->consumePacketData();
             }
         }
     }
@@ -80,7 +82,24 @@ void wtmApp::draw(){
         this->texture.draw(10, 10, 640, 440);
 }
 
-void wtmApp::makeTexture()
+void wtmApp::consumePacketData()
+{
+    unsigned char* b = this->recvBuffer;
+    uint16_t* vals = this->capGridValues;
+    int bs = 0, br = 0, cnt = 0;
+    
+    for (int i=0; i<this->bytesPerFrame; i++) {
+        br |= b[i] << bs;
+        bs += 8;
+        while (bs >= 10) {
+            *vals++ = br & 0x3ff;
+            br >>= 10;
+            bs -= 10;
+        }
+    }
+}
+
+/*void wtmApp::makeTexture()
 {
     unsigned char* pixels = (unsigned char*)alloca(this->sensorColumns * this->sensorRows * sizeof(unsigned char));
     
@@ -107,7 +126,7 @@ void wtmApp::makeTexture()
         this->texture.allocate(this->sensorColumns, this->sensorRows, GL_LUMINANCE);
     
     this->texture.loadData(pixels, this->sensorColumns, this->sensorRows, GL_LUMINANCE);    
-}
+}*/
 
 //------------------------------------------------------------s--
 void wtmApp::keyPressed(int key)

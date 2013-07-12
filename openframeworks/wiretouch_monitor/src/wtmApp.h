@@ -24,8 +24,8 @@ class wtmApp : public ofBaseApp {
         void dragEvent(ofDragInfo dragInfo);
         void gotMessage(ofMessage msg);
         void exit();
-    
-        void makeTexture();
+        
+        void consumePacketData();
 		
         int sensorColumns, sensorRows, bytesPerFrame;
     
@@ -33,6 +33,8 @@ class wtmApp : public ofBaseApp {
         int didSend;
         unsigned char* recvBuffer;
         float lastRecvFrameTime;
+    
+        uint16_t* capGridValues;
     
         ofTexture texture;
     
