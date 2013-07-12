@@ -76,4 +76,4 @@ if ($kext_loaded) {
    system("kextload -b com.FTDI.driver.FTDIUSBSerialDriver");
 }
 
-print "done.";
+print "done.\n";
