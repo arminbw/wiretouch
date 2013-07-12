@@ -4,3 +4,4 @@
 *.xcworkspace
 xcuserdata
 bin/*
+openframeworks/wiretouch_monitor/bin/**
