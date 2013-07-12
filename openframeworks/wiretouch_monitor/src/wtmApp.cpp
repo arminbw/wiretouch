@@ -14,6 +14,9 @@ void wtmApp::setup()
 	ofBackground(255);
 	ofSetLogLevel(OF_LOG_VERBOSE);
     
+    // setup GUI
+    gui = new ofxUICanvas(200,200,320,320);
+    
 	// this should be set to whatever com port your serial device is connected to.
 	// (ie, COM4 on a pc, /dev/tty.... on linux, /dev/tty... on a mac)
 	// arduino users check in arduino app....
@@ -135,4 +138,11 @@ void wtmApp::dragEvent(ofDragInfo dragInfo){
 void wtmApp::exit()
 {
     serial.close();
+    gui->saveSettings("GUI/guiSettings.xml");
+    delete gui;
+}
+
+void wtmApp::guiEvent(ofxUIEventArgs &e)
+{
+	
 }

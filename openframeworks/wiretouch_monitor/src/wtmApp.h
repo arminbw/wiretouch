@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ofMain.h"
-#include ofxUI.h
+#include "ofxUI.h"
 
 class wtmApp : public ofBaseApp {
 
@@ -32,4 +32,6 @@ class wtmApp : public ofBaseApp {
     
         ofTexture texture;
     
+        ofxUICanvas *gui;
+    	void guiEvent(ofxUIEventArgs &e);
 };
