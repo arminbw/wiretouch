@@ -10,12 +10,31 @@ void wtmApp::setup()
     this->recvBuffer = (unsigned char*)malloc(this->bytesPerFrame * sizeof(unsigned char));
     
     ofSetVerticalSync(true);
-	
 	ofBackground(255);
 	ofSetLogLevel(OF_LOG_VERBOSE);
     
     // setup GUI
-    gui = new ofxUICanvas(200,200,320,320);
+    int guiWidth = 300;
+    int widgetLength = guiWidth - (2* OFX_UI_GLOBAL_WIDGET_SPACING);
+    int widgetHeight = 16;
+    gui = new ofxUICanvas(WINDOWWIDTH-(guiWidth+WINDOWBORDERDISTANCE),WINDOWBORDERDISTANCE,guiWidth,600);
+    gui->addWidgetDown(new ofxUILabel("SENSOR PARAMETERS", OFX_UI_FONT_SMALL));
+    gui->addSlider("HALFWAVE AMP", 0.0, 100.0, 50, widgetLength, widgetHeight);
+    gui->addSlider("OUTPUT AMP", 0.0, 100.0, 50, widgetLength, widgetHeight);
+    gui->addSlider("SAMPLE DELAY", 0.0, 100.0, 50, widgetLength, widgetHeight);
+    gui->addSlider("SIGNAL FREQUENCY", 0.0, 100.0, 50, widgetLength, widgetHeight);
+    gui->addLabelToggle("BLOBS", false,(widgetLength/2)-(OFX_UI_GLOBAL_WIDGET_SPACING/2),widgetHeight);
+    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    gui->addLabelToggle("GRID", false,(widgetLength/2)-(OFX_UI_GLOBAL_WIDGET_SPACING/2),widgetHeight);
+	gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui->addWidgetDown(new ofxUIFPS(OFX_UI_FONT_SMALL));
+    
+    ofAddListener(gui->newGUIEvent, this, &wtmApp::guiEvent);
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_BACK, ofColor(200,200,200));
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL, ofColor(60,60,60,200)); // also: font color
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL_HIGHLIGHT, ofColor(180,220));
+    gui->setColorBack(ofColor(255, 255, 255));
+    gui->loadSettings("GUI/guiSettings.xml");
     
 	// this should be set to whatever com port your serial device is connected to.
 	// (ie, COM4 on a pc, /dev/tty.... on linux, /dev/tty... on a mac)
@@ -144,5 +163,26 @@ void wtmApp::exit()
 
 void wtmApp::guiEvent(ofxUIEventArgs &e)
 {
-	
+    string widgetName = e.widget->getName();
+	if (widgetName == "HALFWAVE AMP") {
+        ofxUISlider *slider = (ofxUISlider *) e.widget;
+        // slider->getScaledValue()
+    }
+    else if (widgetName == "OUTPUT AMP") {
+        ofxUISlider *slider = (ofxUISlider *) e.widget;        
+    }
+    else if (widgetName == "SAMPLE DELAY") {
+        ofxUISlider *slider = (ofxUISlider *) e.widget;
+    }
+    else if (widgetName == "SIGNAL FREQUENCY") {
+        ofxUISlider *slider = (ofxUISlider *) e.widget;
+    }
+    else if (widgetName == "BLOBS") {
+        ofxUIButton *button = (ofxUIButton *) e.widget;
+        bDrawBlobs = button->getValue();
+    }
+    else if (widgetName == "GRID") {
+        ofxUIButton *button = (ofxUIButton *) e.widget;
+        bDrawGrid = button->getValue();
+    }
 }

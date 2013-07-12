@@ -3,6 +3,10 @@
 #include "ofMain.h"
 #include "ofxUI.h"
 
+#define WINDOWWIDTH 1024
+#define WINDOWHEIGHT 768
+#define WINDOWBORDERDISTANCE 10
+
 class wtmApp : public ofBaseApp {
 
     public:
@@ -34,4 +38,6 @@ class wtmApp : public ofBaseApp {
     
         ofxUICanvas *gui;
     	void guiEvent(ofxUIEventArgs &e);
+        bool bDrawBlobs;
+        bool bDrawGrid;
 };
