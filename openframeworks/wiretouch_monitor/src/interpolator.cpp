@@ -100,7 +100,7 @@ ofTexture* wtmInterpolator::currentTexture()
     }
     
     for (i=0; i<num_pixels; i++) {
-        this->pixels[i] = (unsigned char)(this->interpolatedBuffer[i] * 255);
+        this->pixels[i] = (unsigned char)(255 - this->interpolatedBuffer[i] * 255);
     }
     
     this->texture.loadData(this->pixels, this->interpolatedWidth, this->interpolatedHeight, GL_LUMINANCE);

@@ -22,7 +22,6 @@ void wtmApp::setup()
     int widgetLength = guiWidth - (2* OFX_UI_GLOBAL_WIDGET_SPACING);
     int widgetHeight = 22;
     gui = new ofxUICanvas(WINDOWWIDTH-(guiWidth+WINDOWBORDERDISTANCE),WINDOWBORDERDISTANCE,guiWidth,600);
-    gui->addButton("START", true, widgetLength, widgetHeight);
     gui->addWidgetDown(new ofxUILabel("SENSOR PARAMETERS", OFX_UI_FONT_MEDIUM));
     gui->addSpacer();
     gui->addSlider("HALFWAVE AMP", 0.0, 100.0, 50, widgetLength, widgetHeight);
@@ -38,12 +37,15 @@ void wtmApp::setup()
     gui->addLabelToggle("GRID", false,(widgetLength/2)-(OFX_UI_GLOBAL_WIDGET_SPACING/2),widgetHeight);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->addWidgetDown(new ofxUIFPS(OFX_UI_FONT_SMALL));
+    gui->addSpacer();
+    gui->addButton("START", false, widgetLength, widgetHeight);
     
     ofAddListener(gui->newGUIEvent, this, &wtmApp::guiEvent);
-    // gui->setWidgetColor(OFX_UI_WIDGET_COLOR_BACK, ofColor(200,200,200));
-    // gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL, ofColor(60,60,60,200)); // also: font color
-    // gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL_HIGHLIGHT, ofColor(180,220));
-    gui->setColorBack(ofColor(255, 100));
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_BACK, ofColor(160));
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL, ofColor(255)); // also: font color
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_PADDED, ofColor(255,0,0)); // also: font color
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL_HIGHLIGHT, ofColor(60));
+    gui->setColorBack(ofColor(100, 80));
     gui->loadSettings("GUI/guiSettings.xml");
     
     this->imageInterpolator = (wtmInterpolator*)new wtmInterpolatorCatmullRom(this->sensorColumns, this->sensorRows, 8, 8);
@@ -53,7 +55,6 @@ void wtmApp::setup()
 	// arduino users check in arduino app....
 	int baud = 300;
 	serial.setup(0, baud);
-    sleep(5);
 }
 
 //--------------------------------------------------------------
@@ -83,7 +84,7 @@ void wtmApp::update()
 void wtmApp::draw()
 {
     if (this->texture && this->texture->isAllocated())
-        this->texture->draw(10, 10, 640, 440);
+        this->texture->draw(0, 0, ofGetWidth(), ofGetHeight());
 }
 
 void wtmApp::consumePacketData()
@@ -188,6 +189,8 @@ void wtmApp::guiEvent(ofxUIEventArgs &e)
     else if (widgetName == "START") {
         if (!didSend) {
             didSend = true;
+            serial.writeByte('c');
+            serial.writeByte('\n');
             serial.writeByte('s');
             serial.writeByte('\n');
         }
