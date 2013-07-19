@@ -14,30 +14,36 @@ void wtmApp::setup()
     this->capGridValues = (uint16_t*)malloc(sensorColumns * sensorRows * sizeof(uint16_t));
     
     ofSetVerticalSync(true);
-	ofBackground(255);
+	ofBackground(0);
 	ofSetLogLevel(OF_LOG_VERBOSE);
     
     // setup GUI
     int guiWidth = 300;
     int widgetLength = guiWidth - (2* OFX_UI_GLOBAL_WIDGET_SPACING);
-    int widgetHeight = 16;
+    int widgetHeight = 22;
     gui = new ofxUICanvas(WINDOWWIDTH-(guiWidth+WINDOWBORDERDISTANCE),WINDOWBORDERDISTANCE,guiWidth,600);
-    gui->addWidgetDown(new ofxUILabel("SENSOR PARAMETERS", OFX_UI_FONT_SMALL));
+    gui->addButton("START", true, widgetLength, widgetHeight);
+    gui->addWidgetDown(new ofxUILabel("SENSOR PARAMETERS", OFX_UI_FONT_MEDIUM));
+    gui->addSpacer();
     gui->addSlider("HALFWAVE AMP", 0.0, 100.0, 50, widgetLength, widgetHeight);
     gui->addSlider("OUTPUT AMP", 0.0, 100.0, 50, widgetLength, widgetHeight);
     gui->addSlider("SAMPLE DELAY", 0.0, 100.0, 50, widgetLength, widgetHeight);
     gui->addSlider("SIGNAL FREQUENCY", 0.0, 100.0, 50, widgetLength, widgetHeight);
-    gui->addLabelToggle("BLOBS", false,(widgetLength/2)-(OFX_UI_GLOBAL_WIDGET_SPACING/2),widgetHeight);
+    
+    gui->addWidgetDown(new ofxUILabel("POST PROCESSING", OFX_UI_FONT_MEDIUM));
+    gui->addSpacer();
+    gui->addSlider("SIGNAL FREQUENCY", 1.0, 8.0, 50, widgetLength, widgetHeight);
+    gui->addLabelToggle("BLOBS", false,(widgetLength/2)-(OFX_UI_GLOBAL_WIDGET_SPACING),widgetHeight);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui->addLabelToggle("GRID", false,(widgetLength/2)-(OFX_UI_GLOBAL_WIDGET_SPACING/2),widgetHeight);
-	gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->addWidgetDown(new ofxUIFPS(OFX_UI_FONT_SMALL));
     
     ofAddListener(gui->newGUIEvent, this, &wtmApp::guiEvent);
-    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_BACK, ofColor(200,200,200));
-    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL, ofColor(60,60,60,200)); // also: font color
-    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL_HIGHLIGHT, ofColor(180,220));
-    gui->setColorBack(ofColor(255, 255, 255));
+    // gui->setWidgetColor(OFX_UI_WIDGET_COLOR_BACK, ofColor(200,200,200));
+    // gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL, ofColor(60,60,60,200)); // also: font color
+    // gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL_HIGHLIGHT, ofColor(180,220));
+    gui->setColorBack(ofColor(255, 100));
     gui->loadSettings("GUI/guiSettings.xml");
     
     this->imageInterpolator = (wtmInterpolator*)new wtmInterpolatorCatmullRom(this->sensorColumns, this->sensorRows, 8, 8);
@@ -53,14 +59,7 @@ void wtmApp::setup()
 //--------------------------------------------------------------
 void wtmApp::update()
 {    
-    if (!didSend) {
-        didSend = 1;
-        
-        //for (int i=0; i<100; i++) {
-            serial.writeByte('s');
-            serial.writeByte('\n');
-        //}
-    } else {        
+    if (didSend) {        
         if (serial.available() >= this->bytesPerFrame) {
             int len = serial.readBytes(this->recvBuffer, this->bytesPerFrame);
             
@@ -185,5 +184,12 @@ void wtmApp::guiEvent(ofxUIEventArgs &e)
     else if (widgetName == "GRID") {
         ofxUIButton *button = (ofxUIButton *) e.widget;
         bDrawGrid = button->getValue();
+    }
+    else if (widgetName == "START") {
+        if (!didSend) {
+            didSend = true;
+            serial.writeByte('s');
+            serial.writeByte('\n');
+        }
     }
 }
