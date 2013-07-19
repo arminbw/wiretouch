@@ -90,7 +90,7 @@ void setup() {
   textInformation = configurator.helpText;
   blobManager = new BlobManager(interpolator.pixelWidth, interpolator.pixelHeight, blobThreshold);
   flobManager = new FlobManager(this, interpolator.pixelWidth, interpolator.pixelHeight, blobThreshold);
-  tuioServer = new TuioServer(new NetAddress("128.130.182.86", 3333), 12000);
+  tuioServer = new TuioServer(new NetAddress("127.0.0.1", 3333), 12000);
   lastMillis = millis();
   bNewFrame = true;
   serialDebugger = "";
