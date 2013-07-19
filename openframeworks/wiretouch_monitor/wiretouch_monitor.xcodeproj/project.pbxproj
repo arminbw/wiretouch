@@ -10,6 +10,7 @@
 		6E9E57271790858C0031D95D /* interpolator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E9E57251790858B0031D95D /* interpolator.cpp */; };
 		6E9E572A17908EA20031D95D /* interpolator2x2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E9E572817908EA20031D95D /* interpolator2x2.cpp */; };
 		6E9E572D1790903D0031D95D /* interpolator4x4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E9E572B1790903D0031D95D /* interpolator4x4.cpp */; };
+		6ED6467A1799638C00486DE3 /* interpolator-catmull-rom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6ED646781799638C00486DE3 /* interpolator-catmull-rom.cpp */; };
 		BBAB23CB13894F3D00AA2426 /* GLUT.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = BBAB23BE13894E4700AA2426 /* GLUT.framework */; };
 		C6ED285B179049B800D47DF0 /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C6ED2854179049B800D47DF0 /* tinyxml.cpp */; };
 		C6ED285C179049B800D47DF0 /* tinyxmlerror.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C6ED2856179049B800D47DF0 /* tinyxmlerror.cpp */; };
@@ -73,6 +74,8 @@
 		6E9E572917908EA20031D95D /* interpolator2x2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = interpolator2x2.h; sourceTree = "<group>"; };
 		6E9E572B1790903D0031D95D /* interpolator4x4.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = interpolator4x4.cpp; sourceTree = "<group>"; };
 		6E9E572C1790903D0031D95D /* interpolator4x4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = interpolator4x4.h; sourceTree = "<group>"; };
+		6ED646781799638C00486DE3 /* interpolator-catmull-rom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "interpolator-catmull-rom.cpp"; sourceTree = "<group>"; };
+		6ED646791799638C00486DE3 /* interpolator-catmull-rom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "interpolator-catmull-rom.h"; sourceTree = "<group>"; };
 		BBAB23BE13894E4700AA2426 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = ../../../libs/glut/lib/osx/GLUT.framework; sourceTree = "<group>"; };
 		C6ED28231790497600D47DF0 /* ofxUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxUI.h; sourceTree = "<group>"; };
 		C6ED28241790497600D47DF0 /* ofxUI2DGraph.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ofxUI2DGraph.h; sourceTree = "<group>"; };
@@ -346,6 +349,8 @@
 				6E9E572817908EA20031D95D /* interpolator2x2.cpp */,
 				6E9E572C1790903D0031D95D /* interpolator4x4.h */,
 				6E9E572B1790903D0031D95D /* interpolator4x4.cpp */,
+				6ED646791799638C00486DE3 /* interpolator-catmull-rom.h */,
+				6ED646781799638C00486DE3 /* interpolator-catmull-rom.cpp */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -452,6 +457,7 @@
 				6E9E57271790858C0031D95D /* interpolator.cpp in Sources */,
 				6E9E572A17908EA20031D95D /* interpolator2x2.cpp in Sources */,
 				6E9E572D1790903D0031D95D /* interpolator4x4.cpp in Sources */,
+				6ED6467A1799638C00486DE3 /* interpolator-catmull-rom.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

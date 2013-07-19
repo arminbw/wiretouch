@@ -1,5 +1,7 @@
 #include "wtmApp.h"
 
+#include "interpolator-catmull-rom.h"
+
 //--------------------------------------------------------------
 void wtmApp::setup()
 {
@@ -37,6 +39,8 @@ void wtmApp::setup()
     gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL_HIGHLIGHT, ofColor(180,220));
     gui->setColorBack(ofColor(255, 255, 255));
     gui->loadSettings("GUI/guiSettings.xml");
+    
+    this->imageInterpolator = (wtmInterpolator*)new wtmInterpolatorCatmullRom(this->sensorColumns, this->sensorRows, 8, 8);
     
 	// this should be set to whatever com port your serial device is connected to.
 	// (ie, COM4 on a pc, /dev/tty.... on linux, /dev/tty... on a mac)
@@ -77,56 +81,34 @@ void wtmApp::update()
 }
 
 //--------------------------------------------------------------
-void wtmApp::draw(){
-    if (this->texture.isAllocated())
-        this->texture.draw(10, 10, 640, 440);
+void wtmApp::draw()
+{
+    if (this->texture && this->texture->isAllocated())
+        this->texture->draw(10, 10, 640, 440);
 }
 
 void wtmApp::consumePacketData()
 {
     unsigned char* b = this->recvBuffer;
-    uint16_t* vals = this->capGridValues;
     int bs = 0, br = 0, cnt = 0;
     
     for (int i=0; i<this->bytesPerFrame; i++) {
         br |= b[i] << bs;
         bs += 8;
         while (bs >= 10) {
-            *vals++ = br & 0x3ff;
-            br >>= 10;
-            bs -= 10;
-        }
-    }
-}
-
-/*void wtmApp::makeTexture()
-{
-    unsigned char* pixels = (unsigned char*)alloca(this->sensorColumns * this->sensorRows * sizeof(unsigned char));
-    
-    unsigned char* b = this->recvBuffer;
-    int bs = 0, br = 0, cnt = 0;
-    
-    for (int i=0; i<this->bytesPerFrame; i++) {
-        br |= b[i] << bs;
-        bs += 8;
-        while (bs >= 10) {
-            int sig = br & 0x3ff;
-            br >>= 10;
-            bs -= 10;
-            
             int px = cnt / this->sensorRows, py = cnt % this->sensorRows;
             
-            pixels[py * this->sensorColumns + px] = (unsigned char)((float)sig/(float)1023.0 * 255);
+            this->capGridValues[py * this->sensorColumns + px] = br & 0x3ff;
             
+            br >>= 10;
+            bs -= 10;
             cnt++;
         }
     }
     
-    if (!this->texture.isAllocated())
-        this->texture.allocate(this->sensorColumns, this->sensorRows, GL_LUMINANCE);
-    
-    this->texture.loadData(pixels, this->sensorColumns, this->sensorRows, GL_LUMINANCE);    
-}*/
+    this->imageInterpolator->runInterpolation(this->capGridValues);
+    this->texture = this->imageInterpolator->currentTexture();
+}
 
 //------------------------------------------------------------s--
 void wtmApp::keyPressed(int key)

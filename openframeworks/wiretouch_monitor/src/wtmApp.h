@@ -3,6 +3,8 @@
 #include "ofMain.h"
 #include "ofxUI.h"
 
+#include "interpolator.h"
+
 #define WINDOWWIDTH 1024
 #define WINDOWHEIGHT 768
 #define WINDOWBORDERDISTANCE 10
@@ -34,9 +36,11 @@ class wtmApp : public ofBaseApp {
         unsigned char* recvBuffer;
         float lastRecvFrameTime;
     
+        ofTexture* texture;
+    
         uint16_t* capGridValues;
     
-        ofTexture texture;
+        wtmInterpolator* imageInterpolator;
     
         ofxUICanvas *gui;
     	void guiEvent(ofxUIEventArgs &e);

@@ -20,6 +20,13 @@ wtmInterpolator::wtmInterpolator(int sw, int sh, int wf, int hf)
     this->_fy                   = 1.0 / (2.0 * (double)hf);
     
     this->interpolatedBuffer    = (double*)malloc(this->interpolatedHeight * this->interpolatedWidth * sizeof(double));
+    this->pixels = (unsigned char*)malloc(this->interpolatedHeight * this->interpolatedWidth * sizeof(unsigned char));
+}
+
+wtmInterpolator::~wtmInterpolator()
+{
+    free(this->interpolatedBuffer);
+    free(this->pixels);
 }
 
 double wtmInterpolator::sensorValueAt(int x, int y)
@@ -30,7 +37,7 @@ double wtmInterpolator::sensorValueAt(int x, int y)
         x = MAX(0, MIN(x, this->sourceWidth-1));
         y = MAX(0, MIN(y, this->sourceHeight-1));
     
-        val = (double)this->values[y * this->sourceHeight + x] / 1024.0;
+        val = (double)this->values[y * this->sourceWidth + x] / 1024.0;
     }
     
     return val;
@@ -81,4 +88,22 @@ void wtmInterpolator::finishInterpolate4(int x, int y)
 double wtmInterpolator::interpolate4(int x, int y, int ix, int iy, float fx, float fy)
 {
     return 0.0;
+}
+
+ofTexture* wtmInterpolator::currentTexture()
+{
+    int i, num_pixels = this->interpolatedWidth * this->interpolatedHeight;
+    
+    if (!this->texture.isAllocated()) {
+        this->texture.allocate(this->interpolatedWidth, this->interpolatedHeight, GL_LUMINANCE);
+        this->texture.setTextureMinMagFilter(GL_NEAREST, GL_NEAREST);
+    }
+    
+    for (i=0; i<num_pixels; i++) {
+        this->pixels[i] = (unsigned char)(this->interpolatedBuffer[i] * 255);
+    }
+    
+    this->texture.loadData(this->pixels, this->interpolatedWidth, this->interpolatedHeight, GL_LUMINANCE);
+    
+    return &this->texture;
 }

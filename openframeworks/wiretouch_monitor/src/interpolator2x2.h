@@ -11,14 +11,14 @@
 
 #include "interpolator.h"
 
-class wtmInterpolator2x2 : wtmInterpolator {
+class wtmInterpolator2x2 : public wtmInterpolator {
     public:
         wtmInterpolator2x2(int sw, int sh, int wf, int hf);
     
     protected:
         double a, b, c, d;
     
-        double interp_func(double a, double b, float f);
+        virtual double interp_func(double a, double b, float f);
         double interpolate4(int x, int y, int ix, int iy, float fx, float fy);
         void beginInterpolate4(int x, int y);
 };

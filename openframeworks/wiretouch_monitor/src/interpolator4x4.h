@@ -11,7 +11,7 @@
 
 #include "interpolator.h"
 
-class wtmInterpolator4x4 : wtmInterpolator {
+class wtmInterpolator4x4 : public wtmInterpolator {
     public:
         wtmInterpolator4x4(int sw, int sh, int wf, int hf);
     
@@ -24,7 +24,7 @@ class wtmInterpolator4x4 : wtmInterpolator {
          */
         double a, b, c, d, t0, t1, t2, t3, t4, t5, t6, t7, t8, t9, t10, t11;
     
-        double interp_func(double p0, double p1, double p2, double p3, double f);
+        virtual double interp_func(double p0, double p1, double p2, double p3, double f);
         double interpolate4(int x, int y, int ix, int iy, float fx, float fy);
         void beginInterpolate4(int x, int y);
 };
