@@ -5,4 +5,5 @@
 xcuserdata
 bin/*
 openframeworks/wiretouch_monitor/bin/**
+openframeworks/wiretouch_monitor/bin/data/GUI/guiSettings.xml
 !data/

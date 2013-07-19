@@ -1,5 +1,7 @@
 #include "wtmApp.h"
 
+#include "cJSON.h"
+
 #include "interpolator-catmull-rom.h"
 
 //--------------------------------------------------------------
@@ -7,9 +9,13 @@ void wtmApp::setup()
 {
     this->sensorColumns = 32;
     this->sensorRows = 22;
+    
+    state = wtmAppStateIdle;
 	
     this->bytesPerFrame = (sensorColumns*sensorRows*10)/8;
     this->recvBuffer = (unsigned char*)malloc(this->bytesPerFrame * sizeof(unsigned char));
+    
+    this->settingsString = NULL;
     
     this->capGridValues = (uint16_t*)malloc(sensorColumns * sensorRows * sizeof(uint16_t));
     
@@ -24,14 +30,14 @@ void wtmApp::setup()
     gui = new ofxUICanvas(WINDOWWIDTH-(guiWidth+WINDOWBORDERDISTANCE),WINDOWBORDERDISTANCE,guiWidth,600);
     gui->addWidgetDown(new ofxUILabel("SENSOR PARAMETERS", OFX_UI_FONT_MEDIUM));
     gui->addSpacer();
-    gui->addSlider("HALFWAVE AMP", 0.0, 100.0, 50, widgetLength, widgetHeight);
-    gui->addSlider("OUTPUT AMP", 0.0, 100.0, 50, widgetLength, widgetHeight);
+    gui->addSlider("HALFWAVE AMP", 0.0, 255.0, 50, widgetLength, widgetHeight);
+    gui->addSlider("OUTPUT AMP", 0.0, 255.0, 50, widgetLength, widgetHeight);
     gui->addSlider("SAMPLE DELAY", 0.0, 100.0, 50, widgetLength, widgetHeight);
-    gui->addSlider("SIGNAL FREQUENCY", 0.0, 100.0, 50, widgetLength, widgetHeight);
+    gui->addSlider("SIGNAL FREQUENCY", 1.0, 60.0, 50, widgetLength, widgetHeight);
     
     gui->addWidgetDown(new ofxUILabel("POST PROCESSING", OFX_UI_FONT_MEDIUM));
     gui->addSpacer();
-    gui->addSlider("SIGNAL FREQUENCY", 1.0, 8.0, 50, widgetLength, widgetHeight);
+    gui->addSlider("UPSAMPLING", 1.0, 8.0, 50, widgetLength, widgetHeight);
     gui->addLabelToggle("BLOBS", false,(widgetLength/2)-(OFX_UI_GLOBAL_WIDGET_SPACING),widgetHeight);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui->addLabelToggle("GRID", false,(widgetLength/2)-(OFX_UI_GLOBAL_WIDGET_SPACING/2),widgetHeight);
@@ -59,24 +65,55 @@ void wtmApp::setup()
 
 //--------------------------------------------------------------
 void wtmApp::update()
-{    
-    if (didSend) {        
-        if (serial.available() >= this->bytesPerFrame) {
-            int len = serial.readBytes(this->recvBuffer, this->bytesPerFrame);
+{
+    switch (this->state) {
+        case wtmAppStateReceivingSettings: {
+            while(serial.available()) {
+                if (NULL == this->settingsString)
+                    this->settingsString = new string();
             
-            if (len == this->bytesPerFrame) {
-                if (0 != this->lastRecvFrameTime) {
-                    float now = ofGetElapsedTimef();
-                    
-                    ofLog() << (1.0/(now - this->lastRecvFrameTime)) << " pkts/sec, dt: " << (now - this->lastRecvFrameTime);
-                    
-                    this->lastRecvFrameTime = now;
-                } else
-                    this->lastRecvFrameTime = ofGetElapsedTimef();
+                int c = serial.readByte();
                 
-                this->consumePacketData();
+                *this->settingsString += (char)c;
+                
+                if ('\n' == c) {
+                    this->state = wtmAppStateReceivingTouches;
+
+                    this->consumeSettings(this->settingsString->c_str());
+                    
+                    delete this->settingsString;
+                    this->settingsString = NULL;
+                    break;
+                }
             }
+            
+            break;
         }
+    
+        case wtmAppStateReceivingTouches: {
+            if (serial.available() >= this->bytesPerFrame) {
+                int len = serial.readBytes(this->recvBuffer, this->bytesPerFrame);
+                
+                if (len == this->bytesPerFrame) {
+                    if (0 != this->lastRecvFrameTime) {
+                        float now = ofGetElapsedTimef();
+                        
+                        ofLog() << (1.0/(now - this->lastRecvFrameTime)) << " pkts/sec, dt: " << (now - this->lastRecvFrameTime);
+                        
+                        this->lastRecvFrameTime = now;
+                    } else
+                        this->lastRecvFrameTime = ofGetElapsedTimef();
+                    
+                    this->consumePacketData();
+                }
+            }
+            
+            break;
+        }
+            
+        case wtmAppStateIdle:
+        default:
+            break;
     }
 }
 
@@ -108,6 +145,36 @@ void wtmApp::consumePacketData()
     
     this->imageInterpolator->runInterpolation(this->capGridValues);
     this->texture = this->imageInterpolator->currentTexture();
+}
+
+void wtmApp::consumeSettings(const char* json)
+{
+    if (NULL != json) {
+        cJSON* root = cJSON_Parse(json);
+        
+        if (NULL != root) {
+            cJSON* version = cJSON_GetObjectItem(root, "version"), *cur;
+            printf("VERSION: %s\n", version->valuestring);
+            
+            cur = cJSON_GetObjectItem(root, "halfwave_amp");
+            ofxUISlider* slider = (ofxUISlider*)gui->getWidget("HALFWAVE AMP");
+            slider->setValue(atoi(cur->valuestring));
+            
+            cur = cJSON_GetObjectItem(root, "output_amp");
+            slider = (ofxUISlider*)gui->getWidget("OUTPUT AMP");
+            slider->setValue(atoi(cur->valuestring));
+            
+            cur = cJSON_GetObjectItem(root, "delay");
+            slider = (ofxUISlider*)gui->getWidget("SAMPLE DELAY");
+            slider->setValue(atoi(cur->valuestring));
+            
+            cur = cJSON_GetObjectItem(root, "freq");
+            slider = (ofxUISlider*)gui->getWidget("SIGNAL FREQUENCY");
+            slider->setValue(atoi(cur->valuestring));
+            
+            cJSON_Delete(root);
+        }
+    }
 }
 
 //------------------------------------------------------------s--
@@ -187,12 +254,15 @@ void wtmApp::guiEvent(ofxUIEventArgs &e)
         bDrawGrid = button->getValue();
     }
     else if (widgetName == "START") {
-        if (!didSend) {
-            didSend = true;
+        if (wtmAppStateIdle == this->state) {
             serial.writeByte('c');
+            serial.writeByte('\n');
+            serial.writeByte('i');
             serial.writeByte('\n');
             serial.writeByte('s');
             serial.writeByte('\n');
+            
+            this->state = wtmAppStateReceivingSettings;
         }
     }
 }

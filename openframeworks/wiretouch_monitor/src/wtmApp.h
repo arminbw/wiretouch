@@ -9,6 +9,12 @@
 #define WINDOWHEIGHT 768
 #define WINDOWBORDERDISTANCE 10
 
+typedef enum _wtmAppState {
+    wtmAppStateIdle,
+    wtmAppStateReceivingSettings,
+    wtmAppStateReceivingTouches
+} wtmAppState;
+
 class wtmApp : public ofBaseApp {
 
     public:
@@ -28,13 +34,17 @@ class wtmApp : public ofBaseApp {
         void exit();
         
         void consumePacketData();
+        void consumeSettings(const char* json);
 		
+        wtmAppState state;
+    
         int sensorColumns, sensorRows, bytesPerFrame;
     
         ofSerial serial;
-        int didSend;
         unsigned char* recvBuffer;
         float lastRecvFrameTime;
+    
+        string* settingsString;
     
         ofTexture* texture;
     
