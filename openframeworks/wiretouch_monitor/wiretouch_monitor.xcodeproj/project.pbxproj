@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		6E8FB56017AC0A5600CD1A36 /* interpolator-wnn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E8FB55E17AC0A5600CD1A36 /* interpolator-wnn.cpp */; };
 		6E9053B51799A35A0059DAA9 /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = 6E9053B31799A35A0059DAA9 /* cJSON.c */; };
+		6E906EDC17AC385F004AB489 /* interpolator-lagrange.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E906EDA17AC385F004AB489 /* interpolator-lagrange.cpp */; };
 		6E9E57271790858C0031D95D /* interpolator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E9E57251790858B0031D95D /* interpolator.cpp */; };
 		6E9E572A17908EA20031D95D /* interpolator2x2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E9E572817908EA20031D95D /* interpolator2x2.cpp */; };
 		6E9E572D1790903D0031D95D /* interpolator4x4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E9E572B1790903D0031D95D /* interpolator4x4.cpp */; };
@@ -79,6 +80,8 @@
 		6E8FB55F17AC0A5600CD1A36 /* interpolator-wnn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "interpolator-wnn.h"; sourceTree = "<group>"; };
 		6E9053B31799A35A0059DAA9 /* cJSON.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cJSON.c; sourceTree = "<group>"; };
 		6E9053B41799A35A0059DAA9 /* cJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cJSON.h; sourceTree = "<group>"; };
+		6E906EDA17AC385F004AB489 /* interpolator-lagrange.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "interpolator-lagrange.cpp"; sourceTree = "<group>"; };
+		6E906EDB17AC385F004AB489 /* interpolator-lagrange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "interpolator-lagrange.h"; sourceTree = "<group>"; };
 		6E9E57251790858B0031D95D /* interpolator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = interpolator.cpp; sourceTree = "<group>"; };
 		6E9E57261790858B0031D95D /* interpolator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = interpolator.h; sourceTree = "<group>"; };
 		6E9E572817908EA20031D95D /* interpolator2x2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = interpolator2x2.cpp; sourceTree = "<group>"; };
@@ -236,6 +239,8 @@
 				6E9F653717ABF3C8002D5DC8 /* interpolator-hermite.cpp */,
 				6E8FB55F17AC0A5600CD1A36 /* interpolator-wnn.h */,
 				6E8FB55E17AC0A5600CD1A36 /* interpolator-wnn.cpp */,
+				6E906EDB17AC385F004AB489 /* interpolator-lagrange.h */,
+				6E906EDA17AC385F004AB489 /* interpolator-lagrange.cpp */,
 			);
 			name = "Sensor Interpolation";
 			sourceTree = "<group>";
@@ -516,6 +521,7 @@
 				6E9F653917ABF3CA002D5DC8 /* interpolator-hermite.cpp in Sources */,
 				6E9F653C17ABF67A002D5DC8 /* interpolator-types.cpp in Sources */,
 				6E8FB56017AC0A5600CD1A36 /* interpolator-wnn.cpp in Sources */,
+				6E906EDC17AC385F004AB489 /* interpolator-lagrange.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

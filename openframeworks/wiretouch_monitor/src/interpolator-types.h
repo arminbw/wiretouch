@@ -18,7 +18,8 @@ typedef enum _wtmInterpolatorType {
     wtmInterpolatorTypeCubic,
     wtmInterpolatorTypeHermite,
     wtmInterpolatorTypeCatmullRom,
-    wtmInterpolatorTypeWNN
+    wtmInterpolatorTypeWNN,
+    wtmInterpolatorTypeLagrange
 } wtmInterpolatorType;
 
 wtmInterpolator* wtmInterpolatorOfType(wtmInterpolatorType aType,

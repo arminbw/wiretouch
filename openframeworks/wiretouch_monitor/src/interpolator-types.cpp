@@ -14,6 +14,7 @@
 #include "interpolator-hermite.h"
 #include "interpolator-catmull-rom.h"
 #include "interpolator-wnn.h"
+#include "interpolator-lagrange.h"
 
 
 wtmInterpolator* wtmInterpolatorOfType(wtmInterpolatorType aType,
@@ -53,6 +54,11 @@ wtmInterpolator* wtmInterpolatorOfType(wtmInterpolatorType aType,
         case wtmInterpolatorTypeWNN:
             anInterpolator =
                 (wtmInterpolator*)new wtmInterpolatorWNN(width, height, upsample_width, upsample_height);
+            break;
+        
+        case wtmInterpolatorTypeLagrange:
+            anInterpolator =
+                (wtmInterpolator*)new wtmInterpolatorLagrange(width, height, upsample_width, upsample_height);
             break;
             
         case wtmInterpolatorTypeUnknown:
