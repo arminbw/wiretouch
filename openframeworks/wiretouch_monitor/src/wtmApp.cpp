@@ -317,19 +317,19 @@ void wtmApp::guiEvent(ofxUIEventArgs &e)
         snprintf(buf, sizeof(buf), "f%d\n", val);
         serial.writeBytes((unsigned char*)buf, strlen(buf));
     } else if (widgetName == kGUILinearName) {
-        this->interpolatorType = wtmInterpolatorTypeTypeLinear;
+        this->interpolatorType = wtmInterpolatorTypeLinear;
         this->updateInterpolator();
     } else if (widgetName == kGUICatmullName) {
-        this->interpolatorType = wtmInterpolatorTypeTypeCatmullRom;
+        this->interpolatorType = wtmInterpolatorTypeCatmullRom;
         this->updateInterpolator();
     } else if (widgetName == kGUICosineName) {
-        this->interpolatorType = wtmInterpolatorTypeTypeCosine;
+        this->interpolatorType = wtmInterpolatorTypeCosine;
         this->updateInterpolator();
     } else if (widgetName == kGUICubicName) {
-        this->interpolatorType = wtmInterpolatorTypeTypeCubic;
+        this->interpolatorType = wtmInterpolatorTypeCubic;
         this->updateInterpolator();
     } else if (widgetName == kGUIHermiteName) {
-        this->interpolatorType = wtmInterpolatorTypeTypeHermite;
+        this->interpolatorType = wtmInterpolatorTypeHermite;
         this->updateInterpolator();
     } else if (widgetName == kGUIBlobsName) {
         ofxUIButton *button = (ofxUIButton *) e.widget;
