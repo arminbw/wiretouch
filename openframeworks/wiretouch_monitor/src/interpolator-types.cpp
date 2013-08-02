@@ -13,6 +13,8 @@
 #include "interpolator-cubic.h"
 #include "interpolator-hermite.h"
 #include "interpolator-catmull-rom.h"
+#include "interpolator-wnn.h"
+#include "interpolator-lagrange.h"
 
 
 wtmInterpolator* wtmInterpolatorOfType(wtmInterpolatorType aType,
@@ -24,32 +26,42 @@ wtmInterpolator* wtmInterpolatorOfType(wtmInterpolatorType aType,
     wtmInterpolator* anInterpolator = NULL;
     
     switch (aType) {
-        case wtmInterpolatorTypeTypeLinear:
+        case wtmInterpolatorTypeLinear:
             anInterpolator =
                 (wtmInterpolator*)new wtmInterpolatorLinear(width, height, upsample_width, upsample_height);
             break;
         
-        case wtmInterpolatorTypeTypeCosine:
+        case wtmInterpolatorTypeCosine:
             anInterpolator =
                 (wtmInterpolator*)new wtmInterpolatorCosine(width, height, upsample_width, upsample_height);
             break;
         
-        case wtmInterpolatorTypeTypeCubic:
+        case wtmInterpolatorTypeCubic:
             anInterpolator =
                 (wtmInterpolator*)new wtmInterpolatorCubic(width, height, upsample_width, upsample_height);
             break;
         
-        case wtmInterpolatorTypeTypeHermite:
+        case wtmInterpolatorTypeHermite:
             anInterpolator =
                 (wtmInterpolator*)new wtmInterpolatorHermite(width, height, upsample_width, upsample_height);
             break;
         
-        case wtmInterpolatorTypeTypeCatmullRom:
+        case wtmInterpolatorTypeCatmullRom:
             anInterpolator =
                 (wtmInterpolator*)new wtmInterpolatorCatmullRom(width, height, upsample_width, upsample_height);
             break;
         
-        case wtmInterpolatorTypeTypeUnknown:
+        case wtmInterpolatorTypeWNN:
+            anInterpolator =
+                (wtmInterpolator*)new wtmInterpolatorWNN(width, height, upsample_width, upsample_height);
+            break;
+        
+        case wtmInterpolatorTypeLagrange:
+            anInterpolator =
+                (wtmInterpolator*)new wtmInterpolatorLagrange(width, height, upsample_width, upsample_height);
+            break;
+            
+        case wtmInterpolatorTypeUnknown:
         default:
             break;
             

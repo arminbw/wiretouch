@@ -12,12 +12,14 @@
 #include "interpolator.h"
 
 typedef enum _wtmInterpolatorType {
-    wtmInterpolatorTypeTypeUnknown = 0,
-    wtmInterpolatorTypeTypeLinear,
-    wtmInterpolatorTypeTypeCosine,
-    wtmInterpolatorTypeTypeCubic,
-    wtmInterpolatorTypeTypeHermite,
-    wtmInterpolatorTypeTypeCatmullRom
+    wtmInterpolatorTypeUnknown = 0,
+    wtmInterpolatorTypeLinear,
+    wtmInterpolatorTypeCosine,
+    wtmInterpolatorTypeCubic,
+    wtmInterpolatorTypeHermite,
+    wtmInterpolatorTypeCatmullRom,
+    wtmInterpolatorTypeWNN,
+    wtmInterpolatorTypeLagrange
 } wtmInterpolatorType;
 
 wtmInterpolator* wtmInterpolatorOfType(wtmInterpolatorType aType,
