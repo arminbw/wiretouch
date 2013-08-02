@@ -48,15 +48,15 @@ void wtmApp::setup()
     
     gui->addWidgetDown(new ofxUILabel("INTERPOLATION", OFX_UI_FONT_MEDIUM));
     gui->addSpacer();
-    gui->addSlider("UPSAMPLING", 1.0, 8.0, 50, widgetWidth, widgetHeight);
-    vector<string> items;
-    items.push_back("LINEAR");
-    items.push_back("CATMULL");
-    items.push_back("COSINE");
-    items.push_back("CUBIC");
-    items.push_back("HERMITE");
-    ofxUIDropDownList *interpolationDropdownMenu = gui->addDropDownList("TYPE", items, (widgetWidth/2)-(OFX_UI_GLOBAL_WIDGET_SPACING));
-    interpolationDropdownMenu->setAutoClose(true);
+    // gui->addWidgetDown(new ofxUISpectrum(widgetWidth, widgetHeight, buffer, 256, 0.0, 1.0, "SPECTRUM"));
+                       
+    vector<string> whatAType;
+    whatAType.push_back("LINEAR");
+    whatAType.push_back("CATMULL");
+    whatAType.push_back("COSINE");
+    whatAType.push_back("CUBIC");
+    whatAType.push_back("HERMITE");
+    ofxUIDropDownList *interpolationDropdownMenu = gui->addDropDownList("TYPE", whatAType, (widgetWidth/2)-(OFX_UI_GLOBAL_WIDGET_SPACING));
     gui->addLabelToggle("BLOBS", false,(widgetWidth/2)-(OFX_UI_GLOBAL_WIDGET_SPACING),widgetHeight);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     gui->addLabelToggle("GRID", false,(widgetWidth/2)-(OFX_UI_GLOBAL_WIDGET_SPACING/2),widgetHeight);
@@ -66,14 +66,15 @@ void wtmApp::setup()
     gui->addLabelButton("START", false, widgetWidth, widgetHeight);
     
     
-    
-    ofAddListener(gui->newGUIEvent, this, &wtmApp::guiEvent);
-    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_BACK, ofColor(160));
-    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL, ofColor(255)); // also: font color
-    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_PADDED, ofColor(255,0,0)); // also: font color
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_BACK, ofColor(120));
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL, ofColor(255, 120)); // font color
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_OUTLINE_HIGHLIGHT, ofColor(0,0,255));
     gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL_HIGHLIGHT, ofColor(239, 171, 233));
     gui->setColorBack(ofColor(100, 80));
+    
     gui->loadSettings("GUI/guiSettings.xml");
+    ofAddListener(gui->newGUIEvent, this, &wtmApp::guiEvent);
+    interpolationDropdownMenu->setAutoClose(true);
     interpolationDropdownMenu->setShowCurrentSelected(true);
     interpolationDropdownMenu->checkAndSetTitleLabel();
     
@@ -242,7 +243,8 @@ void wtmApp::mouseDragged(int x, int y, int button){
 
 //--------------------------------------------------------------
 void wtmApp::mousePressed(int x, int y, int button){
-
+    // close all pullDown menus when click happens somewhere outside the menus
+    
 }
 
 //--------------------------------------------------------------
@@ -279,25 +281,34 @@ void wtmApp::guiEvent(ofxUIEventArgs &e)
     string widgetName = e.widget->getName();
 	if (widgetName == kGUIHalfwaveAmpName) {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
-        int val = slider->getScaledValue();
+        int val = round(slider->getScaledValue());
+        slider->setValue(val);
         snprintf(buf, sizeof(buf), "h%d\n", val);
         serial.writeBytes((unsigned char*)buf, strlen(buf));
     }
     else if (widgetName == kGUIOutputAmpName) {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
-        int val = slider->getScaledValue();
+        int val = round(slider->getScaledValue());
+        slider->setValue(val);
         snprintf(buf, sizeof(buf), "o%d\n", val);
         serial.writeBytes((unsigned char*)buf, strlen(buf));
     }
     else if (widgetName == kGUISampleDelayName) {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
-        int val = slider->getScaledValue();
+        int val = round(slider->getScaledValue());
+        slider->setValue(val);
         snprintf(buf, sizeof(buf), "d%d\n", val);
         serial.writeBytes((unsigned char*)buf, strlen(buf));
     }
+    else if (widgetName == kGUIUpSamplingName) {
+        ofxUISlider *slider = (ofxUISlider *) e.widget;
+        int val = round(slider->getScaledValue());
+        slider->setValue(val);
+    }
     else if (widgetName == kGUISignalFrequencyName) {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
-        int val = slider->getScaledValue();
+        int val = round(slider->getScaledValue());
+        slider->setValue(val);
         snprintf(buf, sizeof(buf), "f%d\n", val);
         serial.writeBytes((unsigned char*)buf, strlen(buf));
     }
