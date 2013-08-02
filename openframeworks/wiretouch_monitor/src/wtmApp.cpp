@@ -53,7 +53,7 @@ void wtmApp::setup()
     gui->loadSettings("GUI/guiSettings.xml");
     
     this->interpolator = NULL;
-    this->interpolatorType = wtmInterpolatorTypeTypeCatmullRom;
+    this->interpolatorType = wtmInterpolatorTypeCatmullRom;
     this->interpolatorUpsampleX = 8;
     this->interpolatorUpsampleY = 8;
     
