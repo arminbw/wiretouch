@@ -3,6 +3,7 @@
 #include "ofMain.h"
 #include "ofxUI.h"
 
+#include "interpolator-types.h"
 #include "interpolator.h"
 
 #define WINDOWWIDTH 1024
@@ -35,6 +36,9 @@ class wtmApp : public ofBaseApp {
         
         void consumePacketData();
         void consumeSettings(const char* json);
+    
+    protected:
+        void updateInterpolator();
 		
         wtmAppState state;
     
@@ -50,7 +54,9 @@ class wtmApp : public ofBaseApp {
     
         uint16_t* capGridValues;
     
-        wtmInterpolator* imageInterpolator;
+        wtmInterpolator*        interpolator;
+        wtmInterpolatorType     interpolatorType;
+        int                     interpolatorUpsampleX, interpolatorUpsampleY;
     
         ofxUICanvas *gui;
     	void guiEvent(ofxUIEventArgs &e);
