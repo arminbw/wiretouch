@@ -4,6 +4,17 @@
 
 #include "interpolator-catmull-rom.h"
 
+#define kGUIHalfwaveAmpName         ("HALFWAVE AMP")
+#define kGUIOutputAmpName           ("OUTPUT AMP")
+#define kGUISampleDelayName         ("SAMPLE DELAY")
+#define kGUISignalFrequencyName     ("SIGNAL FREQUENCY")
+#define kGUIPostProcessingName      ("POST PROCESSING")
+#define kGUIUpSamplingName          ("UPSAMPLING")
+#define kGUIInterpolationTypeName   ("INTERPOLATION")
+#define kGUIGridName                ("GRID")
+#define kGUIBlobsName               ("BLOBS")
+#define kGUIStartName               ("START")
+
 //--------------------------------------------------------------
 void wtmApp::setup()
 {
@@ -23,36 +34,48 @@ void wtmApp::setup()
 	ofBackground(0);
 	ofSetLogLevel(OF_LOG_VERBOSE);
     
-    // setup GUI
+    // setup MAIN GUI
     int guiWidth = 300;
-    int widgetLength = guiWidth - (2* OFX_UI_GLOBAL_WIDGET_SPACING);
+    int widgetWidth = guiWidth - (2* OFX_UI_GLOBAL_WIDGET_SPACING);
     int widgetHeight = 22;
     gui = new ofxUICanvas(WINDOWWIDTH-(guiWidth+WINDOWBORDERDISTANCE),WINDOWBORDERDISTANCE,guiWidth,600);
     gui->addWidgetDown(new ofxUILabel("SENSOR PARAMETERS", OFX_UI_FONT_MEDIUM));
     gui->addSpacer();
-    gui->addSlider("HALFWAVE AMP", 0.0, 255.0, 50, widgetLength, widgetHeight);
-    gui->addSlider("OUTPUT AMP", 0.0, 255.0, 50, widgetLength, widgetHeight);
-    gui->addSlider("SAMPLE DELAY", 0.0, 100.0, 50, widgetLength, widgetHeight);
-    gui->addSlider("SIGNAL FREQUENCY", 1.0, 60.0, 50, widgetLength, widgetHeight);
+    gui->addSlider(kGUIHalfwaveAmpName, 0.0, 255.0, 50, widgetWidth, widgetHeight);
+    gui->addSlider(kGUIOutputAmpName, 0.0, 255.0, 50, widgetWidth, widgetHeight);
+    gui->addSlider(kGUISampleDelayName, 0.0, 100.0, 50, widgetWidth, widgetHeight);
+    gui->addSlider(kGUISignalFrequencyName, 1.0, 60.0, 50, widgetWidth, widgetHeight);
     
-    gui->addWidgetDown(new ofxUILabel("POST PROCESSING", OFX_UI_FONT_MEDIUM));
+    gui->addWidgetDown(new ofxUILabel("INTERPOLATION", OFX_UI_FONT_MEDIUM));
     gui->addSpacer();
-    gui->addSlider("UPSAMPLING", 1.0, 8.0, 50, widgetLength, widgetHeight);
-    gui->addLabelToggle("BLOBS", false,(widgetLength/2)-(OFX_UI_GLOBAL_WIDGET_SPACING),widgetHeight);
+    gui->addSlider("UPSAMPLING", 1.0, 8.0, 50, widgetWidth, widgetHeight);
+    vector<string> items;
+    items.push_back("LINEAR");
+    items.push_back("CATMULL");
+    items.push_back("COSINE");
+    items.push_back("CUBIC");
+    items.push_back("HERMITE");
+    ofxUIDropDownList *interpolationDropdownMenu = gui->addDropDownList("TYPE", items, (widgetWidth/2)-(OFX_UI_GLOBAL_WIDGET_SPACING));
+    interpolationDropdownMenu->setAutoClose(true);
+    gui->addLabelToggle("BLOBS", false,(widgetWidth/2)-(OFX_UI_GLOBAL_WIDGET_SPACING),widgetHeight);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui->addLabelToggle("GRID", false,(widgetLength/2)-(OFX_UI_GLOBAL_WIDGET_SPACING/2),widgetHeight);
+    gui->addLabelToggle("GRID", false,(widgetWidth/2)-(OFX_UI_GLOBAL_WIDGET_SPACING/2),widgetHeight);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->addWidgetDown(new ofxUIFPS(OFX_UI_FONT_SMALL));
     gui->addSpacer();
-    gui->addButton("START", false, widgetLength, widgetHeight);
+    gui->addLabelButton("START", false, widgetWidth, widgetHeight);
+    
+    
     
     ofAddListener(gui->newGUIEvent, this, &wtmApp::guiEvent);
     gui->setWidgetColor(OFX_UI_WIDGET_COLOR_BACK, ofColor(160));
     gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL, ofColor(255)); // also: font color
     gui->setWidgetColor(OFX_UI_WIDGET_COLOR_PADDED, ofColor(255,0,0)); // also: font color
-    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL_HIGHLIGHT, ofColor(60));
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL_HIGHLIGHT, ofColor(239, 171, 233));
     gui->setColorBack(ofColor(100, 80));
     gui->loadSettings("GUI/guiSettings.xml");
+    interpolationDropdownMenu->setShowCurrentSelected(true);
+    interpolationDropdownMenu->checkAndSetTitleLabel();
     
     this->imageInterpolator = (wtmInterpolator*)new wtmInterpolatorCatmullRom(this->sensorColumns, this->sensorRows, 8, 8);
     
@@ -157,19 +180,19 @@ void wtmApp::consumeSettings(const char* json)
             printf("VERSION: %s\n", version->valuestring);
             
             cur = cJSON_GetObjectItem(root, "halfwave_amp");
-            ofxUISlider* slider = (ofxUISlider*)gui->getWidget("HALFWAVE AMP");
+            ofxUISlider* slider = (ofxUISlider*)gui->getWidget(kGUIHalfwaveAmpName);
             slider->setValue(atoi(cur->valuestring));
             
             cur = cJSON_GetObjectItem(root, "output_amp");
-            slider = (ofxUISlider*)gui->getWidget("OUTPUT AMP");
+            slider = (ofxUISlider*)gui->getWidget(kGUIOutputAmpName);
             slider->setValue(atoi(cur->valuestring));
             
             cur = cJSON_GetObjectItem(root, "delay");
-            slider = (ofxUISlider*)gui->getWidget("SAMPLE DELAY");
+            slider = (ofxUISlider*)gui->getWidget(kGUISampleDelayName);
             slider->setValue(atoi(cur->valuestring));
             
             cur = cJSON_GetObjectItem(root, "freq");
-            slider = (ofxUISlider*)gui->getWidget("SIGNAL FREQUENCY");
+            slider = (ofxUISlider*)gui->getWidget(kGUISignalFrequencyName);
             slider->setValue(atoi(cur->valuestring));
             
             cJSON_Delete(root);
@@ -231,29 +254,45 @@ void wtmApp::exit()
 
 void wtmApp::guiEvent(ofxUIEventArgs &e)
 {
+    char buf[32];
+    
     string widgetName = e.widget->getName();
-	if (widgetName == "HALFWAVE AMP") {
+	if (widgetName == kGUIHalfwaveAmpName) {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
-        // slider->getScaledValue()
+        int val = slider->getScaledValue();
+        snprintf(buf, sizeof(buf), "h%d\n", val);
+        serial.writeBytes((unsigned char*)buf, strlen(buf));
     }
-    else if (widgetName == "OUTPUT AMP") {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;        
-    }
-    else if (widgetName == "SAMPLE DELAY") {
+    else if (widgetName == kGUIOutputAmpName) {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
+        int val = slider->getScaledValue();
+        snprintf(buf, sizeof(buf), "o%d\n", val);
+        serial.writeBytes((unsigned char*)buf, strlen(buf));
     }
-    else if (widgetName == "SIGNAL FREQUENCY") {
+    else if (widgetName == kGUISampleDelayName) {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
+        int val = slider->getScaledValue();
+        snprintf(buf, sizeof(buf), "d%d\n", val);
+        serial.writeBytes((unsigned char*)buf, strlen(buf));
     }
-    else if (widgetName == "BLOBS") {
+    else if (widgetName == kGUISignalFrequencyName) {
+        ofxUISlider *slider = (ofxUISlider *) e.widget;
+        int val = slider->getScaledValue();
+        snprintf(buf, sizeof(buf), "f%d\n", val);
+        serial.writeBytes((unsigned char*)buf, strlen(buf));
+    }
+    else if (widgetName == kGUIInterpolationTypeName) {
+        ofxUIButton *pullDownMenu = (ofxUIButton *) e.widget;
+    }
+    else if (widgetName == kGUIBlobsName) {
         ofxUIButton *button = (ofxUIButton *) e.widget;
         bDrawBlobs = button->getValue();
     }
-    else if (widgetName == "GRID") {
+    else if (widgetName == kGUIGridName) {
         ofxUIButton *button = (ofxUIButton *) e.widget;
         bDrawGrid = button->getValue();
     }
-    else if (widgetName == "START") {
+    else if (widgetName == kGUIStartName) {
         if (wtmAppStateIdle == this->state) {
             serial.writeByte('c');
             serial.writeByte('\n');
