@@ -33,7 +33,7 @@ class wtmApp : public ofBaseApp {
         void dragEvent(ofDragInfo dragInfo);
         void gotMessage(ofMessage msg);
         void exit();
-        
+
         void consumePacketData();
         void consumeSettings(const char* json);
     

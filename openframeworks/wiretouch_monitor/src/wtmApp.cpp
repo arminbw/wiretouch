@@ -14,6 +14,11 @@
 #define kGUIGridName                ("GRID")
 #define kGUIBlobsName               ("BLOBS")
 #define kGUIStartName               ("START")
+#define kGUILinearName              ("LINEAR")
+#define kGUICatmullName             ("CATMULL")
+#define kGUICosineName              ("COSINE")
+#define kGUICubicName               ("CUBIC")
+#define kGUIHermiteName             ("HERMITE")
 
 //--------------------------------------------------------------
 void wtmApp::setup()
@@ -49,21 +54,22 @@ void wtmApp::setup()
     gui->addWidgetDown(new ofxUILabel("INTERPOLATION", OFX_UI_FONT_MEDIUM));
     gui->addSpacer();
     // gui->addWidgetDown(new ofxUISpectrum(widgetWidth, widgetHeight, buffer, 256, 0.0, 1.0, "SPECTRUM"));
-                       
     vector<string> whatAType;
-    whatAType.push_back("LINEAR");
-    whatAType.push_back("CATMULL");
-    whatAType.push_back("COSINE");
-    whatAType.push_back("CUBIC");
-    whatAType.push_back("HERMITE");
+    whatAType.push_back(kGUILinearName);
+    whatAType.push_back(kGUICatmullName);
+    whatAType.push_back(kGUICosineName);
+    whatAType.push_back(kGUICubicName);
+    whatAType.push_back(kGUIHermiteName);
     ofxUIDropDownList *interpolationDropdownMenu = gui->addDropDownList("TYPE", whatAType, (widgetWidth/2)-(OFX_UI_GLOBAL_WIDGET_SPACING));
-    gui->addLabelToggle("BLOBS", false,(widgetWidth/2)-(OFX_UI_GLOBAL_WIDGET_SPACING),widgetHeight);
+    gui->addSlider(kGUIUpSamplingName, 1.0, 8.0, 50, widgetWidth, widgetHeight);
+    gui->addSpacer();
+    gui->addLabelToggle(kGUIBlobsName, false,(widgetWidth/2)-(OFX_UI_GLOBAL_WIDGET_SPACING),widgetHeight);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui->addLabelToggle("GRID", false,(widgetWidth/2)-(OFX_UI_GLOBAL_WIDGET_SPACING/2),widgetHeight);
+    gui->addLabelToggle(kGUIGridName, false,(widgetWidth/2)-(OFX_UI_GLOBAL_WIDGET_SPACING/2),widgetHeight);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->addWidgetDown(new ofxUIFPS(OFX_UI_FONT_SMALL));
     gui->addSpacer();
-    gui->addLabelButton("START", false, widgetWidth, widgetHeight);
+    gui->addLabelButton(kGUIStartName, false, widgetWidth, widgetHeight);
     
     
     gui->setWidgetColor(OFX_UI_WIDGET_COLOR_BACK, ofColor(120));
@@ -277,53 +283,61 @@ void wtmApp::exit()
 void wtmApp::guiEvent(ofxUIEventArgs &e)
 {
     char buf[32];
-    
     string widgetName = e.widget->getName();
+    // printf("guiEvent: %s\n", widgetName.c_str());
 	if (widgetName == kGUIHalfwaveAmpName) {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
         int val = round(slider->getScaledValue());
         slider->setValue(val);
         snprintf(buf, sizeof(buf), "h%d\n", val);
         serial.writeBytes((unsigned char*)buf, strlen(buf));
-    }
-    else if (widgetName == kGUIOutputAmpName) {
+    } else if (widgetName == kGUIOutputAmpName) {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
         int val = round(slider->getScaledValue());
         slider->setValue(val);
         snprintf(buf, sizeof(buf), "o%d\n", val);
         serial.writeBytes((unsigned char*)buf, strlen(buf));
-    }
-    else if (widgetName == kGUISampleDelayName) {
+    } else if (widgetName == kGUISampleDelayName) {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
         int val = round(slider->getScaledValue());
         slider->setValue(val);
         snprintf(buf, sizeof(buf), "d%d\n", val);
         serial.writeBytes((unsigned char*)buf, strlen(buf));
-    }
-    else if (widgetName == kGUIUpSamplingName) {
+    } else if (widgetName == kGUIUpSamplingName) {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
         int val = round(slider->getScaledValue());
         slider->setValue(val);
-    }
-    else if (widgetName == kGUISignalFrequencyName) {
+        this->interpolatorUpsampleX = val;
+        this->interpolatorUpsampleY = val;
+        this->updateInterpolator();
+    } else if (widgetName == kGUISignalFrequencyName) {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
         int val = round(slider->getScaledValue());
         slider->setValue(val);
         snprintf(buf, sizeof(buf), "f%d\n", val);
         serial.writeBytes((unsigned char*)buf, strlen(buf));
-    }
-    else if (widgetName == kGUIInterpolationTypeName) {
-        ofxUIButton *pullDownMenu = (ofxUIButton *) e.widget;
-    }
-    else if (widgetName == kGUIBlobsName) {
+    } else if (widgetName == kGUILinearName) {
+        this->interpolatorType = wtmInterpolatorTypeTypeLinear;
+        this->updateInterpolator();
+    } else if (widgetName == kGUICatmullName) {
+        this->interpolatorType = wtmInterpolatorTypeTypeCatmullRom;
+        this->updateInterpolator();
+    } else if (widgetName == kGUICosineName) {
+        this->interpolatorType = wtmInterpolatorTypeTypeCosine;
+        this->updateInterpolator();
+    } else if (widgetName == kGUICubicName) {
+        this->interpolatorType = wtmInterpolatorTypeTypeCubic;
+        this->updateInterpolator();
+    } else if (widgetName == kGUIHermiteName) {
+        this->interpolatorType = wtmInterpolatorTypeTypeHermite;
+        this->updateInterpolator();
+    } else if (widgetName == kGUIBlobsName) {
         ofxUIButton *button = (ofxUIButton *) e.widget;
         bDrawBlobs = button->getValue();
-    }
-    else if (widgetName == kGUIGridName) {
+    } else if (widgetName == kGUIGridName) {
         ofxUIButton *button = (ofxUIButton *) e.widget;
         bDrawGrid = button->getValue();
-    }
-    else if (widgetName == kGUIStartName) {
+    } else if (widgetName == kGUIStartName) {
         if (wtmAppStateIdle == this->state) {
             serial.writeByte('c');
             serial.writeByte('\n');
