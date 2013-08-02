@@ -18,7 +18,7 @@ class wtmInterpolator2x2 : public wtmInterpolator {
     protected:
         double a, b, c, d;
     
-        virtual double interp_func(double a, double b, float f);
+        virtual double interp_func(double a, double b, double f);
         double interpolate4(int x, int y, int ix, int iy, float fx, float fy);
         void beginInterpolate4(int x, int y);
 };

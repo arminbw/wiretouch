@@ -25,11 +25,15 @@ wtmInterpolator::wtmInterpolator(int sw, int sh, int wf, int hf)
 
 wtmInterpolator::~wtmInterpolator()
 {
+    if (this->texture.isAllocated())
+        this->texture.clear();
+    
     free(this->interpolatedBuffer);
     free(this->pixels);
 }
 
-double wtmInterpolator::sensorValueAt(int x, int y)
+double
+wtmInterpolator::sensorValueAt(int x, int y)
 {
     double val = 0.0;
     
@@ -43,7 +47,8 @@ double wtmInterpolator::sensorValueAt(int x, int y)
     return val;
 }
 
-void wtmInterpolator::runInterpolation(uint16_t* sensorValues)
+void
+wtmInterpolator::runInterpolation(uint16_t* sensorValues)
 {
     this->values = sensorValues;
     this->beginInterpolation();
@@ -69,28 +74,34 @@ void wtmInterpolator::runInterpolation(uint16_t* sensorValues)
     this->values = NULL;
 }
 
-void wtmInterpolator::beginInterpolation()
+void
+wtmInterpolator::beginInterpolation()
 {
 }
 
-void wtmInterpolator::finishInterpolation()
+void
+wtmInterpolator::finishInterpolation()
 {
 }
 
-void wtmInterpolator::beginInterpolate4(int x, int y)
+void
+wtmInterpolator::beginInterpolate4(int x, int y)
 {
 }
 
-void wtmInterpolator::finishInterpolate4(int x, int y)
+void
+wtmInterpolator::finishInterpolate4(int x, int y)
 {
 }
 
-double wtmInterpolator::interpolate4(int x, int y, int ix, int iy, float fx, float fy)
+double
+wtmInterpolator::interpolate4(int x, int y, int ix, int iy, float fx, float fy)
 {
     return 0.0;
 }
 
-ofTexture* wtmInterpolator::currentTexture()
+ofTexture*
+wtmInterpolator::currentTexture()
 {
     int i, num_pixels = this->interpolatedWidth * this->interpolatedHeight;
     

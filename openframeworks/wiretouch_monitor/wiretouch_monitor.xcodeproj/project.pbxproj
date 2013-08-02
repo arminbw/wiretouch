@@ -11,6 +11,11 @@
 		6E9E57271790858C0031D95D /* interpolator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E9E57251790858B0031D95D /* interpolator.cpp */; };
 		6E9E572A17908EA20031D95D /* interpolator2x2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E9E572817908EA20031D95D /* interpolator2x2.cpp */; };
 		6E9E572D1790903D0031D95D /* interpolator4x4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E9E572B1790903D0031D95D /* interpolator4x4.cpp */; };
+		6E9F653017ABF17D002D5DC8 /* interpolator-linear.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E9F652E17ABF17D002D5DC8 /* interpolator-linear.cpp */; };
+		6E9F653317ABF2D9002D5DC8 /* interpolator-cosine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E9F653117ABF2D8002D5DC8 /* interpolator-cosine.cpp */; };
+		6E9F653617ABF339002D5DC8 /* interpolator-cubic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E9F653417ABF338002D5DC8 /* interpolator-cubic.cpp */; };
+		6E9F653917ABF3CA002D5DC8 /* interpolator-hermite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E9F653717ABF3C8002D5DC8 /* interpolator-hermite.cpp */; };
+		6E9F653C17ABF67A002D5DC8 /* interpolator-types.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E9F653B17ABF67A002D5DC8 /* interpolator-types.cpp */; };
 		6ED6467A1799638C00486DE3 /* interpolator-catmull-rom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6ED646781799638C00486DE3 /* interpolator-catmull-rom.cpp */; };
 		BBAB23CB13894F3D00AA2426 /* GLUT.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = BBAB23BE13894E4700AA2426 /* GLUT.framework */; };
 		C6ED285B179049B800D47DF0 /* tinyxml.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C6ED2854179049B800D47DF0 /* tinyxml.cpp */; };
@@ -77,6 +82,16 @@
 		6E9E572917908EA20031D95D /* interpolator2x2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = interpolator2x2.h; sourceTree = "<group>"; };
 		6E9E572B1790903D0031D95D /* interpolator4x4.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = interpolator4x4.cpp; sourceTree = "<group>"; };
 		6E9E572C1790903D0031D95D /* interpolator4x4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = interpolator4x4.h; sourceTree = "<group>"; };
+		6E9F652E17ABF17D002D5DC8 /* interpolator-linear.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "interpolator-linear.cpp"; sourceTree = "<group>"; };
+		6E9F652F17ABF17D002D5DC8 /* interpolator-linear.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "interpolator-linear.h"; sourceTree = "<group>"; };
+		6E9F653117ABF2D8002D5DC8 /* interpolator-cosine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "interpolator-cosine.cpp"; sourceTree = "<group>"; };
+		6E9F653217ABF2D8002D5DC8 /* interpolator-cosine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "interpolator-cosine.h"; sourceTree = "<group>"; };
+		6E9F653417ABF338002D5DC8 /* interpolator-cubic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "interpolator-cubic.cpp"; sourceTree = "<group>"; };
+		6E9F653517ABF339002D5DC8 /* interpolator-cubic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "interpolator-cubic.h"; sourceTree = "<group>"; };
+		6E9F653717ABF3C8002D5DC8 /* interpolator-hermite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "interpolator-hermite.cpp"; sourceTree = "<group>"; };
+		6E9F653817ABF3C9002D5DC8 /* interpolator-hermite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "interpolator-hermite.h"; sourceTree = "<group>"; };
+		6E9F653A17ABF4D7002D5DC8 /* interpolator-types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "interpolator-types.h"; sourceTree = "<group>"; };
+		6E9F653B17ABF67A002D5DC8 /* interpolator-types.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "interpolator-types.cpp"; sourceTree = "<group>"; };
 		6ED646781799638C00486DE3 /* interpolator-catmull-rom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "interpolator-catmull-rom.cpp"; sourceTree = "<group>"; };
 		6ED646791799638C00486DE3 /* interpolator-catmull-rom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "interpolator-catmull-rom.h"; sourceTree = "<group>"; };
 		BBAB23BE13894E4700AA2426 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = ../../../libs/glut/lib/osx/GLUT.framework; sourceTree = "<group>"; };
@@ -193,6 +208,31 @@
 				6E9053B31799A35A0059DAA9 /* cJSON.c */,
 			);
 			path = "3rd-party";
+			sourceTree = "<group>";
+		};
+		6E9F652D17ABF0F0002D5DC8 /* Sensor Interpolation */ = {
+			isa = PBXGroup;
+			children = (
+				6E9F653A17ABF4D7002D5DC8 /* interpolator-types.h */,
+				6E9F653B17ABF67A002D5DC8 /* interpolator-types.cpp */,
+				6E9E57261790858B0031D95D /* interpolator.h */,
+				6E9E57251790858B0031D95D /* interpolator.cpp */,
+				6E9E572917908EA20031D95D /* interpolator2x2.h */,
+				6E9E572817908EA20031D95D /* interpolator2x2.cpp */,
+				6E9E572C1790903D0031D95D /* interpolator4x4.h */,
+				6E9E572B1790903D0031D95D /* interpolator4x4.cpp */,
+				6E9F652F17ABF17D002D5DC8 /* interpolator-linear.h */,
+				6E9F652E17ABF17D002D5DC8 /* interpolator-linear.cpp */,
+				6E9F653217ABF2D8002D5DC8 /* interpolator-cosine.h */,
+				6E9F653117ABF2D8002D5DC8 /* interpolator-cosine.cpp */,
+				6E9F653517ABF339002D5DC8 /* interpolator-cubic.h */,
+				6E9F653417ABF338002D5DC8 /* interpolator-cubic.cpp */,
+				6ED646791799638C00486DE3 /* interpolator-catmull-rom.h */,
+				6ED646781799638C00486DE3 /* interpolator-catmull-rom.cpp */,
+				6E9F653817ABF3C9002D5DC8 /* interpolator-hermite.h */,
+				6E9F653717ABF3C8002D5DC8 /* interpolator-hermite.cpp */,
+			);
+			name = "Sensor Interpolation";
 			sourceTree = "<group>";
 		};
 		BB4B014C10F69532006C3DED /* addons */ = {
@@ -352,18 +392,11 @@
 		E4B69E1C0A3A1BDC003C02F2 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				6E9F652D17ABF0F0002D5DC8 /* Sensor Interpolation */,
 				6E9053B21799A35A0059DAA9 /* 3rd-party */,
 				E4B69E1D0A3A1BDC003C02F2 /* main.cpp */,
 				E4B69E1F0A3A1BDC003C02F2 /* wtmApp.h */,
 				E4B69E1E0A3A1BDC003C02F2 /* wtmApp.cpp */,
-				6E9E57261790858B0031D95D /* interpolator.h */,
-				6E9E57251790858B0031D95D /* interpolator.cpp */,
-				6E9E572917908EA20031D95D /* interpolator2x2.h */,
-				6E9E572817908EA20031D95D /* interpolator2x2.cpp */,
-				6E9E572C1790903D0031D95D /* interpolator4x4.h */,
-				6E9E572B1790903D0031D95D /* interpolator4x4.cpp */,
-				6ED646791799638C00486DE3 /* interpolator-catmull-rom.h */,
-				6ED646781799638C00486DE3 /* interpolator-catmull-rom.cpp */,
 			);
 			path = src;
 			sourceTree = SOURCE_ROOT;
@@ -472,6 +505,11 @@
 				6E9E572D1790903D0031D95D /* interpolator4x4.cpp in Sources */,
 				6ED6467A1799638C00486DE3 /* interpolator-catmull-rom.cpp in Sources */,
 				6E9053B51799A35A0059DAA9 /* cJSON.c in Sources */,
+				6E9F653017ABF17D002D5DC8 /* interpolator-linear.cpp in Sources */,
+				6E9F653317ABF2D9002D5DC8 /* interpolator-cosine.cpp in Sources */,
+				6E9F653617ABF339002D5DC8 /* interpolator-cubic.cpp in Sources */,
+				6E9F653917ABF3CA002D5DC8 /* interpolator-hermite.cpp in Sources */,
+				6E9F653C17ABF67A002D5DC8 /* interpolator-types.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

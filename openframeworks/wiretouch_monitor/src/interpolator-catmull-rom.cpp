@@ -13,7 +13,8 @@ wtmInterpolatorCatmullRom::wtmInterpolatorCatmullRom(int sw, int sh, int wf, int
 {
 }
 
-double wtmInterpolatorCatmullRom::interp_func(double p0, double p1, double p2, double p3, double f)
+double
+wtmInterpolatorCatmullRom::interp_func(double p0, double p1, double p2, double p3, double f)
 {
     double f2 = f*f;
     double i0 = -.5*p0 + 1.5*p1 - 1.5*p2 + .5*p3;

@@ -2,8 +2,6 @@
 
 #include "cJSON.h"
 
-#include "interpolator-catmull-rom.h"
-
 //--------------------------------------------------------------
 void wtmApp::setup()
 {
@@ -54,7 +52,12 @@ void wtmApp::setup()
     gui->setColorBack(ofColor(100, 80));
     gui->loadSettings("GUI/guiSettings.xml");
     
-    this->imageInterpolator = (wtmInterpolator*)new wtmInterpolatorCatmullRom(this->sensorColumns, this->sensorRows, 8, 8);
+    this->interpolator = NULL;
+    this->interpolatorType = wtmInterpolatorTypeTypeCatmullRom;
+    this->interpolatorUpsampleX = 8;
+    this->interpolatorUpsampleY = 8;
+    
+    this->updateInterpolator();
     
 	// this should be set to whatever com port your serial device is connected to.
 	// (ie, COM4 on a pc, /dev/tty.... on linux, /dev/tty... on a mac)
@@ -143,8 +146,8 @@ void wtmApp::consumePacketData()
         }
     }
     
-    this->imageInterpolator->runInterpolation(this->capGridValues);
-    this->texture = this->imageInterpolator->currentTexture();
+    this->interpolator->runInterpolation(this->capGridValues);
+    this->texture = this->interpolator->currentTexture();
 }
 
 void wtmApp::consumeSettings(const char* json)
@@ -175,6 +178,21 @@ void wtmApp::consumeSettings(const char* json)
             cJSON_Delete(root);
         }
     }
+}
+
+void
+wtmApp::updateInterpolator()
+{
+    if (NULL != this->interpolator) {
+        delete this->interpolator;
+        this->interpolator = NULL;
+    }
+    
+    this->interpolator = wtmInterpolatorOfType(this->interpolatorType,
+                                               this->sensorColumns,
+                                               this->sensorRows,
+                                               this->interpolatorUpsampleX,
+                                               this->interpolatorUpsampleY);
 }
 
 //------------------------------------------------------------s--
