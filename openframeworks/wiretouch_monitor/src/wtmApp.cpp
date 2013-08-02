@@ -19,6 +19,8 @@
 #define kGUICosineName              ("COSINE")
 #define kGUICubicName               ("CUBIC")
 #define kGUIHermiteName             ("HERMITE")
+#define kGUIWNNName                 ("WNN")
+#define kGUILagrangeName            ("LAGRANGE")
 
 //--------------------------------------------------------------
 void wtmApp::setup()
@@ -60,6 +62,8 @@ void wtmApp::setup()
     whatAType.push_back(kGUICosineName);
     whatAType.push_back(kGUICubicName);
     whatAType.push_back(kGUIHermiteName);
+    whatAType.push_back(kGUIWNNName);
+    whatAType.push_back(kGUILagrangeName);
     ofxUIDropDownList *interpolationDropdownMenu = gui->addDropDownList("TYPE", whatAType, (widgetWidth/2)-(OFX_UI_GLOBAL_WIDGET_SPACING));
     gui->addSlider(kGUIUpSamplingName, 1.0, 8.0, 50, widgetWidth, widgetHeight);
     gui->addSpacer();
@@ -330,6 +334,12 @@ void wtmApp::guiEvent(ofxUIEventArgs &e)
         this->updateInterpolator();
     } else if (widgetName == kGUIHermiteName) {
         this->interpolatorType = wtmInterpolatorTypeHermite;
+        this->updateInterpolator();
+    } else if (widgetName == kGUIWNNName) {
+        this->interpolatorType = wtmInterpolatorTypeWNN;
+        this->updateInterpolator();
+    } else if (widgetName == kGUILagrangeName) {
+        this->interpolatorType = wtmInterpolatorTypeLagrange;
         this->updateInterpolator();
     } else if (widgetName == kGUIBlobsName) {
         ofxUIButton *button = (ofxUIButton *) e.widget;
