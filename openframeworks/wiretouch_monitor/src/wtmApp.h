@@ -9,6 +9,28 @@
 #define WINDOWWIDTH 1024
 #define WINDOWHEIGHT 768
 #define WINDOWBORDERDISTANCE 10
+#define GUIWIDTH 300
+#define GUIHEIGHT 600
+#define WIDGETWIDTH (GUIWIDTH-(OFX_UI_GLOBAL_WIDGET_SPACING*2))
+#define WIDGETHEIGHT 22
+
+#define kGUIHalfwaveAmpName         ("HALFWAVE AMP")
+#define kGUIOutputAmpName           ("OUTPUT AMP")
+#define kGUISampleDelayName         ("SAMPLE DELAY")
+#define kGUISignalFrequencyName     ("SIGNAL FREQUENCY")
+#define kGUIPostProcessingName      ("POST PROCESSING")
+#define kGUIUpSamplingName          ("UPSAMPLING")
+#define kGUIInterpolationTypeName   ("INTERPOLATION")
+#define kGUIGridName                ("GRID")
+#define kGUIBlobsName               ("BLOBS")
+#define kGUIStartName               ("START")
+#define kGUILinearName              ("LINEAR")
+#define kGUICatmullName             ("CATMULL")
+#define kGUICosineName              ("COSINE")
+#define kGUICubicName               ("CUBIC")
+#define kGUIHermiteName             ("HERMITE")
+#define kGUIWNNName                 ("WNN")
+#define kGUILagrangeName            ("LAGRANGE")
 
 typedef enum _wtmAppState {
     wtmAppStateIdle,
@@ -39,7 +61,9 @@ class wtmApp : public ofBaseApp {
     
     protected:
         void updateInterpolator();
-		
+        void guiEvent(ofxUIEventArgs &e);
+        void sendSliderData(ofxUIEventArgs &e, char command);
+    
         wtmAppState state;
     
         int sensorColumns, sensorRows, bytesPerFrame;
@@ -58,8 +82,7 @@ class wtmApp : public ofBaseApp {
         wtmInterpolatorType     interpolatorType;
         int                     interpolatorUpsampleX, interpolatorUpsampleY;
     
-        ofxUICanvas *gui;
-    	void guiEvent(ofxUIEventArgs &e);
+        ofxUISuperCanvas *gui;
         bool bDrawBlobs;
         bool bDrawGrid;
 };
