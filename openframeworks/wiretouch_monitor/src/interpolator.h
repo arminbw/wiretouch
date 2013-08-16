@@ -19,6 +19,10 @@ class wtmInterpolator {
         void runInterpolation(uint16_t* sensorValues);
     
         ofTexture* currentTexture();
+        const unsigned char* currentPixels();
+    
+        int getOutputWidth();
+        int getOutputHeight();
 
     protected:
         int sourceWidth, sourceHeight;
