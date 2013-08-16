@@ -31,6 +31,7 @@
 #define kGUIHermiteName             ("HERMITE")
 #define kGUIWNNName                 ("WNN")
 #define kGUILagrangeName            ("LAGRANGE")
+#define kGUIBlobThresholdName       ("THRESHOLD")
 
 typedef enum _wtmAppState {
     wtmAppStateIdle,
