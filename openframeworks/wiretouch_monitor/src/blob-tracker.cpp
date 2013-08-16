@@ -13,10 +13,13 @@ wtmBlobTracker::wtmBlobTracker()
     this->threshold = 100;
     
     this->blobsMinArea = 10;
-    this->blobsMaxArea = 1000;
+    this->blobsMaxArea = 10000;
     this->blobsNumMax = 50;
     
-    this->blobsManager.normalizePercentage = 0.7;
+    this->blobsManager.normalizePercentage = 1.0;
+    this->blobsManager.maxMergeDis         = 10;
+    this->blobsManager.minDetectedTime     = 0;
+    this->blobsManager.maxUndetectedTime   = 0;
 }
 
 wtmBlobTracker::~wtmBlobTracker()
@@ -45,6 +48,7 @@ wtmBlobTracker::update()
         this->hasNewData = false;
         
         this->trackedImage.threshold(this->threshold);
+        //this->trackedImage.adaptiveThreshold(15, this->threshold, false, true);
         
         this->contourFinder.findContours(this->trackedImage,
                                          this->blobsMinArea,
@@ -64,21 +68,43 @@ wtmBlobTracker::draw()
 	
     ofPushStyle();
 	ofEnableAlphaBlending();
+    ofSetColor(255, 0, 222, 127);
+    ofSetLineWidth(2);
     
 	int numBlobs = this->blobsManager.blobs.size();
 	for( int i = 0; i < numBlobs; i++ )	{
 		ofxStoredBlobVO& blob = this->blobsManager.blobs.at(i);
-		
-		int x = blob.centroid.x / scaleX;
-		int y = blob.centroid.y / scaleY;
-		
-		ofFill();
-		ofSetColor(255,0,0,127);
-		ofCircle(x, y, 10);
+		vector <ofPoint>& pts = blob.pts;
+        int nPts = blob.nPts;
         
-		if(blob.id >= 10)
+        ofNoFill();
+        ofBeginShape();
+        for (int i = 0; i < nPts; i++){
+            ofVertex(pts[i].x / scaleX, pts[i].y / scaleY);
+        }
+        ofEndShape(true);
+		
+        ofRectangle bbox = blob.boundingRect;
+        
+        ofRect(bbox.x / scaleX,
+               bbox.y / scaleY,
+               bbox.width / scaleX,
+               bbox.height / scaleY);
+        
+		ofFill();
+		ofCircle(blob.centroid.x / scaleX, blob.centroid.y / scaleY, 2);
+        
+		/*
+         
+         int x = blob.centroid.x / scaleX;
+         int y = blob.centroid.y / scaleY;
+         
+         if(blob.id >= 10)
             x -= 4;
-		ofDrawBitmapString(ofToString(blob.id),x-4,y+5);
+		
+        ofPushStyle();
+        ofDrawBitmapString(ofToString(blob.id),x-4,y+5);
+        ofPopStyle();*/
 	}
     
     ofDisableAlphaBlending();

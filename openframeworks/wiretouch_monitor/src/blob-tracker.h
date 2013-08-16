@@ -18,6 +18,8 @@ public:
     wtmBlobTracker();
     ~wtmBlobTracker();
     
+    int                     threshold;
+    
     void setGrayscalePixels(const unsigned char* pixels, int width, int height);
     
     void update();
@@ -25,8 +27,6 @@ public:
     void draw();
     
 protected:
-    
-    int                     threshold;
     int                     blobsMinArea;
     int                     blobsMaxArea;
     int                     blobsNumMax;

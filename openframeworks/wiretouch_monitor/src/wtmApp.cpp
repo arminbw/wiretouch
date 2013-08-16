@@ -289,6 +289,8 @@ void wtmApp::guiEvent(ofxUIEventArgs &e)
         int val = round(slider->getScaledValue());
         slider->setValue(val);
         // TODO: to something
+        
+        this->blobTracker.threshold = val;
     }
     else if (widgetName == kGUIStartName) {
         if (wtmAppStateIdle == this->state) {
