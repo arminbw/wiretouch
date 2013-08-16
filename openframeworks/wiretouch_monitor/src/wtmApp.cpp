@@ -38,9 +38,14 @@ void wtmApp::setup()
     
     // setup the graphical user interface
     gui = new ofxUISuperCanvas("WIRETOUCH 0.2",WINDOWWIDTH-(GUIWIDTH+WINDOWBORDERDISTANCE),WINDOWBORDERDISTANCE, GUIWIDTH, GUIHEIGHT);
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_BACK, ofColor(120));
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL, ofColor(255, 120)); // font color
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_OUTLINE_HIGHLIGHT, ofColor(0,0,255));
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL_HIGHLIGHT, ofColor(239, 171, 233));
+    gui->setColorBack(ofColor(100, 80));
+    
     gui->addSpacer();
     gui->addWidgetDown(new ofxUILabel("SENSOR PARAMETERS", OFX_UI_FONT_MEDIUM));
-    ofxUISlider *slider;
     gui->addSlider(kGUIHalfwaveAmpName, 0.0, 255.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSlider(kGUIOutputAmpName, 0.0, 255.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSlider(kGUISampleDelayName, 0.0, 100.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
@@ -56,28 +61,26 @@ void wtmApp::setup()
     whatAType.push_back(kGUIHermiteName);
     whatAType.push_back(kGUIWNNName);
     whatAType.push_back(kGUILagrangeName);
-    ofxUIDropDownList *interpolationDropdownMenu = gui->addDropDownList("TYPE", whatAType, (WIDGETWIDTH/2)-(OFX_UI_GLOBAL_WIDGET_SPACING));
+    ofxUIDropDownList *interpolationDropDownMenu = gui->addDropDownList("TYPE", whatAType, (WIDGETWIDTH/2)-(OFX_UI_GLOBAL_WIDGET_SPACING));
     gui->addSlider(kGUIUpSamplingName, 1.0, 8.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSpacer();
-    gui->addLabelToggle(kGUIBlobsName, false,(WIDGETWIDTH/2)-OFX_UI_GLOBAL_WIDGET_SPACING, WIDGETHEIGHT);
+    ofxUILabelToggle* toggle = gui->addLabelToggle(kGUIBlobsName, false, (WIDGETWIDTH/2)-OFX_UI_GLOBAL_WIDGET_SPACING, WIDGETHEIGHT);
+    toggle->setLabelVisible(true); // doesn't get set by default
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    gui->addLabelToggle(kGUIGridName, false,(WIDGETWIDTH/2)-OFX_UI_GLOBAL_WIDGET_SPACING, WIDGETHEIGHT);
+    toggle = gui->addLabelToggle(kGUIGridName, false, (WIDGETWIDTH/2)-OFX_UI_GLOBAL_WIDGET_SPACING, WIDGETHEIGHT);
+    toggle->setLabelVisible(true);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->addWidgetDown(new ofxUIFPS(OFX_UI_FONT_SMALL));
     gui->addSpacer();
-    gui->addLabelButton(kGUIStartName, false, WIDGETWIDTH, WIDGETHEIGHT);
+    ofxUILabelButton* button = gui->addLabelButton(kGUIStartName, false, WIDGETWIDTH, WIDGETHEIGHT);
+    button->setLabelVisible(true);
     
-    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_BACK, ofColor(120));
-    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL, ofColor(255, 120)); // font color
-    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_OUTLINE_HIGHLIGHT, ofColor(0,0,255));
-    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL_HIGHLIGHT, ofColor(239, 171, 233));
-    gui->setColorBack(ofColor(100, 80));
+    ofAddListener(gui->newGUIEvent, this, &wtmApp::guiEvent);
     
     gui->loadSettings("GUI/guiSettings.xml");
-    ofAddListener(gui->newGUIEvent, this, &wtmApp::guiEvent);
-    interpolationDropdownMenu->setAutoClose(true);
-    interpolationDropdownMenu->setShowCurrentSelected(true);
-    interpolationDropdownMenu->checkAndSetTitleLabel();
+    /*interpolationDropDownMenu->setAutoClose(true);
+    interpolationDropDownMenu->setShowCurrentSelected(true);
+    interpolationDropDownMenu->checkAndSetTitleLabel();*/
 }
 
 //--------------------------------------------------------------
