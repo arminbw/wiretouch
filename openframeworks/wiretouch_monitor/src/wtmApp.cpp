@@ -137,6 +137,9 @@ void wtmApp::update()
         default:
             break;
     }
+    
+    if (this->bTrackBlobs)
+        this->blobTracker.update();
 }
 
 //--------------------------------------------------------------
@@ -144,6 +147,9 @@ void wtmApp::draw()
 {
     if (this->texture && this->texture->isAllocated())
         this->texture->draw(0, 0, ofGetWidth(), ofGetHeight());
+    
+    if (this->bTrackBlobs)
+        this->blobTracker.draw();
 }
 
 //--------------------------------------------------------------
@@ -168,6 +174,11 @@ void wtmApp::consumePacketData()
     
     this->interpolator->runInterpolation(this->capGridValues);
     this->texture = this->interpolator->currentTexture();
+    
+    if (this->bTrackBlobs)
+        this->blobTracker.setGrayscalePixels(this->interpolator->currentPixels(),
+                                             this->interpolator->getOutputWidth(),
+                                             this->interpolator->getOutputHeight());
 }
 
 //--------------------------------------------------------------
@@ -269,7 +280,7 @@ void wtmApp::guiEvent(ofxUIEventArgs &e)
         this->updateInterpolator();
     } else if (widgetName == kGUIBlobsName) {
         ofxUIButton *button = (ofxUIButton *) e.widget;
-        bDrawBlobs = button->getValue();
+        bTrackBlobs = button->getValue();
     } else if (widgetName == kGUIGridName) {
         ofxUIButton *button = (ofxUIButton *) e.widget;
         bDrawGrid = button->getValue();

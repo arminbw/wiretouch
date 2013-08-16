@@ -32,6 +32,18 @@ wtmInterpolator::~wtmInterpolator()
     free(this->pixels);
 }
 
+int
+wtmInterpolator::getOutputWidth()
+{
+    return this->interpolatedWidth;
+}
+
+int
+wtmInterpolator::getOutputHeight()
+{
+    return this->interpolatedHeight;
+}
+
 double
 wtmInterpolator::sensorValueAt(int x, int y)
 {
@@ -45,6 +57,12 @@ wtmInterpolator::sensorValueAt(int x, int y)
     }
     
     return val;
+}
+
+const unsigned char*
+wtmInterpolator::currentPixels()
+{
+    return this->pixels;
 }
 
 void

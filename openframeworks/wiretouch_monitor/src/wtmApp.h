@@ -6,6 +6,8 @@
 #include "interpolator-types.h"
 #include "interpolator.h"
 
+#include "blob-tracker.h"
+
 #define WINDOWWIDTH 1024
 #define WINDOWHEIGHT 768
 #define WINDOWBORDERDISTANCE 10
@@ -83,7 +85,9 @@ class wtmApp : public ofBaseApp {
         wtmInterpolatorType     interpolatorType;
         int                     interpolatorUpsampleX, interpolatorUpsampleY;
     
+        wtmBlobTracker          blobTracker;
+    
         ofxUISuperCanvas *gui;
-        bool bDrawBlobs;
+        bool bTrackBlobs;
         bool bDrawGrid;
 };
