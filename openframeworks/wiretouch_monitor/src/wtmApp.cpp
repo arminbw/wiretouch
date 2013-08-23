@@ -411,8 +411,18 @@ void wtmApp::mousePressed(int x, int y, int button){
 //--------------------------------------------------------------
 void wtmApp::mouseReleased(int x, int y, int button){
     // the gui title bar shouldn't leave the app window
+    // TODO: correct onMouseDragged in ofxUISuperCanvas itself
     if (gui->getRect()->getY() < 0) {
         gui->getRect()->setY((0.0));
+    }
+    else if (gui->getRect()->getY() > WINDOWHEIGHT-30) {
+        gui->getRect()->setY(WINDOWHEIGHT-30);
+    }
+    if (gui->getRect()->getX() < 30-GUIWIDTH) {
+        gui->getRect()->setX(30-GUIWIDTH);
+    }
+    else if (gui->getRect()->getX() > WINDOWWIDTH-30) {
+        gui->getRect()->setX(WINDOWWIDTH-30);
     }
 }
 
