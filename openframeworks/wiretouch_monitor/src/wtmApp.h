@@ -26,6 +26,7 @@
 #define kGUIGridName                ("GRID")
 #define kGUIBlobsName               ("BLOBS")
 #define kGUIStartName               ("START")
+#define kGUIConnectSerialName       ("CONNECT SERIAL")
 #define kGUILinearName              ("LINEAR")
 #define kGUICatmullName             ("CATMULL")
 #define kGUICosineName              ("COSINE")
@@ -34,6 +35,7 @@
 #define kGUIWNNName                 ("WNN")
 #define kGUILagrangeName            ("LAGRANGE")
 #define kGUIBlobThresholdName       ("THRESHOLD")
+#define kGUIBlobVisualizationName   ("BLOB VISUALIZATION")
 
 typedef enum _wtmAppState {
     wtmAppStateIdle,
@@ -72,6 +74,7 @@ class wtmApp : public ofBaseApp {
         int sensorColumns, sensorRows, bytesPerFrame;
     
         ofSerial serial;
+        bool bSerialConnectionAvailable;
         unsigned char* recvBuffer;
         float lastRecvFrameTime;
     

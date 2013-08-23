@@ -34,11 +34,11 @@ void wtmApp::setup()
 	// (ie, COM4 on a pc, /dev/tty.... on linux, /dev/tty... on a mac)
 	// arduino users check in arduino app....
 	int baud = 300;
-	serial.setup(0, baud);
+	bSerialConnectionAvailable = serial.setup(0, baud);
+    // vector <ofSerialDeviceInfo> serialDevices = serial.getDeviceList();
     
     // setup the graphical user interface
     gui = new ofxUISuperCanvas("WIRETOUCH 0.2",WINDOWWIDTH-(GUIWIDTH+WINDOWBORDERDISTANCE),WINDOWBORDERDISTANCE, GUIWIDTH, GUIHEIGHT);
-    
     gui->addSpacer();
     gui->addWidgetDown(new ofxUILabel("SENSOR PARAMETERS", OFX_UI_FONT_MEDIUM));
     gui->addSlider(kGUIHalfwaveAmpName, 0.0, 255.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
@@ -48,15 +48,15 @@ void wtmApp::setup()
     gui->addSpacer();
     gui->addWidgetDown(new ofxUILabel("INTERPOLATION", OFX_UI_FONT_MEDIUM));
     // gui->addWidgetDown(new ofxUISpectrum(widgetWidth, widgetHeight, buffer, 256, 0.0, 1.0, "SPECTRUM"));
-    vector<string> whatAType;
-    whatAType.push_back(kGUILinearName);
-    whatAType.push_back(kGUICatmullName);
-    whatAType.push_back(kGUICosineName);
-    whatAType.push_back(kGUICubicName);
-    whatAType.push_back(kGUIHermiteName);
-    whatAType.push_back(kGUIWNNName);
-    whatAType.push_back(kGUILagrangeName);
-    ofxUIDropDownList *interpolationDropDownMenu = gui->addDropDownList("TYPE", whatAType, (WIDGETWIDTH/2)-(OFX_UI_GLOBAL_WIDGET_SPACING));
+    vector<string> interpolationTypes;
+    interpolationTypes.push_back(kGUILinearName);
+    interpolationTypes.push_back(kGUICatmullName);
+    interpolationTypes.push_back(kGUICosineName);
+    interpolationTypes.push_back(kGUICubicName);
+    interpolationTypes.push_back(kGUIHermiteName);
+    interpolationTypes.push_back(kGUIWNNName);
+    interpolationTypes.push_back(kGUILagrangeName);
+    ofxUIDropDownList *interpolationDropDownMenu = gui->addDropDownList("TYPE", interpolationTypes, (WIDGETWIDTH/2)-(OFX_UI_GLOBAL_WIDGET_SPACING));
     gui->addSlider(kGUIUpSamplingName, 1.0, 8.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSpacer();
     gui->addWidgetDown(new ofxUILabel("BLOB DETECTION", OFX_UI_FONT_MEDIUM));
@@ -67,10 +67,10 @@ void wtmApp::setup()
     toggle->setLabelVisible(true);
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->addSlider(kGUIBlobThresholdName, 0.0, 255.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
+    gui->addSlider(kGUIBlobVisualizationName, 0.0, 255.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSpacer();
     ofxUILabelButton* button = gui->addLabelButton(kGUIStartName, false, WIDGETWIDTH, WIDGETHEIGHT);
     button->setLabelVisible(true);
-    // gui->addWidgetDown(new ofxUIFPS(OFX_UI_FONT_SMALL));
     
     gui->setWidgetColor(OFX_UI_WIDGET_COLOR_BACK, ofColor(120));
     gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL, ofColor(255, 120)); // font color
@@ -241,7 +241,7 @@ void wtmApp::sendSliderData(ofxUIEventArgs &e, char command) {
 void wtmApp::guiEvent(ofxUIEventArgs &e)
 {
     string widgetName = e.widget->getName();
-    // printf("guiEvent: %s\n", widgetName.c_str());
+    printf("guiEvent: %s   widgetName: %s\n", e.getName().c_str() ,widgetName.c_str());
 	if (widgetName == kGUIHalfwaveAmpName) {
         sendSliderData(e, 'h');
     } else if (widgetName == kGUIOutputAmpName) {
@@ -288,11 +288,11 @@ void wtmApp::guiEvent(ofxUIEventArgs &e)
         ofxUISlider *slider = (ofxUISlider *) e.widget;
         int val = round(slider->getScaledValue());
         slider->setValue(val);
-        // TODO: to something
-        
         this->blobTracker.threshold = val;
-    }
-    else if (widgetName == kGUIStartName) {
+    } else if (widgetName == kGUIStartName) {
+        if (!bSerialConnectionAvailable) {
+            ofxUIButton *button = (ofxUIButton *) e.widget;
+        }
         if (wtmAppStateIdle == this->state) {
             serial.writeByte('c');
             serial.writeByte('\n');
@@ -306,6 +306,7 @@ void wtmApp::guiEvent(ofxUIEventArgs &e)
 }
 //--------------------------------------------------------------
 void wtmApp::keyReleased(int key){
+
 }
 
 
@@ -332,7 +333,10 @@ void wtmApp::mousePressed(int x, int y, int button){
 
 //--------------------------------------------------------------
 void wtmApp::mouseReleased(int x, int y, int button){
-    
+    // the gui title bar shouldn't leave the app window
+    if (gui->getRect()->getY() < 0) {
+        gui->getRect()->setY((0.0));
+    }
 }
 
 //--------------------------------------------------------------
