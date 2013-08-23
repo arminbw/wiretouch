@@ -37,6 +37,7 @@ wtmBlobTracker::setGrayscalePixels(const unsigned char* pixels, int width, int h
         }
     }
     
+    this->trackedImage.setUseTexture(true);
     this->trackedImage.setFromPixels(pixels, width, height);
     this->hasNewData = true;
 }
@@ -49,6 +50,7 @@ wtmBlobTracker::update()
         
         this->trackedImage.threshold(this->threshold);
         //this->trackedImage.adaptiveThreshold(15, this->threshold, false, true);
+        this->trackedImage.updateTexture();
         
         this->contourFinder.findContours(this->trackedImage,
                                          this->blobsMinArea,

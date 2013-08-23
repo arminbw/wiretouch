@@ -26,6 +26,8 @@ public:
     
     void draw();
     
+    ofxCvGrayscaleImage     trackedImage;
+    
 protected:
     int                     blobsMinArea;
     int                     blobsMaxArea;
@@ -33,7 +35,6 @@ protected:
     
     bool                    hasNewData;
     
-    ofxCvGrayscaleImage     trackedImage;
     ofxCvContourFinder      contourFinder;
     ofxBlobsManager         blobsManager;
 };

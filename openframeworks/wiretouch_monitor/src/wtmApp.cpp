@@ -144,12 +144,19 @@ void wtmApp::update()
 
 //--------------------------------------------------------------
 void wtmApp::draw()
-{
+{    
     if (this->texture && this->texture->isAllocated())
         this->texture->draw(0, 0, ofGetWidth(), ofGetHeight());
     
+    ofPushStyle();
+    ofEnableAlphaBlending();
+    ofSetColor(255, 0, 222, 60);
+    this->blobTracker.trackedImage.getTextureReference().draw(0, 0, ofGetWidth(), ofGetHeight());
+    ofDisableAlphaBlending();
+    ofPopStyle();
+
     if (this->bTrackBlobs)
-        this->blobTracker.draw();
+        this->blobTracker.draw();    
 }
 
 //--------------------------------------------------------------
