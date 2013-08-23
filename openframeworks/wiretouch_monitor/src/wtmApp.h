@@ -24,6 +24,7 @@
 
 #include "interpolator-types.h"
 #include "interpolator.h"
+#include "tuio-server.h"
 
 #include "blob-tracker.h"
 
@@ -117,4 +118,8 @@ class wtmApp : public ofBaseApp {
         ofxUISuperCanvas *gui;
         bool bTrackBlobs;
         bool bDrawGrid;
+    
+        wtmTuioServer* tuioServer;
+    
+        void distributeTuio();
 };

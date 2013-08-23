@@ -36,12 +36,12 @@ wtmBlobTracker::wtmBlobTracker()
     this->blobsMaxArea = 10000;
     this->blobsNumMax = 50;
     
-    this->blobsManager.normalizePercentage = .75;
-    this->blobsManager.maxMergeDis         = 4;
+    this->blobsManager.normalizePercentage = .5;
+    this->blobsManager.maxMergeDis         = 16;
     this->blobsManager.minDetectedTime     = 0;
     this->blobsManager.maxUndetectedTime   = 0;
     this->blobsManager.enableMinDetectedTimeFilter = false;
-    this->blobsManager.giveLowestPossibleIDs = false;
+    this->blobsManager.giveLowestPossibleIDs = true;
 }
 
 wtmBlobTracker::~wtmBlobTracker()
@@ -139,6 +139,12 @@ ofTexture*
 wtmBlobTracker::currentTresholdedTexture()
 {
     return &this->trackedImage.getTextureReference();
+}
+
+vector<ofxStoredBlobVO>&
+wtmBlobTracker::currentBlobs()
+{
+    return this->blobsManager.blobs;
 }
 
 void

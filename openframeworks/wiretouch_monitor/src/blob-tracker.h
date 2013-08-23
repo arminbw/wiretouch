@@ -49,6 +49,8 @@ public:
     
     void setAdaptiveThresholdRange(int aRange);
     
+    vector<ofxStoredBlobVO>& currentBlobs();
+    
 protected:
     int                     blobsMinArea;
     int                     blobsMaxArea;

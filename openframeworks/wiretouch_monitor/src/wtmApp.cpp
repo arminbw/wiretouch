@@ -103,6 +103,9 @@ void wtmApp::setup()
     gui->loadSettings("GUI/guiSettings.xml");
     interpolationDropDownMenu->setAutoClose(true);
     interpolationDropDownMenu->setShowCurrentSelected(true);
+    
+    this->tuioServer = new wtmTuioServer();
+    this->tuioServer->start("127.0.0.1", 3333);
 }
 
 //--------------------------------------------------------------
@@ -140,7 +143,7 @@ void wtmApp::update()
                     if (0 != this->lastRecvFrameTime) {
                         float now = ofGetElapsedTimef();
                         
-                        ofLog() << (1.0/(now - this->lastRecvFrameTime)) << " pkts/sec, dt: " << (now - this->lastRecvFrameTime);
+                        //ofLog() << (1.0/(now - this->lastRecvFrameTime)) << " pkts/sec, dt: " << (now - this->lastRecvFrameTime);
                         
                         this->lastRecvFrameTime = now;
                     } else
@@ -158,8 +161,29 @@ void wtmApp::update()
             break;
     }
     
-    if (this->bTrackBlobs)
+    if (this->bTrackBlobs) {
         this->blobTracker.update();
+        
+        this->distributeTuio();
+    }
+}
+
+void
+wtmApp::distributeTuio()
+{
+    vector<ofxStoredBlobVO>& blobs = this->blobTracker.currentBlobs();
+    
+    float w = this->interpolator->getOutputWidth(), h = this->interpolator->getOutputHeight();
+    int numBlobs = blobs.size();
+	for(int i = 0; i < numBlobs; i++ )	{
+		ofxStoredBlobVO& blob = blobs.at(i);
+        
+        this->tuioServer->registerCursorPosition(blob.id,
+                                                 (float)blob.centroid.x / w,
+                                                 (float)blob.centroid.y / h);
+    }
+    
+    this->tuioServer->update();
 }
 
 //--------------------------------------------------------------
