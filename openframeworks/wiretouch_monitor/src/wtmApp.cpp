@@ -11,6 +11,8 @@ void wtmApp::setup()
 	ofBackground(0);
 	ofSetLogLevel(OF_LOG_VERBOSE);
     
+    this->inputGamma = 1.0;
+    
     this->sensorColumns = 32;
     this->sensorRows = 22;
     
@@ -68,6 +70,8 @@ void wtmApp::setup()
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->addSlider(kGUIBlobThresholdName, 0.0, 255.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSlider(kGUIBlobVisualizationName, 0.0, 255.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
+    gui->addSlider(kGUIBlobGammaName, 0.0, 6.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(2);
+    gui->addSlider(kGUIBlobAdaptiveThresholdRangeName, 0.0, 100.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(2);
     gui->addSpacer();
     ofxUILabelButton* button = gui->addLabelButton(kGUIStartName, false, WIDGETWIDTH, WIDGETHEIGHT);
     button->setLabelVisible(true);
@@ -148,12 +152,20 @@ void wtmApp::draw()
     if (this->texture && this->texture->isAllocated())
         this->texture->draw(0, 0, ofGetWidth(), ofGetHeight());
     
-    ofPushStyle();
-    ofEnableAlphaBlending();
-    ofSetColor(255, 0, 222, 60);
-    this->blobTracker.trackedImage.getTextureReference().draw(0, 0, ofGetWidth(), ofGetHeight());
-    ofDisableAlphaBlending();
-    ofPopStyle();
+    if (wtmAppStateReceivingTouches == this->state && 0 < this->thresholdImageAlpha) {
+        ofTexture* thresholdedTexture = this->blobTracker.currentTresholdedTexture();
+        
+        if (NULL != thresholdedTexture) {
+            ofPushStyle();
+            ofEnableAlphaBlending();
+            ofSetColor(255, 0, 222, this->thresholdImageAlpha);
+        
+            thresholdedTexture->draw(0, 0, ofGetWidth(), ofGetHeight());
+            
+            ofDisableAlphaBlending();
+            ofPopStyle();        
+        }
+    }
 
     if (this->bTrackBlobs)
         this->blobTracker.draw();    
@@ -171,7 +183,11 @@ void wtmApp::consumePacketData()
         while (bs >= 10) {
             int px = cnt / this->sensorRows, py = cnt % this->sensorRows;
             
-            this->capGridValues[py * this->sensorColumns + px] = br & 0x3ff;
+            int pix_val = br & 0x3ff;
+            
+            pix_val = pow((double)pix_val / 1023, this->inputGamma) * 1023;
+            
+            this->capGridValues[py * this->sensorColumns + px] = pix_val;
             
             br >>= 10;
             bs -= 10;
@@ -248,7 +264,7 @@ void wtmApp::sendSliderData(ofxUIEventArgs &e, char command) {
 void wtmApp::guiEvent(ofxUIEventArgs &e)
 {
     string widgetName = e.widget->getName();
-    printf("guiEvent: %s   widgetName: %s\n", e.getName().c_str() ,widgetName.c_str());
+
 	if (widgetName == kGUIHalfwaveAmpName) {
         sendSliderData(e, 'h');
     } else if (widgetName == kGUIOutputAmpName) {
@@ -296,6 +312,20 @@ void wtmApp::guiEvent(ofxUIEventArgs &e)
         int val = round(slider->getScaledValue());
         slider->setValue(val);
         this->blobTracker.threshold = val;
+    } else if (widgetName == kGUIBlobVisualizationName) {
+        ofxUISlider *slider = (ofxUISlider *) e.widget;
+        int val = round(slider->getScaledValue());
+        slider->setValue(val);
+        this->thresholdImageAlpha = val;
+    } else if (widgetName == kGUIBlobAdaptiveThresholdRangeName) {
+        ofxUISlider *slider = (ofxUISlider *) e.widget;
+        
+        double value = (slider->getScaledValue()/100.0) * this->interpolator->getOutputWidth();
+        
+        this->blobTracker.setAdaptiveThresholdRange(((int)value) | 1);
+    } else if (widgetName == kGUIBlobGammaName) {
+        ofxUISlider *slider = (ofxUISlider *) e.widget;
+        this->inputGamma = slider->getScaledValue();
     } else if (widgetName == kGUIStartName) {
         if (!bSerialConnectionAvailable) {
             ofxUIButton *button = (ofxUIButton *) e.widget;

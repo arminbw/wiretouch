@@ -26,17 +26,21 @@ public:
     
     void draw();
     
-    ofxCvGrayscaleImage     trackedImage;
+    ofTexture* currentTresholdedTexture();
+    
+    void setAdaptiveThresholdRange(int aRange);
     
 protected:
     int                     blobsMinArea;
     int                     blobsMaxArea;
     int                     blobsNumMax;
+    int                     adaptiveThreshRange;
     
     bool                    hasNewData;
     
     ofxCvContourFinder      contourFinder;
     ofxBlobsManager         blobsManager;
+    ofxCvGrayscaleImage     trackedImage;
 };
 
 

@@ -36,6 +36,8 @@
 #define kGUILagrangeName            ("LAGRANGE")
 #define kGUIBlobThresholdName       ("THRESHOLD")
 #define kGUIBlobVisualizationName   ("BLOB VISUALIZATION")
+#define kGUIBlobGammaName           ("GAMMA")
+#define kGUIBlobAdaptiveThresholdRangeName ("ADAPTIVE RANGE")
 
 typedef enum _wtmAppState {
     wtmAppStateIdle,
@@ -68,6 +70,9 @@ class wtmApp : public ofBaseApp {
         void updateInterpolator();
         void guiEvent(ofxUIEventArgs &e);
         void sendSliderData(ofxUIEventArgs &e, char command);
+    
+        int thresholdImageAlpha;
+        double inputGamma;
     
         wtmAppState state;
     

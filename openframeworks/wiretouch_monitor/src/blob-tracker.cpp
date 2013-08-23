@@ -11,15 +11,18 @@
 wtmBlobTracker::wtmBlobTracker()
 {
     this->threshold = 100;
+    this->adaptiveThreshRange = 15;
     
-    this->blobsMinArea = 10;
+    this->blobsMinArea = 1;
     this->blobsMaxArea = 10000;
     this->blobsNumMax = 50;
     
-    this->blobsManager.normalizePercentage = 1.0;
-    this->blobsManager.maxMergeDis         = 10;
+    this->blobsManager.normalizePercentage = .75;
+    this->blobsManager.maxMergeDis         = 4;
     this->blobsManager.minDetectedTime     = 0;
     this->blobsManager.maxUndetectedTime   = 0;
+    this->blobsManager.enableMinDetectedTimeFilter = false;
+    this->blobsManager.giveLowestPossibleIDs = false;
 }
 
 wtmBlobTracker::~wtmBlobTracker()
@@ -48,8 +51,8 @@ wtmBlobTracker::update()
     if (this->hasNewData) {
         this->hasNewData = false;
         
-        this->trackedImage.threshold(this->threshold);
-        //this->trackedImage.adaptiveThreshold(15, this->threshold, false, true);
+        //this->trackedImage.threshold(this->threshold);
+        this->trackedImage.adaptiveThreshold(this->adaptiveThreshRange, 128-this->threshold, false, false);
         this->trackedImage.updateTexture();
         
         this->contourFinder.findContours(this->trackedImage,
@@ -111,4 +114,16 @@ wtmBlobTracker::draw()
     
     ofDisableAlphaBlending();
     ofPopStyle();
+}
+
+ofTexture*
+wtmBlobTracker::currentTresholdedTexture()
+{
+    return &this->trackedImage.getTextureReference();
+}
+
+void
+wtmBlobTracker::setAdaptiveThresholdRange(int aRange)
+{
+    this->adaptiveThreshRange = aRange;
 }
