@@ -32,8 +32,8 @@ wtmBlobTracker::wtmBlobTracker()
     this->threshold = 100;
     this->adaptiveThreshRange = 15;
     
-    this->blobsMinArea = 1;
-    this->blobsMaxArea = 10000;
+    this->blobsMinArea = 0.1;
+    this->blobsMaxArea = 3.0;
     this->blobsNumMax = 50;
     
     this->blobsManager.normalizePercentage = .5;
@@ -74,9 +74,11 @@ wtmBlobTracker::update()
         this->trackedImage.adaptiveThreshold(this->adaptiveThreshRange, 128-this->threshold, false, false);
         this->trackedImage.updateTexture();
         
+        int width = this->trackedImage.getWidth();
+        
         this->contourFinder.findContours(this->trackedImage,
-                                         this->blobsMinArea,
-                                         this->blobsMaxArea,
+                                         this->blobsMinArea * width,
+                                         this->blobsMaxArea * width,
                                          this->blobsNumMax,
                                          false);
 

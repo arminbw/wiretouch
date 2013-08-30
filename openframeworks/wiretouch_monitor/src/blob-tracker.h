@@ -52,8 +52,8 @@ public:
     vector<ofxStoredBlobVO>& currentBlobs();
     
 protected:
-    int                     blobsMinArea;
-    int                     blobsMaxArea;
+    float                   blobsMinArea;
+    float                   blobsMaxArea;
     int                     blobsNumMax;
     int                     adaptiveThreshRange;
     
