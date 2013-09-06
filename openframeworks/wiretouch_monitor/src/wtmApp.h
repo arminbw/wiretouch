@@ -61,6 +61,7 @@
 #define kGUIBlobVisualizationName   ("BLOB VISUALIZATION")
 #define kGUIBlobGammaName           ("GAMMA")
 #define kGUIBlobAdaptiveThresholdRangeName ("ADAPTIVE RANGE")
+#define kGUIFirmwareName            ("FIRMWARE")
 
 typedef enum _wtmAppState {
     wtmAppStateIdle,
@@ -98,6 +99,7 @@ class wtmApp : public ofBaseApp {
         void sendSliderData(ofxUIEventArgs &e, char command);
         void updateFPSLabelWithValue(float fps);
         void updateInterpolationTypeLabel(const char* newName);
+        void updateFirmwareVersionLabel(const char* newVersion);
     
         int thresholdImageAlpha;
         double inputGamma;

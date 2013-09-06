@@ -57,7 +57,7 @@ void wtmApp::setup()
     
     // setup the graphical user interface
     gui = new ofxUISuperCanvas("WIRETOUCH 0.2",WINDOWWIDTH-(GUIWIDTH+WINDOWBORDERDISTANCE),WINDOWBORDERDISTANCE, GUIWIDTH, GUIHEIGHT);
-    ofxUILabel* fpsLabel = new ofxUILabel(kGUIFPS, OFX_UI_FONT_MEDIUM);
+    ofxUILabel* fpsLabel = new ofxUILabel(kGUIFPS, OFX_UI_FONT_SMALL);
     gui->addWidgetPosition(fpsLabel, OFX_UI_WIDGET_POSITION_RIGHT, OFX_UI_ALIGN_RIGHT);
     this->updateFPSLabelWithValue(0.);
     gui->addSpacer();
@@ -92,6 +92,12 @@ void wtmApp::setup()
     gui->addSlider(kGUIBlobGammaName, 0.0, 6.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(2);
     gui->addSlider(kGUIBlobAdaptiveThresholdRangeName, 0.0, 100.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(2);
     gui->addSpacer();
+    
+    ofxUILabel* firmwareLabel = new ofxUILabel(kGUIFirmwareName, OFX_UI_FONT_SMALL);
+    gui->addWidgetDown(firmwareLabel);
+    
+    this->updateFirmwareVersionLabel("unknown");
+    
     ofxUILabelButton* button = gui->addLabelButton(kGUICalibrateName, false, WIDGETWIDTH, WIDGETHEIGHT);
     button->setLabelVisible(true);
     button = gui->addLabelButton(kGUIStartName, false, WIDGETWIDTH, WIDGETHEIGHT);
@@ -283,7 +289,7 @@ void wtmApp::consumeSettings(const char* json)
         
         if (NULL != root) {
             cJSON* version = cJSON_GetObjectItem(root, "version"), *cur;
-            printf("VERSION: %s\n", version->valuestring);
+            this->updateFirmwareVersionLabel(version->valuestring);
             
             cur = cJSON_GetObjectItem(root, "halfwave_amp");
             ofxUISlider* slider = (ofxUISlider*)gui->getWidget(kGUIHalfwaveAmpName);
@@ -381,6 +387,18 @@ wtmApp::updateInterpolationTypeLabel(const char* newName)
     ofxUIDropDownList* list = (ofxUIDropDownList*)gui->getWidget(kGUIInterpTypeName);
     if (NULL != list)
         list->setLabelText(newName);
+}
+
+void
+wtmApp::updateFirmwareVersionLabel(const char* newVersion)
+{
+    ofxUILabel* firmwareLabel = (ofxUILabel*)gui->getWidget(kGUIFirmwareName);
+    if (NULL != firmwareLabel) {
+        char buf[64];
+        snprintf(buf, 64, "FIRMWARE VERSION: %s", newVersion);
+        
+        firmwareLabel->setLabel(buf);
+    }
 }
 
 //--------------------------------------------------------------
