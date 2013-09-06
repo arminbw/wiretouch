@@ -57,6 +57,9 @@ void wtmApp::setup()
     
     // setup the graphical user interface
     gui = new ofxUISuperCanvas("WIRETOUCH 0.2",WINDOWWIDTH-(GUIWIDTH+WINDOWBORDERDISTANCE),WINDOWBORDERDISTANCE, GUIWIDTH, GUIHEIGHT);
+    ofxUILabel* fpsLabel = new ofxUILabel(kGUIFPS, OFX_UI_FONT_MEDIUM);
+    gui->addWidgetPosition(fpsLabel, OFX_UI_WIDGET_POSITION_RIGHT, OFX_UI_ALIGN_RIGHT);
+    this->updateFPSLabelWithValue(0.);
     gui->addSpacer();
     gui->addWidgetDown(new ofxUILabel("SENSOR PARAMETERS", OFX_UI_FONT_MEDIUM));
     gui->addSlider(kGUIHalfwaveAmpName, 0.0, 255.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
@@ -167,7 +170,7 @@ void wtmApp::update()
                     if (0 != this->lastRecvFrameTime) {
                         float now = ofGetElapsedTimef();
                         
-                        //ofLog() << (1.0/(now - this->lastRecvFrameTime)) << " pkts/sec, dt: " << (now - this->lastRecvFrameTime);
+                        this->updateFPSLabelWithValue(1.0 / (now - this->lastRecvFrameTime));
                         
                         this->lastRecvFrameTime = now;
                     } else
@@ -353,6 +356,20 @@ wtmApp::drainSerial()
 {
     while (serial.available())
         (void)serial.readByte();
+}
+
+void
+wtmApp::updateFPSLabelWithValue(float fps)
+{
+    ofxUILabel* fpsLabel = (ofxUILabel*)gui->getWidget(kGUIFPS);
+    
+    if (NULL != fpsLabel) {
+        char buf[16];
+        
+        snprintf(buf, 16, "FPS: %.2f", fps);
+        
+        fpsLabel->setLabel(buf);
+    }
 }
 
 //--------------------------------------------------------------

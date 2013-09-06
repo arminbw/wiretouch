@@ -36,6 +36,7 @@
 #define WIDGETWIDTH (GUIWIDTH-(OFX_UI_GLOBAL_WIDGET_SPACING*2))
 #define WIDGETHEIGHT 22
 
+#define kGUIFPS                     ("FPS______")
 #define kGUIHalfwaveAmpName         ("HALFWAVE AMP")
 #define kGUIOutputAmpName           ("OUTPUT AMP")
 #define kGUISampleDelayName         ("SAMPLE DELAY")
@@ -95,6 +96,7 @@ class wtmApp : public ofBaseApp {
         void drainSerial();
         void guiEvent(ofxUIEventArgs &e);
         void sendSliderData(ofxUIEventArgs &e, char command);
+        void updateFPSLabelWithValue(float fps);
     
         int thresholdImageAlpha;
         double inputGamma;
