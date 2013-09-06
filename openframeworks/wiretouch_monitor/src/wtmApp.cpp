@@ -77,7 +77,7 @@ void wtmApp::setup()
     interpolationTypes.push_back(kGUIHermiteName);
     interpolationTypes.push_back(kGUIWNNName);
     interpolationTypes.push_back(kGUILagrangeName);
-    ofxUIDropDownList *interpolationDropDownMenu = gui->addDropDownList("TYPE", interpolationTypes, (WIDGETWIDTH/2)-(OFX_UI_GLOBAL_WIDGET_SPACING));
+    ofxUIDropDownList *interpolationDropDownMenu = gui->addDropDownList(kGUIInterpTypeName, interpolationTypes, (WIDGETWIDTH/2)-(OFX_UI_GLOBAL_WIDGET_SPACING));
     gui->addSlider(kGUIUpSamplingName, 1.0, 8.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSpacer();
     gui->addWidgetDown(new ofxUILabel("BLOB DETECTION", OFX_UI_FONT_MEDIUM));
@@ -150,7 +150,10 @@ void wtmApp::update()
                     } else {
                         this->state = wtmAppStateIdle;
                     }
-
+                    
+                    ofxUILabelButton* button = (ofxUILabelButton*)gui->getWidget(kGUICalibrateName);
+                    button->setLabelText(kGUICalibrateName);
+                    
                     this->consumeSettings(this->settingsString->c_str());
                     
                     delete this->settingsString;
@@ -372,6 +375,14 @@ wtmApp::updateFPSLabelWithValue(float fps)
     }
 }
 
+void
+wtmApp::updateInterpolationTypeLabel(const char* newName)
+{
+    ofxUIDropDownList* list = (ofxUIDropDownList*)gui->getWidget(kGUIInterpTypeName);
+    if (NULL != list)
+        list->setLabelText(newName);
+}
+
 //--------------------------------------------------------------
 void wtmApp::guiEvent(ofxUIEventArgs &e)
 {
@@ -395,24 +406,31 @@ void wtmApp::guiEvent(ofxUIEventArgs &e)
     } else if (widgetName == kGUILinearName) {
         this->interpolatorType = wtmInterpolatorTypeLinear;
         this->updateInterpolator();
+        this->updateInterpolationTypeLabel(widgetName.c_str());
     } else if (widgetName == kGUICatmullName) {
         this->interpolatorType = wtmInterpolatorTypeCatmullRom;
         this->updateInterpolator();
+        this->updateInterpolationTypeLabel(widgetName.c_str());
     } else if (widgetName == kGUICosineName) {
         this->interpolatorType = wtmInterpolatorTypeCosine;
         this->updateInterpolator();
+        this->updateInterpolationTypeLabel(widgetName.c_str());
     } else if (widgetName == kGUICubicName) {
         this->interpolatorType = wtmInterpolatorTypeCubic;
         this->updateInterpolator();
+        this->updateInterpolationTypeLabel(widgetName.c_str());
     } else if (widgetName == kGUIHermiteName) {
         this->interpolatorType = wtmInterpolatorTypeHermite;
         this->updateInterpolator();
+        this->updateInterpolationTypeLabel(widgetName.c_str());
     } else if (widgetName == kGUIWNNName) {
         this->interpolatorType = wtmInterpolatorTypeWNN;
         this->updateInterpolator();
+        this->updateInterpolationTypeLabel(widgetName.c_str());
     } else if (widgetName == kGUILagrangeName) {
         this->interpolatorType = wtmInterpolatorTypeLagrange;
         this->updateInterpolator();
+        this->updateInterpolationTypeLabel(widgetName.c_str());
     } else if (widgetName == kGUIBlobsName) {
         ofxUIButton *button = (ofxUIButton *) e.widget;
         bTrackBlobs = button->getValue();
@@ -439,7 +457,9 @@ void wtmApp::guiEvent(ofxUIEventArgs &e)
         ofxUISlider *slider = (ofxUISlider *) e.widget;
         this->inputGamma = slider->getScaledValue();
     } else if (widgetName == kGUICalibrateName) {
-        if (wtmAppStateReceivingSettings != this->state) {
+        ofxUILabelButton *button = (ofxUILabelButton *) e.widget;
+        
+        if (wtmAppStateReceivingSettings != this->state) {            
             bool wasRunning = (wtmAppStateReceivingTouches == this->state);
             
             if (wasRunning)
@@ -449,6 +469,8 @@ void wtmApp::guiEvent(ofxUIEventArgs &e)
             serial.writeBytes((unsigned char*)"c\ni\n", 4);
             
             this->resumeAfterSettingsReceipt = wasRunning;
+            
+            button->setLabelText("CALIBRATING...");
         }
     } else if (widgetName == kGUIStartName) {
         ofxUILabelButton *button = (ofxUILabelButton *) e.widget;

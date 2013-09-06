@@ -43,8 +43,8 @@
 #define kGUISignalFrequencyName     ("SIGNAL FREQUENCY")
 #define kGUIPostProcessingName      ("POST PROCESSING")
 #define kGUIUpSamplingName          ("UPSAMPLING")
-#define kGUIInterpolationTypeName   ("INTERPOLATION")
 #define kGUIGridName                ("GRID")
+#define kGUIInterpTypeName          ("INTERP_TYPE")
 #define kGUIBlobsName               ("BLOBS")
 #define kGUICalibrateName           ("CALIBRATE")
 #define kGUIStartName               ("START")
@@ -97,6 +97,7 @@ class wtmApp : public ofBaseApp {
         void guiEvent(ofxUIEventArgs &e);
         void sendSliderData(ofxUIEventArgs &e, char command);
         void updateFPSLabelWithValue(float fps);
+        void updateInterpolationTypeLabel(const char* newName);
     
         int thresholdImageAlpha;
         double inputGamma;
