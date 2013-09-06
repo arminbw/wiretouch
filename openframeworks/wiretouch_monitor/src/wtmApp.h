@@ -45,7 +45,9 @@
 #define kGUIInterpolationTypeName   ("INTERPOLATION")
 #define kGUIGridName                ("GRID")
 #define kGUIBlobsName               ("BLOBS")
+#define kGUICalibrateName           ("CALIBRATE")
 #define kGUIStartName               ("START")
+#define kGUIStopName                ("STOP")
 #define kGUIConnectSerialName       ("CONNECT SERIAL")
 #define kGUILinearName              ("LINEAR")
 #define kGUICatmullName             ("CATMULL")
@@ -88,6 +90,9 @@ class wtmApp : public ofBaseApp {
     
     protected:
         void updateInterpolator();
+        void startSensor();
+        void stopSensor();
+        void drainSerial();
         void guiEvent(ofxUIEventArgs &e);
         void sendSliderData(ofxUIEventArgs &e, char command);
     
@@ -100,8 +105,10 @@ class wtmApp : public ofBaseApp {
     
         ofSerial serial;
         bool bSerialConnectionAvailable;
+        bool resumeAfterSettingsReceipt;
         unsigned char* recvBuffer;
         float lastRecvFrameTime;
+        float lastWindowResizeTime;
     
         string* settingsString;
     

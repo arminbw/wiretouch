@@ -89,7 +89,9 @@ void wtmApp::setup()
     gui->addSlider(kGUIBlobGammaName, 0.0, 6.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(2);
     gui->addSlider(kGUIBlobAdaptiveThresholdRangeName, 0.0, 100.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(2);
     gui->addSpacer();
-    ofxUILabelButton* button = gui->addLabelButton(kGUIStartName, false, WIDGETWIDTH, WIDGETHEIGHT);
+    ofxUILabelButton* button = gui->addLabelButton(kGUICalibrateName, false, WIDGETWIDTH, WIDGETHEIGHT);
+    button->setLabelVisible(true);
+    button = gui->addLabelButton(kGUIStartName, false, WIDGETWIDTH, WIDGETHEIGHT);
     button->setLabelVisible(true);
     
     gui->setWidgetColor(OFX_UI_WIDGET_COLOR_BACK, ofColor(120));
@@ -106,11 +108,28 @@ void wtmApp::setup()
     
     this->tuioServer = new wtmTuioServer();
     this->tuioServer->start("127.0.0.1", 3333);
+    
+    this->lastWindowResizeTime = -1.0;
 }
 
 //--------------------------------------------------------------
 void wtmApp::update()
 {
+    float now = ofGetElapsedTimef();
+    if (this->lastWindowResizeTime > 0) {
+        if ((now - this->lastWindowResizeTime) <.5)
+            return;
+        else if (now - this->lastWindowResizeTime > .5) {
+            this->lastWindowResizeTime = -1.0;
+            
+            if (wtmAppStateReceivingTouches == this->state) {
+                this->stopSensor();
+                ofSleepMillis(100);
+                this->startSensor();
+            }
+        }
+    }
+    
     switch (this->state) {
         case wtmAppStateReceivingSettings: {
             while(serial.available()) {
@@ -122,7 +141,12 @@ void wtmApp::update()
                 *this->settingsString += (char)c;
                 
                 if ('\n' == c) {
-                    this->state = wtmAppStateReceivingTouches;
+                    if (this->resumeAfterSettingsReceipt) {
+                        this->startSensor();
+                        this->resumeAfterSettingsReceipt = false;
+                    } else {
+                        this->state = wtmAppStateIdle;
+                    }
 
                     this->consumeSettings(this->settingsString->c_str());
                     
@@ -158,6 +182,7 @@ void wtmApp::update()
             
         case wtmAppStateIdle:
         default:
+            this->drainSerial();
             break;
     }
     
@@ -300,6 +325,36 @@ void wtmApp::sendSliderData(ofxUIEventArgs &e, char command) {
     serial.writeBytes((unsigned char*)buf, strlen(buf));
 }
 
+void
+wtmApp::startSensor()
+{
+    this->drainSerial();
+    
+    serial.writeBytes((unsigned char*)"s\n", 2);
+    
+    this->state = wtmAppStateReceivingTouches;
+}
+
+void
+wtmApp::stopSensor()
+{
+    serial.writeBytes((unsigned char*)"x\n", 2);
+    
+    this->tuioServer->update();
+    this->tuioServer->update();
+    
+    this->drainSerial();
+    
+    this->state = wtmAppStateIdle;
+}
+
+void
+wtmApp::drainSerial()
+{
+    while (serial.available())
+        (void)serial.readByte();
+}
+
 //--------------------------------------------------------------
 void wtmApp::guiEvent(ofxUIEventArgs &e)
 {
@@ -366,18 +421,37 @@ void wtmApp::guiEvent(ofxUIEventArgs &e)
     } else if (widgetName == kGUIBlobGammaName) {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
         this->inputGamma = slider->getScaledValue();
-    } else if (widgetName == kGUIStartName) {
-        if (!bSerialConnectionAvailable) {
-            ofxUIButton *button = (ofxUIButton *) e.widget;
-        }
-        if (wtmAppStateIdle == this->state) {
-            serial.writeByte('c');
-            serial.writeByte('\n');
-            serial.writeByte('i');
-            serial.writeByte('\n');
-            serial.writeByte('s');
-            serial.writeByte('\n');
+    } else if (widgetName == kGUICalibrateName) {
+        if (wtmAppStateReceivingSettings != this->state) {
+            bool wasRunning = (wtmAppStateReceivingTouches == this->state);
+            
+            if (wasRunning)
+                this->stopSensor();
+            
             this->state = wtmAppStateReceivingSettings;
+            serial.writeBytes((unsigned char*)"c\ni\n", 4);
+            
+            this->resumeAfterSettingsReceipt = wasRunning;
+        }
+    } else if (widgetName == kGUIStartName) {
+        ofxUILabelButton *button = (ofxUILabelButton *) e.widget;
+
+        if (button->getValue()) {
+            if (wtmAppStateIdle == this->state) {
+                button->setLabelText(kGUIStopName);
+                
+                if (wtmAppStateReceivingSettings == this->state)
+                    this->resumeAfterSettingsReceipt = true;
+                else
+                    this->startSensor();
+            } else {
+                button->setLabelText(kGUIStartName);
+                
+                if (wtmAppStateReceivingSettings == this->state)
+                    this->resumeAfterSettingsReceipt = false;
+                else
+                    this->stopSensor();
+            }
         }
     }
 }
@@ -411,24 +485,14 @@ void wtmApp::mousePressed(int x, int y, int button){
 //--------------------------------------------------------------
 void wtmApp::mouseReleased(int x, int y, int button){
     // the gui title bar shouldn't leave the app window
-    // TODO: correct onMouseDragged in ofxUISuperCanvas itself
     if (gui->getRect()->getY() < 0) {
         gui->getRect()->setY((0.0));
-    }
-    else if (gui->getRect()->getY() > WINDOWHEIGHT-30) {
-        gui->getRect()->setY(WINDOWHEIGHT-30);
-    }
-    if (gui->getRect()->getX() < 30-GUIWIDTH) {
-        gui->getRect()->setX(30-GUIWIDTH);
-    }
-    else if (gui->getRect()->getX() > WINDOWWIDTH-30) {
-        gui->getRect()->setX(WINDOWWIDTH-30);
     }
 }
 
 //--------------------------------------------------------------
 void wtmApp::windowResized(int w, int h){
-    
+    this->lastWindowResizeTime = ofGetElapsedTimef();
 }
 
 //--------------------------------------------------------------

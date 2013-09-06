@@ -59,8 +59,6 @@ wtmTuioServer::update()
             TUIO::TuioCursor* aCursor = this->_cursors[identifier];
             this->_tuioServer->removeTuioCursor(aCursor);
             this->_cursors.erase(identifier);
-            
-            printf("remove cursor : %d\n", identifier);
         }
     }
     
