@@ -14,7 +14,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with rfm12b-linux. If not, see <http://www.gnu.org/licenses/>.
+ * along with Wiretouch. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <SPI.h>
@@ -401,6 +401,11 @@ process_cmd(char* cmd)
     
     case 's': {
       isRunning = 1;
+      break;
+    }
+    
+    case 'x': {
+      isRunning = 0;
       break;
     }
     
