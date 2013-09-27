@@ -16,7 +16,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with rfm12b-linux. If not, see <http://www.gnu.org/licenses/>.
+# along with Wiretouch. If not, see <http://www.gnu.org/licenses/>.
 
 my($targetPID, $targetVID) = (24577, 1027);
 my($plistpath) = "/System/Library/Extensions/FTDIUSBSerialDriver.kext/Contents/Info.plist";
