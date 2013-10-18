@@ -27,6 +27,7 @@
 
 #include "blob-tracker.h"
 
+
 wtmBlobTracker::wtmBlobTracker()
 {
     this->threshold = 100;
@@ -83,6 +84,12 @@ wtmBlobTracker::update()
                                          false);
 
         this->blobsManager.update(this->contourFinder.blobs);
+        
+        int numBlobs = this->blobsManager.blobs.size();
+        for( int i = 0; i < numBlobs; i++ )	{
+            ofxStoredBlobVO& blob = this->blobsManager.blobs.at(i);
+            this->updateBlobCentroidFromImageIntensities(blob);
+        }
     }
 }
 
@@ -153,4 +160,30 @@ void
 wtmBlobTracker::setAdaptiveThresholdRange(int aRange)
 {
     this->adaptiveThreshRange = aRange;
+}
+
+void
+wtmBlobTracker::updateBlobCentroidFromImageIntensities(ofxCvBlob& aBlob)
+{
+    int     x = floor(aBlob.boundingRect.getX()),
+            y = floor(aBlob.boundingRect.getY()),
+            w = floor(aBlob.boundingRect.getWidth()),
+            h = floor(aBlob.boundingRect.getHeight());
+    
+    unsigned char* pixels = this->trackedImage.getPixels();
+    int iw = this->trackedImage.getWidth();
+    
+    float accumX = 0, accumY = 0, wsum = 0.0;
+    
+    for (int i = x; i < x+w; i++) {
+        for (int j = y; j < y+h; j++) {
+            float weight = (float)(pixels[iw * j + i]) / 255.0;
+            
+            accumX += i * weight;
+            accumY += j * weight;
+            wsum   += weight;
+        }
+    }
+    
+    aBlob.centroid.set(accumX / wsum, accumY / wsum);
 }

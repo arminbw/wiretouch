@@ -62,6 +62,8 @@ protected:
     ofxCvContourFinder      contourFinder;
     ofxBlobsManager         blobsManager;
     ofxCvGrayscaleImage     trackedImage;
+    
+    void updateBlobCentroidFromImageIntensities(ofxCvBlob& aBlob);
 };
 
 
