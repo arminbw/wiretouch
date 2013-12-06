@@ -135,7 +135,16 @@ muxSPI(byte output, byte vertical, byte off)
     if (off)
        bits = 0xff;
     else {
-      bits = ((output % 2) ? (1 << 4) : (1 << 5)) | (output >> 1);
+      //bits = ((output % 2) ? (1 << 4) : (1 << 5)) | (output >> 1);
+      if (output % 2) {
+         bits = (1 << 4);
+         output >>= 1;
+         bits |= (output < 8) ? output : (23 - output);
+      } else {
+        bits = (1 << 5);
+        output >>= 1;
+        bits |= (output < 8) ? (7 - output) : output;
+      }
     }
   } else {
     if (off)
