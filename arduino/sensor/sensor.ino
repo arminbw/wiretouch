@@ -26,15 +26,15 @@
 #define IBUF_LEN            12        // serial buffer for incoming commands
 
 #define DEFAULT_MEASURE_DELAY       14
-#define HALFWAVE_POT_VALUE          205
-#define OUTPUT_AMP_POT_VALUE        8
+#define HALFWAVE_POT_VALUE          195
+#define OUTPUT_AMP_POT_VALUE        22
 #define OUTPUT_AMP_POT_TUNE_DEFAULT 8
-#define WAVE_FREQUENCY              13
+#define WAVE_FREQUENCY              18
 
 #define CALIB_NUM_TARGET_MEASURE    128
 #define CALIB_NUM_MEASURE           16
 #define CALIB_THRESHOLD             500
-#define CALIB_THRESHOLD2            1010
+#define CALIB_THRESHOLD2            1005
 #define CALIB_OUTPUT_BLIND_DELTA    4
 
 #define ORDER_MEASURE_UNORDERED   0
@@ -264,13 +264,16 @@ auto_tune_output_amp()
 {   
   uint16_t targetValue = 0;
   byte mid_x = verticalWires >> 1, mid_y = horizontalWires >> 1;
+  uint16_t xx, yy;
   
   for (uint16_t oabase = 255; oabase > 0; oabase--) {
      outputAmpPotBase = oabase;
     
      set_output_amp_pot(oabase);
+   
+     map_coords(mid_x, mid_y, &xx, &yy);
      
-     if ((targetValue = measure_one_avg(mid_x, mid_y, CALIB_NUM_TARGET_MEASURE)) > CALIB_THRESHOLD)
+     if ((targetValue = measure_one_avg(xx, yy, CALIB_NUM_TARGET_MEASURE)) > CALIB_THRESHOLD)
        break;
   }
     
@@ -278,8 +281,10 @@ auto_tune_output_amp()
     for (uint16_t l = 0; l < horizontalWires; l++) {
       uint16_t minDiff = 0xffff, tune_val = 0;
       
+      map_coords(k, l, &xx, &yy);
+      
       for (byte amp_tune=0; amp_tune<16; amp_tune++) {
-        set_output_amp_tuning_for_point(k, l, amp_tune);
+        set_output_amp_tuning_for_point(xx, yy, amp_tune);
 
         uint16_t val = measure_one_avg(k, l, CALIB_NUM_MEASURE);
         uint16_t diff = (uint16_t)abs((int)val - (int)targetValue);
@@ -290,7 +295,7 @@ auto_tune_output_amp()
         }
       }
       
-      set_output_amp_tuning_for_point(k, l, tune_val);
+      set_output_amp_tuning_for_point(xx, yy, tune_val);
     }
   }
   
@@ -299,7 +304,9 @@ auto_tune_output_amp()
     
      set_output_amp_pot(oabase);
      
-     if ((targetValue = measure_one_avg(mid_x, mid_y, CALIB_NUM_TARGET_MEASURE)) > CALIB_THRESHOLD2) {
+     map_coords(mid_x, mid_y, &xx, &yy);
+     
+     if ((targetValue = measure_one_avg(xx, yy, CALIB_NUM_TARGET_MEASURE)) > CALIB_THRESHOLD2) {
        outputAmpPotBase -= CALIB_OUTPUT_BLIND_DELTA;
        break;
      }
