@@ -228,24 +228,25 @@ void wtmApp::draw()
 {    
     if (this->texture && this->texture->isAllocated())
         this->texture->draw(0, 0, ofGetWidth(), ofGetHeight());
-    
-    if (wtmAppStateReceivingTouches == this->state && 0 < this->thresholdImageAlpha) {
-        ofTexture* thresholdedTexture = this->blobTracker.currentTresholdedTexture();
-        
-        if (NULL != thresholdedTexture) {
-            ofPushStyle();
-            ofEnableAlphaBlending();
-            ofSetColor(255, 0, 222, this->thresholdImageAlpha);
-        
-            thresholdedTexture->draw(0, 0, ofGetWidth(), ofGetHeight());
-            
-            ofDisableAlphaBlending();
-            ofPopStyle();        
-        }
-    }
 
-    if (this->bTrackBlobs)
-        this->blobTracker.draw();    
+    if (this->bTrackBlobs) {
+        
+        if (wtmAppStateReceivingTouches == this->state && 0 < this->thresholdImageAlpha) {
+            ofTexture* thresholdedTexture = this->blobTracker.currentTresholdedTexture();
+            
+            if (NULL != thresholdedTexture) {
+                ofPushStyle();
+                ofEnableAlphaBlending();
+                ofSetColor(255, 0, 222, this->thresholdImageAlpha);
+                
+                thresholdedTexture->draw(0, 0, ofGetWidth(), ofGetHeight());
+                
+                ofDisableAlphaBlending();
+                ofPopStyle();
+            }
+        }
+        this->blobTracker.draw();
+    }
 }
 
 //--------------------------------------------------------------

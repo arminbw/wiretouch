@@ -24,8 +24,8 @@
 
 #include "interpolator-types.h"
 #include "interpolator.h"
-#include "tuio-server.h"
 
+#include "tuio-server.h"
 #include "blob-tracker.h"
 
 #define WINDOWWIDTH 1024
