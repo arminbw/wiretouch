@@ -101,7 +101,8 @@ void wtmApp::setup()
 	// (ie, COM4 on a pc, /dev/tty.... on linux, /dev/tty... on a mac)
 	int baud = 300;
 	bSerialConnectionAvailable = serial.setup(0, baud);
-    
+    bSerialConnectionConfigured = false;
+    this->serialOpenTime = ofGetElapsedTimef();
     
     ofxUILabelButton* button = gui->addLabelButton(kGUICalibrateName, false, WIDGETWIDTH, WIDGETHEIGHT);
     button->setLabelVisible(true);
@@ -143,6 +144,19 @@ void wtmApp::update()
                 this->startSensor();
             }
         }
+    }
+    
+    if (this->bSerialConnectionAvailable && (now - this->serialOpenTime) > 1.0 &&!this->bSerialConnectionConfigured) {
+        static string sliderNames[4] = {
+            kGUIHalfwaveAmpName, kGUIOutputAmpName, kGUISampleDelayName, kGUISignalFrequencyName
+        };
+        
+        for (int i=0; i < 4; i++) {
+            ofxUIWidget* aSlider = this->gui->getWidget(sliderNames[i]);
+            aSlider->triggerSelf();
+        }
+        
+        this->bSerialConnectionConfigured = true;
     }
     
     switch (this->state) {

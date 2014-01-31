@@ -109,11 +109,12 @@ class wtmApp : public ofBaseApp {
         int sensorColumns, sensorRows, bytesPerFrame;
     
         ofSerial serial;
-        bool bSerialConnectionAvailable;
+        bool bSerialConnectionAvailable, bSerialConnectionConfigured;
         bool resumeAfterSettingsReceipt;
         unsigned char* recvBuffer;
         float lastRecvFrameTime;
         float lastWindowResizeTime;
+        float serialOpenTime;
     
         string* settingsString;
     
