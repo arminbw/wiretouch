@@ -39,9 +39,9 @@ wtmBlobTracker::wtmBlobTracker()
     
     this->blobsManager.normalizePercentage = .5;
     this->blobsManager.maxMergeDis         = 16;
-    this->blobsManager.minDetectedTime     = 0;
-    this->blobsManager.maxUndetectedTime   = 0;
-    this->blobsManager.enableMinDetectedTimeFilter = false;
+    this->blobsManager.minDetectedTime     = 150;
+    this->blobsManager.maxUndetectedTime   = 150;
+    this->blobsManager.enableMinDetectedTimeFilter = true;
     this->blobsManager.giveLowestPossibleIDs = true;
 }
 

@@ -48,13 +48,6 @@ void wtmApp::setup()
     
     this->updateInterpolator();
     
-	// this should be set to whatever com port your serial device is connected to.
-	// (ie, COM4 on a pc, /dev/tty.... on linux, /dev/tty... on a mac)
-	// arduino users check in arduino app....
-	int baud = 300;
-	bSerialConnectionAvailable = serial.setup(0, baud);
-    // vector <ofSerialDeviceInfo> serialDevices = serial.getDeviceList();
-    
     // setup the graphical user interface
     gui = new ofxUISuperCanvas("WIRETOUCH 0.2",WINDOWWIDTH-(GUIWIDTH+WINDOWBORDERDISTANCE),WINDOWBORDERDISTANCE, GUIWIDTH, GUIHEIGHT);
     ofxUILabel* fpsLabel = new ofxUILabel(kGUIFPS, OFX_UI_FONT_SMALL);
@@ -98,8 +91,21 @@ void wtmApp::setup()
     
     this->updateFirmwareVersionLabel("unknown");
     
+    vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
+    for(int i=0; i<deviceList.size();i++) {
+        this->serialDevicesNames.push_back(deviceList[i].getDeviceName().c_str());
+        cout<<"device name: "<<serialDevicesNames.at(i)<<endl;
+    }
+    ofxUIDropDownList *serialDeviceDropDownMenu = gui->addDropDownList("serialPort", serialDevicesNames, WIDGETWIDTH);
+    // this should be set to whatever com port your serial device is connected to.
+	// (ie, COM4 on a pc, /dev/tty.... on linux, /dev/tty... on a mac)
+	int baud = 300;
+	bSerialConnectionAvailable = serial.setup(0, baud);
+    
+    
     ofxUILabelButton* button = gui->addLabelButton(kGUICalibrateName, false, WIDGETWIDTH, WIDGETHEIGHT);
     button->setLabelVisible(true);
+    
     button = gui->addLabelButton(kGUIStartName, false, WIDGETWIDTH, WIDGETHEIGHT);
     button->setLabelVisible(true);
     
@@ -205,8 +211,7 @@ void wtmApp::update()
     }
 }
 
-void
-wtmApp::distributeTuio()
+void wtmApp::distributeTuio()
 {
     vector<ofxStoredBlobVO>& blobs = this->blobTracker.currentBlobs();
     
@@ -509,6 +514,12 @@ void wtmApp::guiEvent(ofxUIEventArgs &e)
                     this->resumeAfterSettingsReceipt = false;
                 else
                     this->stopSensor();
+            }
+        }
+    } else {
+        for (std::vector<string>::iterator it = serialDevicesNames.begin(); it != serialDevicesNames.end(); ++it) {
+            if (widgetName == *it) {
+                std::cout << "you selected: " << *it;
             }
         }
     }
