@@ -115,6 +115,7 @@ class wtmApp : public ofBaseApp {
         float lastRecvFrameTime;
         float lastWindowResizeTime;
         float serialOpenTime;
+        bool bRedraw;
     
         string* settingsString;
     

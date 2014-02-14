@@ -26,6 +26,7 @@ void wtmApp::setup()
     ofSetVerticalSync(true);
 	ofBackground(0);
 	ofSetLogLevel(OF_LOG_VERBOSE);
+    this->bRedraw = true;
     
     this->inputGamma = 1.0;
     
@@ -54,14 +55,15 @@ void wtmApp::setup()
     gui->addWidgetPosition(fpsLabel, OFX_UI_WIDGET_POSITION_RIGHT, OFX_UI_ALIGN_RIGHT);
     this->updateFPSLabelWithValue(0.);
     gui->addSpacer();
+    
     gui->addWidgetDown(new ofxUILabel("SENSOR PARAMETERS", OFX_UI_FONT_MEDIUM));
     gui->addSlider(kGUIHalfwaveAmpName, 0.0, 255.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSlider(kGUIOutputAmpName, 0.0, 255.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSlider(kGUISampleDelayName, 0.0, 100.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSlider(kGUISignalFrequencyName, 1.0, 60.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSpacer();
+    
     gui->addWidgetDown(new ofxUILabel("INTERPOLATION", OFX_UI_FONT_MEDIUM));
-    // gui->addWidgetDown(new ofxUISpectrum(widgetWidth, widgetHeight, buffer, 256, 0.0, 1.0, "SPECTRUM"));
     vector<string> interpolationTypes;
     interpolationTypes.push_back(kGUILinearName);
     interpolationTypes.push_back(kGUICatmullName);
@@ -71,14 +73,19 @@ void wtmApp::setup()
     interpolationTypes.push_back(kGUIWNNName);
     interpolationTypes.push_back(kGUILagrangeName);
     ofxUIDropDownList *interpolationDropDownMenu = gui->addDropDownList(kGUIInterpTypeName, interpolationTypes, (WIDGETWIDTH/2)-(OFX_UI_GLOBAL_WIDGET_SPACING));
+    interpolationDropDownMenu->setAutoClose(true);
+    interpolationDropDownMenu->setShowCurrentSelected(true);
+    
     gui->addSlider(kGUIUpSamplingName, 1.0, 8.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSpacer();
+    
     gui->addWidgetDown(new ofxUILabel("BLOB DETECTION", OFX_UI_FONT_MEDIUM));
     ofxUILabelToggle* toggle = gui->addLabelToggle(kGUIBlobsName, false, (WIDGETWIDTH/2)-OFX_UI_GLOBAL_WIDGET_SPACING, WIDGETHEIGHT);
     toggle->setLabelVisible(true); // doesn't get set by default!
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
     // toggle = gui->addLabelToggle(kGUIGridName, false, (WIDGETWIDTH/2)-(OFX_UI_GLOBAL_WIDGET_SPACING/2), WIDGETHEIGHT);
-    toggle->setLabelVisible(true);
+    // toggle->setLabelVisible(true);
+    
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->addSlider(kGUIBlobThresholdName, 0.0, 255.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSlider(kGUIBlobVisualizationName, 0.0, 255.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
@@ -88,7 +95,6 @@ void wtmApp::setup()
     
     ofxUILabel* firmwareLabel = new ofxUILabel(kGUIFirmwareName, OFX_UI_FONT_SMALL);
     gui->addWidgetDown(firmwareLabel);
-    
     this->updateFirmwareVersionLabel("unknown");
     
     vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
@@ -97,16 +103,18 @@ void wtmApp::setup()
         cout<<"device name: "<<serialDevicesNames.at(i)<<endl;
     }
     ofxUIDropDownList *serialDeviceDropDownMenu = gui->addDropDownList("serialPort", serialDevicesNames, WIDGETWIDTH);
+    serialDeviceDropDownMenu->setShowCurrentSelected(true);
+    serialDeviceDropDownMenu->setAutoClose(true);
     // this should be set to whatever com port your serial device is connected to.
 	// (ie, COM4 on a pc, /dev/tty.... on linux, /dev/tty... on a mac)
 	int baud = 300;
-	bSerialConnectionAvailable = serial.setup(0, baud);
+	bSerialConnectionAvailable = serial.setup(serialDevicesNames.front(), baud);
     bSerialConnectionConfigured = false;
     this->serialOpenTime = ofGetElapsedTimef();
     
     ofxUILabelButton* button = gui->addLabelButton(kGUICalibrateName, false, WIDGETWIDTH, WIDGETHEIGHT);
     button->setLabelVisible(true);
-    
+
     button = gui->addLabelButton(kGUIStartName, false, WIDGETWIDTH, WIDGETHEIGHT);
     button->setLabelVisible(true);
     
@@ -119,8 +127,6 @@ void wtmApp::setup()
     ofAddListener(gui->newGUIEvent, this, &wtmApp::guiEvent);
 
     gui->loadSettings("GUI/guiSettings.xml");
-    interpolationDropDownMenu->setAutoClose(true);
-    interpolationDropDownMenu->setShowCurrentSelected(true);
     
     this->tuioServer = new wtmTuioServer();
     this->tuioServer->start("127.0.0.1", 3333);
@@ -146,7 +152,7 @@ void wtmApp::update()
         }
     }
     
-    if (this->bSerialConnectionAvailable && (now - this->serialOpenTime) > 1.0 &&!this->bSerialConnectionConfigured) {
+    if (this->bSerialConnectionAvailable && (now - this->serialOpenTime) > 2.0 &&!this->bSerialConnectionConfigured) {
         static string sliderNames[4] = {
             kGUIHalfwaveAmpName, kGUIOutputAmpName, kGUISampleDelayName, kGUISignalFrequencyName
         };
@@ -244,12 +250,12 @@ void wtmApp::distributeTuio()
 
 //--------------------------------------------------------------
 void wtmApp::draw()
-{    
+{
+    if (!this->bRedraw) return;
     if (this->texture && this->texture->isAllocated())
         this->texture->draw(0, 0, ofGetWidth(), ofGetHeight());
 
     if (this->bTrackBlobs) {
-        
         if (wtmAppStateReceivingTouches == this->state && 0 < this->thresholdImageAlpha) {
             ofTexture* thresholdedTexture = this->blobTracker.currentTresholdedTexture();
             
@@ -266,6 +272,7 @@ void wtmApp::draw()
         }
         this->blobTracker.draw();
     }
+    this->bRedraw == false;
 }
 
 //--------------------------------------------------------------
@@ -299,6 +306,7 @@ void wtmApp::consumePacketData()
         this->blobTracker.setGrayscalePixels(this->interpolator->currentPixels(),
                                              this->interpolator->getOutputWidth(),
                                              this->interpolator->getOutputHeight());
+    this->bRedraw;
 }
 
 //--------------------------------------------------------------
@@ -533,7 +541,7 @@ void wtmApp::guiEvent(ofxUIEventArgs &e)
     } else {
         for (std::vector<string>::iterator it = serialDevicesNames.begin(); it != serialDevicesNames.end(); ++it) {
             if (widgetName == *it) {
-                std::cout << "you selected: " << *it;
+                std::cout << "\nyou selected: " << *it;
             }
         }
     }
@@ -594,4 +602,5 @@ void wtmApp::exit()
     serial.close();
     gui->saveSettings("GUI/guiSettings.xml");
     delete gui;
+    ofSleepMillis(100);
 }
