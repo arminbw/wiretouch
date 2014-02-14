@@ -76,7 +76,7 @@ void wtmApp::setup()
     interpolationDropDownMenu->setAutoClose(true);
     interpolationDropDownMenu->setShowCurrentSelected(true);
     
-    gui->addSlider(kGUIUpSamplingName, 1.0, 8.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
+    gui->addSlider(kGUIUpSamplingName, 1.0, 12.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSpacer();
     
     gui->addWidgetDown(new ofxUILabel("BLOB DETECTION", OFX_UI_FONT_MEDIUM));
@@ -89,7 +89,7 @@ void wtmApp::setup()
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
     gui->addSlider(kGUIBlobThresholdName, 0.0, 255.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSlider(kGUIBlobVisualizationName, 0.0, 255.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
-    gui->addSlider(kGUIBlobGammaName, 0.0, 6.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(2);
+    gui->addSlider(kGUIBlobGammaName, 0.0, 16.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(2);
     gui->addSlider(kGUIBlobAdaptiveThresholdRangeName, 0.0, 100.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(2);
     gui->addSpacer();
     

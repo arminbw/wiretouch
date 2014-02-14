@@ -39,9 +39,9 @@ wtmBlobTracker::wtmBlobTracker()
     
     this->blobsManager.normalizePercentage = .5;
     this->blobsManager.maxMergeDis         = 16;
-    this->blobsManager.minDetectedTime     = 150;
-    this->blobsManager.maxUndetectedTime   = 150;
-    this->blobsManager.enableMinDetectedTimeFilter = true;
+    this->blobsManager.minDetectedTime     = 0;
+    this->blobsManager.maxUndetectedTime   = 0;
+    this->blobsManager.enableMinDetectedTimeFilter = false;
     this->blobsManager.giveLowestPossibleIDs = true;
 }
 
@@ -126,18 +126,20 @@ wtmBlobTracker::draw()
         
 		ofFill();
 		ofCircle(blob.centroid.x / scaleX, blob.centroid.y / scaleY, 2);
-        
-		/*
          
-         int x = blob.centroid.x / scaleX;
-         int y = blob.centroid.y / scaleY;
-         
-         if(blob.id >= 10)
-            x -= 4;
-		
+        int x = blob.centroid.x / scaleX;
+        int y = blob.centroid.y / scaleY;
+
+        if(blob.id >= 10)
+        x -= 4;
+
         ofPushStyle();
-        ofDrawBitmapString(ofToString(blob.id),x-4,y+5);
-        ofPopStyle();*/
+        ofDrawBitmapString(
+            ofToString(blob.id),
+            bbox.x / scaleX,
+            (bbox.y + bbox.height) / scaleY + 12
+        );
+        ofPopStyle();
 	}
     
     ofDisableAlphaBlending();
