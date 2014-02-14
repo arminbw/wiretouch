@@ -26,7 +26,7 @@ void wtmApp::setup()
     ofSetVerticalSync(true);
 	ofBackground(0);
 	ofSetLogLevel(OF_LOG_VERBOSE);
-    this->bRedraw = true;
+    this->bSerialUpdated = false;
     
     this->inputGamma = 1.0;
     
@@ -225,9 +225,11 @@ void wtmApp::update()
     }
     
     if (this->bTrackBlobs) {
-        this->blobTracker.update();
-        
-        this->distributeTuio();
+        if (this->bSerialUpdated) {
+            this->blobTracker.update();
+            this->distributeTuio();
+            this->bSerialUpdated = false;
+        }
     }
 }
 
@@ -251,7 +253,6 @@ void wtmApp::distributeTuio()
 //--------------------------------------------------------------
 void wtmApp::draw()
 {
-    if (!this->bRedraw) return;
     if (this->texture && this->texture->isAllocated())
         this->texture->draw(0, 0, ofGetWidth(), ofGetHeight());
 
@@ -272,7 +273,6 @@ void wtmApp::draw()
         }
         this->blobTracker.draw();
     }
-    this->bRedraw == false;
 }
 
 //--------------------------------------------------------------
@@ -306,7 +306,7 @@ void wtmApp::consumePacketData()
         this->blobTracker.setGrayscalePixels(this->interpolator->currentPixels(),
                                              this->interpolator->getOutputWidth(),
                                              this->interpolator->getOutputHeight());
-    this->bRedraw;
+    this->bSerialUpdated = true;
 }
 
 //--------------------------------------------------------------
