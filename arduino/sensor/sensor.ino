@@ -59,6 +59,10 @@ static byte outputAmpPotBase  = OUTPUT_AMP_POT_VALUE;
 static byte waveFrequency     = WAVE_FREQUENCY;
 static uint16_t measureDelay  = DEFAULT_MEASURE_DELAY;
 
+static float waveLutE = 1.0f;
+static unsigned waveLutA = 0;
+static int waveLut[verticalWires];
+
 static byte outputAmpPotTune[((verticalWires*horizontalWires)>>1)+1];
 
 static byte isRunning;
@@ -94,6 +98,8 @@ setup()
   for (int i=0; i<sizeof(outputAmpPotTune); i++)
     outputAmpPotTune[i] =
       (OUTPUT_AMP_POT_TUNE_DEFAULT) | (OUTPUT_AMP_POT_TUNE_DEFAULT << 4);
+  
+  update_wave_frequency_lut(waveLutE, waveLutA);
 }
 
 byte
@@ -110,6 +116,15 @@ set_output_amp_tuning_for_point(byte x, byte y, byte val)
    outputAmpPotTune[pt >> 1] =
       (outputAmpPotTune[pt >> 1] & ((pt & 1) ? 0x0f : 0xf0)) |
         ((val & 0x0f) << (4 * (pt & 1)));
+}
+
+void
+update_wave_frequency_lut(float e, unsigned a)
+{
+  for (int i=0; i<verticalWires; i++) {
+    float ii = (((float)i)/((float)verticalWires-1));
+    waveLut[i] = (pow(fabs(ii-.5), e) * a);
+  }
 }
 
 void
@@ -241,6 +256,10 @@ measure_one(uint16_t x, uint16_t y)
   map_coords(x, y, &xx, &yy);
   
   set_output_amp_pot(outputAmpPotBase + output_amp_tuning_for_point(xx, yy));
+  
+  //set_wave_frequency(waveFrequency + (((xx < 16) ? (1 + (xx%2)) : (2 - (xx%2))) * abs(xx - verticalWires/2)));
+  //set_wave_frequency(waveFrequency + (((xx < 16) ? (1 + 1 * (xx%2)) : (2 - 1 * (xx%2))) * waveLut[xx]));
+  set_wave_frequency(waveFrequency - waveLut[xx]);
   
   muxSPI(xx, 1, 0);
   muxSPI(yy, 0, 0);
@@ -411,6 +430,30 @@ process_cmd(char* cmd)
         value = value * 10 + (*cmd++ - '0');
       
       set_wave_frequency(waveFrequency = value);
+      
+      break;
+    }
+    
+    case 'p': {
+      uint16_t value = 0;
+      
+      while('\n' != *cmd)
+        value = value * 10 + (uint16_t)(*cmd++ - '0');
+      
+      waveLutE = (((float)value)/65535.0f) * 4.0f;
+      update_wave_frequency_lut(waveLutE, waveLutA);
+      
+      break;
+    }
+    
+    case 'a': {
+      uint16_t value = 0;
+      
+      while('\n' != *cmd)
+        value = value * 10 + (*cmd++ - '0');
+      
+      waveLutA = value;
+      update_wave_frequency_lut(waveLutE, waveLutA);
       
       break;
     }
