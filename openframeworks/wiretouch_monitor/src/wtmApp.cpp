@@ -60,7 +60,9 @@ void wtmApp::setup()
     gui->addSlider(kGUIHalfwaveAmpName, 0.0, 255.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSlider(kGUIOutputAmpName, 0.0, 255.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSlider(kGUISampleDelayName, 0.0, 100.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
-    gui->addSlider(kGUISignalFrequencyName, 1.0, 60.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
+    gui->addSlider(kGUISignalFrequencyName, 127.0, 1.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
+    gui->addSlider(kGUIWaveEQExponent, 0.0, 4.0, 2.0, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(2);
+    gui->addSlider(kGUIWaveEQAbsolute, 1.0, 100.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSpacer();
     
     gui->addWidgetDown(new ofxUILabel("INTERPOLATION", OFX_UI_FONT_MEDIUM));
@@ -356,10 +358,19 @@ void wtmApp::updateInterpolator()
 }
 
 //--------------------------------------------------------------
-void wtmApp::sendSliderData(ofxUIEventArgs &e, char command) {
+void
+wtmApp::sendSliderData(ofxUIEventArgs &e, char command)
+{
     ofxUISlider *slider = (ofxUISlider *) e.widget;
     int val = round(slider->getScaledValue());
     slider->setValue(val);
+    this->sendValue(val, command);
+}
+
+//--------------------------------------------------------------
+void
+wtmApp::sendValue(int val, char command)
+{
     char buf[32];
     snprintf(buf, sizeof(buf), "%c%d\n", command, val);
     serial.writeBytes((unsigned char*)buf, strlen(buf));
@@ -449,6 +460,15 @@ void wtmApp::guiEvent(ofxUIEventArgs &e)
         this->updateInterpolator();
     } else if (widgetName == kGUISignalFrequencyName) {
         sendSliderData(e, 'f');
+        
+        ofxUISlider* slider = (ofxUISlider*)e.widget;
+        slider->getLabelWidget()->setLabel(widgetName + ": " + ofxUIToString(16000000./(round(slider->getScaledValue())+1.)/2000., 3) + " kHz");
+    } else if (widgetName == kGUIWaveEQExponent) {
+        ofxUISlider *slider = (ofxUISlider *) e.widget;
+        int val = floorf((slider->getScaledValue()/4.0f)*65535.0f);
+        sendValue(val, 'p');
+    } else if (widgetName == kGUIWaveEQAbsolute) {
+        sendSliderData(e, 'a');
     } else if (widgetName == kGUILinearName) {
         this->interpolatorType = wtmInterpolatorTypeLinear;
         this->updateInterpolator();

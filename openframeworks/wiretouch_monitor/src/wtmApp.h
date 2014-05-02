@@ -41,6 +41,8 @@
 #define kGUIOutputAmpName           ("OUTPUT AMP")
 #define kGUISampleDelayName         ("SAMPLE DELAY")
 #define kGUISignalFrequencyName     ("SIGNAL FREQUENCY")
+#define kGUIWaveEQExponent          ("WAVEEQEXPONENT")
+#define kGUIWaveEQAbsolute          ("WAVEEQABSOLUTE")
 #define kGUIPostProcessingName      ("POST PROCESSING")
 #define kGUIUpSamplingName          ("UPSAMPLING")
 #define kGUIGridName                ("GRID")
@@ -97,6 +99,7 @@ class wtmApp : public ofBaseApp {
         void drainSerial();
         void guiEvent(ofxUIEventArgs &e);
         void sendSliderData(ofxUIEventArgs &e, char command);
+        void sendValue(int val, char command);
         void updateFPSLabelWithValue(float fps);
         void updateInterpolationTypeLabel(const char* newName);
         void updateFirmwareVersionLabel(const char* newVersion);
