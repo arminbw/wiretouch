@@ -1,5 +1,5 @@
 //
-//  blob-tracker.h
+//  wtmBlobTracker.h
 //  wiretouch_monitor
 //
 //  Created by Georg Kaindl on 16/8/13.
@@ -29,7 +29,6 @@
 #define __wiretouch_monitor__blob_tracker__
 
 #include "ofMain.h"
-#include "ofxOpenCv.h"
 #include "ofxBlobsManager.h"
 
 class wtmBlobTracker {
@@ -37,7 +36,7 @@ public:
     wtmBlobTracker();
     ~wtmBlobTracker();
     
-    int                     threshold;
+    int threshold;
     
     void setGrayscalePixels(const unsigned char* pixels, int width, int height);
     

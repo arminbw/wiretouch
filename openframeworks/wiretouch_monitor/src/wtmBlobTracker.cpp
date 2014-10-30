@@ -1,5 +1,5 @@
 //
-//  blob-tracker.cpp
+//  wtmBlobTracker.cpp
 //  wiretouch_monitor
 //
 //  Created by Georg Kaindl on 16/8/13.
@@ -25,7 +25,7 @@
  * along with Wiretouch. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "blob-tracker.h"
+#include "wtmBlobTracker.h"
 
 
 wtmBlobTracker::wtmBlobTracker()

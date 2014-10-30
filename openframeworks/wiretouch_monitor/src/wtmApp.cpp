@@ -50,7 +50,7 @@ void wtmApp::setup()
     this->updateInterpolator();
     
     // setup the graphical user interface
-    gui = new ofxUISuperCanvas("WIRETOUCH 0.2",WINDOWWIDTH-(GUIWIDTH+WINDOWBORDERDISTANCE),WINDOWBORDERDISTANCE, GUIWIDTH, GUIHEIGHT);
+    gui = new ofxUISuperCanvas("WIRETOUCH 0.21",WINDOWWIDTH-(GUIWIDTH+WINDOWBORDERDISTANCE),WINDOWBORDERDISTANCE, GUIWIDTH, GUIHEIGHT);
     ofxUILabel* fpsLabel = new ofxUILabel(kGUIFPS, OFX_UI_FONT_SMALL);
     gui->addWidgetPosition(fpsLabel, OFX_UI_WIDGET_POSITION_RIGHT, OFX_UI_ALIGN_RIGHT);
     this->updateFPSLabelWithValue(0.);

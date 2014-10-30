@@ -1,5 +1,5 @@
 //
-//  tuio-server.cpp
+//  wtmTuioServer.cpp
 //  wiretouch_monitor
 //
 //  Created by Georg Kaindl on 23/8/13.
@@ -26,7 +26,7 @@
  */
 
 
-#include "tuio-server.h"
+#include "wtmTuioServer.h"
 
 
 wtmTuioServer::wtmTuioServer()
