@@ -3,6 +3,7 @@
 WireTouch is an open capacitive multi-touch tracker in the making.
 Please visit http://www.wiretouch.net for demos and background information.
 
+
 ##WireTouch Firmware
 The heart of the WireTouch hardware is an ATmega328P microcontroller equipped with an Arduino bootloader. To upload the WireTouch firmware connect the mainboard with your computer via an USB to serial UART FTDI 5V cable. Install the Virtual Com Port [FTDI driver](http://www.ftdichip.com/Drivers/VCP.htm). Open arduino/sensor/sensor.io in the [http://arduino.cc/en/Main/Software](Arduino IDE). Choose "Tools>Board>Arduino UNO" and the correct port. **Upload the Arduino sketch**.
 
@@ -11,7 +12,7 @@ To increase the baud rate of the computer-mainboard connection you need to patch
 
 ##WireTouch Monitor
 ###Building
-We are currently using Xcode 6.1 on OSX 10.10 for development. To successully build the Xcode project you have to download [openFrameworks 0.8.4](https://github.com/openframeworks/openFrameworks).You also have to download the following openFrameworks addons:
+We are currently using Xcode 6.1 on OSX 10.10 for development. To successully build the Xcode project you will have to download [openFrameworks 0.8.4](https://github.com/openframeworks/openFrameworks). You will also have to download the following openFrameworks addons:
 
 * ofxCv: https://github.com/kylemcdonald/ofxCv
 * ofxUI: https://github.com/rezaali/ofxUI
@@ -25,6 +26,7 @@ Next to the openFrameworks addons we are also using several other 3rd-party libr
 * cjson: http://cjson.sourceforge.net
 * oscpack: http://code.google.com/p/oscpack
 * TUIO C++ library: http://reactivision.sourceforge.net
+
 
 ##License
 WireTouch is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.

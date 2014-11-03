@@ -1,7 +1,7 @@
 /* Wiretouch: an open capacitive multi-touch tracker
  * Copyright (C) 2011-2013 Georg Kaindl and Armin Wagner
  *
- * This file is part of Wiretouch
+ * This file is part of WireTouch
  *
  * Wiretouch is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Wiretouch. If not, see <http://www.gnu.org/licenses/>.
+ * along with WireTouch. If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <SPI.h>
