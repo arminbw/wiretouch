@@ -28,6 +28,8 @@
 #include "wtmTuioServer.h"
 #include "wtmBlobTracker.h"
 
+#define WIRETOUCHVERSION            ("WireTouch 0.21")
+
 #define WINDOWWIDTH 1024
 #define WINDOWHEIGHT 768
 #define WINDOWBORDERDISTANCE 10
@@ -36,7 +38,7 @@
 #define WIDGETWIDTH (GUIWIDTH-(OFX_UI_GLOBAL_WIDGET_SPACING*2))
 #define WIDGETHEIGHT 22
 
-#define kGUIFPS                     ("FPS______")
+#define kGUIFPS                     ("FPS__")
 #define kGUIHalfwaveAmpName         ("HALFWAVE AMP")
 #define kGUIOutputAmpName           ("OUTPUT AMP")
 #define kGUISampleDelayName         ("SAMPLE DELAY")
@@ -44,12 +46,14 @@
 #define kGUIPostProcessingName      ("POST PROCESSING")
 #define kGUIUpSamplingName          ("UPSAMPLING")
 #define kGUIGridName                ("GRID")
-#define kGUIInterpTypeName          ("INTERP_TYPE")
+#define kGUIInterpolationDropDownName   ("INTERPOLATION TYPE")
+#define kGUISerialDropDownName          ("SERIAL PORT")
 #define kGUIBlobsName               ("BLOBS")
 #define kGUICalibrateName           ("CALIBRATE")
 #define kGUIStartName               ("START")
 #define kGUIStopName                ("STOP")
-#define kGUIConnectSerialName       ("CONNECT SERIAL")
+#define kGUIFirmwareName            ("FIRMWARE")
+
 #define kGUILinearName              ("LINEAR")
 #define kGUICatmullName             ("CATMULL")
 #define kGUICosineName              ("COSINE")
@@ -61,9 +65,9 @@
 #define kGUIBlobVisualizationName   ("BLOB VISUALIZATION")
 #define kGUIBlobGammaName           ("GAMMA")
 #define kGUIBlobAdaptiveThresholdRangeName ("ADAPTIVE RANGE")
-#define kGUIFirmwareName            ("FIRMWARE")
 
 typedef enum _wtmAppState {
+    wtmAppStateNoSerialConnection,
     wtmAppStateIdle,
     wtmAppStateReceivingSettings,
     wtmAppStateReceivingTouches
@@ -76,6 +80,7 @@ class wtmApp : public ofBaseApp {
         void update();
         void draw();
 
+        void moveWidgetsBeneathDropdown(ofxUIDropDownList* widget, bool moveBack);
         void keyPressed  (int key);
         void keyReleased(int key);
         void mouseMoved(int x, int y );
@@ -91,15 +96,18 @@ class wtmApp : public ofBaseApp {
         void consumeSettings(const char* json);
     
     protected:
+        void initGUI();
         void updateInterpolator();
         void startSensor();
         void stopSensor();
+        void initSerialConnection(char* serialDeviceName);
         void drainSerial();
         void guiEvent(ofxUIEventArgs &e);
         void sendSliderData(ofxUIEventArgs &e, char command);
         void updateFPSLabelWithValue(float fps);
         void updateInterpolationTypeLabel(const char* newName);
         void updateFirmwareVersionLabel(const char* newVersion);
+        void distributeTuio();
     
         int thresholdImageAlpha;
         double inputGamma;
@@ -107,6 +115,8 @@ class wtmApp : public ofBaseApp {
         wtmAppState state;
     
         int sensorColumns, sensorRows, bytesPerFrame;
+    
+        bool bGUISerialPortDroppedDown;
     
         ofSerial serial;
         bool bSerialConnectionAvailable, bSerialConnectionConfigured;
@@ -136,6 +146,4 @@ class wtmApp : public ofBaseApp {
         wtmTuioServer* tuioServer;
     
         vector<string> serialDevicesNames;
-    
-        void distributeTuio();
 };

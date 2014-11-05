@@ -1,11 +1,3 @@
-//
-//  wtmTuioServer.h
-//  wiretouch_monitor
-//
-//  Created by Georg Kaindl on 23/8/13.
-//
-//
-
 /* Wiretouch: an open capacitive multi-touch tracker
  * Copyright (C) 2011-2013 Georg Kaindl and Armin Wagner
  *

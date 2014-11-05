@@ -57,6 +57,7 @@
 		C30B3A2A37F8F32EE7318718 /* ofxUILabelToggle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 76AF3B44E0E2FA8BFBD5F592 /* ofxUILabelToggle.cpp */; };
 		C381F2B7CFD84C0E540EB4BC /* ofxUIBiLabelSlider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 876BBA9542E267584885CAD8 /* ofxUIBiLabelSlider.cpp */; };
 		C602002DE761F9B52DB4400A /* ObjectFinder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AE75A3FBA2C2D87D14F06FE6 /* ObjectFinder.cpp */; };
+		C649742C1A0AA7E400EC1FEA /* wtmApp_Gui.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C649742B1A0AA7E400EC1FEA /* wtmApp_Gui.cpp */; };
 		C6F8E7431A02A8DE00E77077 /* cJSON.c in Sources */ = {isa = PBXBuildFile; fileRef = C6F8E6FB1A02A8DE00E77077 /* cJSON.c */; };
 		C6F8E7441A02A8DE00E77077 /* TuioClient.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C6F8E6FF1A02A8DE00E77077 /* TuioClient.cpp */; };
 		C6F8E7451A02A8DE00E77077 /* TuioServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C6F8E7061A02A8DE00E77077 /* TuioServer.cpp */; };
@@ -322,7 +323,16 @@
 		C6151136D101F857DAE12722 /* ofxCvImage.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 30; name = ofxCvImage.cpp; path = ../../../addons/ofxOpenCv/src/ofxCvImage.cpp; sourceTree = SOURCE_ROOT; };
 		C61D3DACE506E4A1C3A6D782 /* highgui.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = highgui.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/highgui/highgui.hpp; sourceTree = SOURCE_ROOT; };
 		C6305369801B450557086284 /* ofxUISpectrum.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxUISpectrum.h; path = ../../../addons/ofxUI/src/ofxUISpectrum.h; sourceTree = SOURCE_ROOT; };
+		C649742B1A0AA7E400EC1FEA /* wtmApp_Gui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = wtmApp_Gui.cpp; sourceTree = "<group>"; };
 		C66C6414C8B86FDB99ED3B70 /* core.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = core.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core/core.hpp; sourceTree = SOURCE_ROOT; };
+		C6E6D97F1A078919003B8C12 /* guiSettings.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = guiSettings.xml; sourceTree = "<group>"; };
+		C6E6D9811A078919003B8C12 /* App.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = App.png; sourceTree = "<group>"; };
+		C6E6D9821A078919003B8C12 /* Preview.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Preview.png; sourceTree = "<group>"; };
+		C6E6D9831A078919003B8C12 /* NewMedia Fett.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NewMedia Fett.ttf"; sourceTree = "<group>"; };
+		C6E6D9841A078919003B8C12 /* toggle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = toggle.png; sourceTree = "<group>"; };
+		C6E6D9851A078919003B8C12 /* toggledown.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = toggledown.png; sourceTree = "<group>"; };
+		C6E6D9861A078919003B8C12 /* toggleon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = toggleon.png; sourceTree = "<group>"; };
+		C6E6D9871A078919003B8C12 /* toggleover.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = toggleover.png; sourceTree = "<group>"; };
 		C6F8E6FB1A02A8DE00E77077 /* cJSON.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cJSON.c; sourceTree = "<group>"; };
 		C6F8E6FC1A02A8DE00E77077 /* cJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cJSON.h; sourceTree = "<group>"; };
 		C6F8E6FF1A02A8DE00E77077 /* TuioClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TuioClient.cpp; sourceTree = "<group>"; };
@@ -891,6 +901,38 @@
 			name = video;
 			sourceTree = "<group>";
 		};
+		C6E6D97C1A078919003B8C12 /* data */ = {
+			isa = PBXGroup;
+			children = (
+				C6E6D97E1A078919003B8C12 /* GUI */,
+			);
+			name = data;
+			path = bin/data;
+			sourceTree = "<group>";
+		};
+		C6E6D97E1A078919003B8C12 /* GUI */ = {
+			isa = PBXGroup;
+			children = (
+				C6E6D97F1A078919003B8C12 /* guiSettings.xml */,
+				C6E6D9801A078919003B8C12 /* images */,
+				C6E6D9831A078919003B8C12 /* NewMedia Fett.ttf */,
+				C6E6D9841A078919003B8C12 /* toggle.png */,
+				C6E6D9851A078919003B8C12 /* toggledown.png */,
+				C6E6D9861A078919003B8C12 /* toggleon.png */,
+				C6E6D9871A078919003B8C12 /* toggleover.png */,
+			);
+			path = GUI;
+			sourceTree = "<group>";
+		};
+		C6E6D9801A078919003B8C12 /* images */ = {
+			isa = PBXGroup;
+			children = (
+				C6E6D9811A078919003B8C12 /* App.png */,
+				C6E6D9821A078919003B8C12 /* Preview.png */,
+			);
+			path = images;
+			sourceTree = "<group>";
+		};
 		C6F8E6F91A02A8DE00E77077 /* 3rd-party */ = {
 			isa = PBXGroup;
 			children = (
@@ -1199,6 +1241,7 @@
 			children = (
 				E4B6FCAD0C3E899E008CF71C /* openFrameworks-Info.plist */,
 				E4EB6923138AFD0F00A09F29 /* Project.xcconfig */,
+				C6E6D97C1A078919003B8C12 /* data */,
 				E4B69E1C0A3A1BDC003C02F2 /* src */,
 				E4EEC9E9138DF44700A80321 /* openFrameworks */,
 				BB4B014C10F69532006C3DED /* addons */,
@@ -1213,6 +1256,7 @@
 				C6F8E75E1A02A8E500E77077 /* interpolator */,
 				C6F8E6F91A02A8DE00E77077 /* 3rd-party */,
 				C6F8E73D1A02A8DE00E77077 /* wtmApp.cpp */,
+				C649742B1A0AA7E400EC1FEA /* wtmApp_Gui.cpp */,
 				C6F8E73E1A02A8DE00E77077 /* wtmApp.h */,
 				C6F8E73F1A02A8DE00E77077 /* wtmBlobTracker.cpp */,
 				C6F8E7401A02A8DE00E77077 /* wtmBlobTracker.h */,
@@ -1404,6 +1448,7 @@
 				C30B3A2A37F8F32EE7318718 /* ofxUILabelToggle.cpp in Sources */,
 				9A83D1B3FB64456BC907667F /* ofxUIMinimalSlider.cpp in Sources */,
 				F440B307990F8F5CE40B9111 /* ofxUIMovingGraph.cpp in Sources */,
+				C649742C1A0AA7E400EC1FEA /* wtmApp_Gui.cpp in Sources */,
 				222C3AB10FA3158602718602 /* ofxUIMultiImageButton.cpp in Sources */,
 				C6F8E75A1A02A8DE00E77077 /* interpolator4x4.cpp in Sources */,
 				F9C20834354ACC8337320B8C /* ofxUIMultiImageToggle.cpp in Sources */,
