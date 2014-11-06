@@ -31,10 +31,6 @@ void wtmApp::setup() {
     
     this->inputGamma = 1.0;
     
-    this->state = wtmAppStateIdle;
-    this->bSerialUpdated = false;
-    
-    
     this->bytesPerFrame = (sensorColumns*sensorRows*10)/8;
     this->recvBuffer = (unsigned char*)malloc(this->bytesPerFrame * sizeof(unsigned char));
     this->settingsString = NULL;
@@ -51,6 +47,8 @@ void wtmApp::setup() {
     gui->setTriggerWidgetsUponLoad(false); // TODO
     gui->loadSettings("GUI/guiSettings.xml");   // TODO: no serial here yet!
 
+    this->state = wtmAppStateIdle;
+    this->bSerialUpdated = false;
     bSerialConnectionAvailable = false; // TODO
     bSerialConnectionConfigured = false;
     this->serialOpenTime = ofGetElapsedTimef();
@@ -63,17 +61,10 @@ void wtmApp::setup() {
     
 }
 
-void wtmApp::initSerialConnection(char* serialDeviceName) {
-    // TODO
-    bSerialConnectionAvailable = false;
-    int baud = 300;
-    ofxUIDropDownList *dropDownList = (ofxUIDropDownList *)  gui->getWidget(kGUISerialDropDownName);
-    serial.setup(dropDownList->getSelectedNames()[0], baud);
-}
-
 //--------------------------------------------------------------
 void wtmApp::update() {
     float now = ofGetElapsedTimef();
+    // window resizing
     if (this->lastWindowResizeTime > 0) {
         if ((now - this->lastWindowResizeTime) <.5)
             return;
@@ -88,7 +79,8 @@ void wtmApp::update() {
         }
     }
     
-    if (this->bSerialConnectionAvailable && (now - this->serialOpenTime) > 2.0 &&!this->bSerialConnectionConfigured) {
+    // TODO: change
+    /* if (this->bSerialConnectionAvailable && (now - this->serialOpenTime) > 2.0 &&!this->bSerialConnectionConfigured) {
         static string sliderNames[4] = {
             kGUIHalfwaveAmpName, kGUIOutputAmpName, kGUISampleDelayName, kGUISignalFrequencyName
         };
@@ -99,22 +91,22 @@ void wtmApp::update() {
         }
         
         this->bSerialConnectionConfigured = true;
-    }
+    }*/
     
-    // TODO:
-    // the application has 4 different states
-    // wtmAppStateNoSerialConnection: The serial connection has not been initialized yet.
-    // wtmAppStateReceivingSettings: The serial connection has been initalized. Settings are now retrieved from the hardware.
-    // wtmAppStateIdle: The serial connection is open. Settings have been retrieved. The user has to press START.
-    // wtmAppStateReceivingTouches: The user pressed START. Now the application continously retrieves data.
+    // serial communication
+    // the application has 5 different states
+    // wtmAppStateNoSerialConnection:   The serial connection has not been initialized yet.
+    // wtmAppStateReceivingSettings:    The serial connection has been initalized. Settings are now retrieved from the hardware.
+    // wtmAppStateIdle:                 The serial connection is open. Settings have been retrieved. The user has to press START.
+    // wtmAppStateReceivingTouches:     The user pressed START. The application continously retrieves data.
+    // wtmAppStateCalibrating:          The user pressed CALIBRATE.
     switch (this->state) {
         case wtmAppStateNoSerialConnection: {
-            
             break;
         }
-            
         case wtmAppStateReceivingSettings: {
             while(serial.available()) {
+ //               cout << "got something" << endl;
                 if (NULL == this->settingsString)
                     this->settingsString = new string();
             
@@ -122,8 +114,8 @@ void wtmApp::update() {
                 
                 *this->settingsString += (char)c;
                 
-                if ('\n' == c) {
-                    cout << "got something" << endl;
+                // TODO: change
+                /*if ('\n' == c) {
                     if (this->resumeAfterSettingsReceipt) {
                         this->startSensor(); // TODO: correct behavior?
                         this->resumeAfterSettingsReceipt = false;
@@ -139,12 +131,10 @@ void wtmApp::update() {
                     delete this->settingsString;
                     this->settingsString = NULL;
                     break;
-                }
+                }*/
             }
-            
             break;
         }
-    
         case wtmAppStateReceivingTouches: {
             if (serial.available() >= this->bytesPerFrame) {
                 int len = serial.readBytes(this->recvBuffer, this->bytesPerFrame);
@@ -171,7 +161,6 @@ void wtmApp::update() {
             }
             break;
         }
-            
         case wtmAppStateIdle:
         default:
             this->drainSerial();
@@ -309,8 +298,26 @@ void wtmApp::sendSliderData(ofxUIEventArgs &e, char command) {
 }
 
 //--------------------------------------------------------------
+bool wtmApp::initSerialConnection(string serialDeviceName) {
+    // TODO
+    cout << "initalizing serial connection: " << serialDeviceName << endl;
+    int baud = 300;
+    if (serial.setup(serialDeviceName, baud)) {
+        this->state = wtmAppStateReceivingSettings;
+        return true;
+    }
+    return false;
+}
+
+//--------------------------------------------------------------
+void wtmApp::closeSerialConnection() {
+    serial.close();
+    this->state = wtmAppStateNoSerialConnection;
+}
+
+//--------------------------------------------------------------
 void wtmApp::startSensor() {
-    cout<<"starting sensor"<<endl;
+    cout << "starting sensor" << endl;
     this->drainSerial();
     serial.writeBytes((unsigned char*)"s\n", 2);
     
@@ -319,7 +326,7 @@ void wtmApp::startSensor() {
 
 //--------------------------------------------------------------
 void wtmApp::stopSensor() {
-    cout<<"stopping sensor"<<endl;
+    cout << "stopping sensor" << endl;
     serial.writeBytes((unsigned char*)"x\n", 2);
     
     this->tuioServer->update();
@@ -331,6 +338,16 @@ void wtmApp::stopSensor() {
 }
 
 //--------------------------------------------------------------
+void wtmApp::receiveSettings() {
+    cout << "receiving settings" << endl;
+    this->drainSerial();
+    serial.writeBytes((unsigned char*)"i\n", 2);
+    this->state = wtmAppStateReceivingSettings;
+}
+
+
+//--------------------------------------------------------------
+// TODO: flush?
 void wtmApp::drainSerial() {
     if (serial.isInitialized()) {
         while (serial.available()) (void)serial.readByte();
@@ -350,7 +367,7 @@ void wtmApp::updateFirmwareVersionLabel(const char* newVersion) {
 
 //--------------------------------------------------------------
 void wtmApp::exit() {
-    serial.close();
+    this->closeSerialConnection();
     gui->saveSettings("GUI/guiSettings.xml");
     delete gui;
     ofSleepMillis(100);

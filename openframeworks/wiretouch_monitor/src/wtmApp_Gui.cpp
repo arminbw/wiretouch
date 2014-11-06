@@ -22,7 +22,6 @@
 //--------------------------------------------------------------
 void wtmApp::initGUI() {
     // setup the graphical user interface
-    
     gui = new ofxUISuperCanvas(WIRETOUCHVERSION, WINDOWWIDTH-(GUIWIDTH+WINDOWBORDERDISTANCE), WINDOWBORDERDISTANCE, GUIWIDTH, GUIHEIGHT);
     
     ofxUILabel* fpsLabel = new ofxUILabel(kGUIFPS, OFX_UI_FONT_SMALL);
@@ -49,7 +48,6 @@ void wtmApp::initGUI() {
     ofxUIDropDownList *interpolationDropDownMenu = gui->addDropDownList(kGUIInterpolationDropDownName, interpolationTypes, WIDGETWIDTH);
     interpolationDropDownMenu->setAutoClose(true);
     interpolationDropDownMenu->setShowCurrentSelected(true);
-    
     gui->addSlider(kGUIUpSamplingName, 1.0, 12.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSpacer();
     
@@ -97,12 +95,9 @@ void wtmApp::initGUI() {
 //--------------------------------------------------------------
 void wtmApp::updateFPSLabelWithValue(float fps) {
     ofxUILabel* fpsLabel = (ofxUILabel*)gui->getWidget(kGUIFPS);
-    
     if (NULL != fpsLabel) {
         char buf[16];
-        
         snprintf(buf, 16, "FPS: %.2f", fps);
-        
         fpsLabel->setLabel(buf);
     }
 }
@@ -111,6 +106,7 @@ void wtmApp::updateFPSLabelWithValue(float fps) {
 // The current implementation of ofxUIDropDownList is problematic
 // as it triggers events of widgets positioned underneath the dropdown menu.
 // This workaround changes the dropdown menu into a "disclosure menu".
+//
 void wtmApp::moveWidgetsBeneathDropdown(ofxUIDropDownList* widget, bool moveBack)
 {
     // calculate the size of the toggles
@@ -165,105 +161,107 @@ void wtmApp::guiEvent(ofxUIEventArgs &e) {
     }
     if (e.widget->getParent() == dropDownlist) {
         // TODO: changing this should stop the serial connection
-        if (widgetName != dropDownlist->getSelectedNames()[0]) {
-            cout << "stopping serial (TODO)" << endl;
+        cout << "serial connection changed" << endl;
+        if (initSerialConnection(dropDownlist->getSelectedNames()[0])) {
+            cout << "serial connection opened" << endl;
+            receiveSettings();
+            // TODO: de-greyout Start Button
+        } else {
+            cout << "Can't open serial connection." << endl;
         }
         return;
     }
     
-    if (widgetName == kGUIHalfwaveAmpName) {
-        sendSliderData(e, 'h');
-    } else if (widgetName == kGUIOutputAmpName) {
-        sendSliderData(e, 'o');
-    } else if (widgetName == kGUISampleDelayName) {
-        sendSliderData(e, 'd');
-    } else if (widgetName == kGUIUpSamplingName) {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        int val = round(slider->getScaledValue());
-        slider->setValue(val);
-        this->interpolatorUpsampleX = val;
-        this->interpolatorUpsampleY = val;
-        this->updateInterpolator();
-    } else if (widgetName == kGUISignalFrequencyName) {
-        sendSliderData(e, 'f');
-     } else if (widgetName == kGUIBlobsName) {
-        ofxUIButton *button = (ofxUIButton *) e.widget;
-        bTrackBlobs = button->getValue();
-    } else if (widgetName == kGUIGridName) {
-        // TODO
-        ofxUIButton *button = (ofxUIButton *) e.widget;
-        bDrawGrid = button->getValue();
-    } else if (widgetName == kGUIBlobThresholdName) {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        int val = round(slider->getScaledValue());
-        slider->setValue(val);
-        this->blobTracker.threshold = val;
-    } else if (widgetName == kGUIBlobVisualizationName) {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        int val = round(slider->getScaledValue());
-        slider->setValue(val);
-        this->thresholdImageAlpha = val;
-    } else if (widgetName == kGUIBlobAdaptiveThresholdRangeName) {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        double value = (slider->getScaledValue()/100.0) * this->interpolator->getOutputWidth();
-        this->blobTracker.setAdaptiveThresholdRange(((int) value) | 1);
-    } else if (widgetName == kGUIBlobGammaName) {
-        ofxUISlider *slider = (ofxUISlider *) e.widget;
-        this->inputGamma = slider->getScaledValue();
-    } else if (widgetName == kGUICalibrateName) {
+    // buttons
+    if (e.widget->getKind() == OFX_UI_WIDGET_LABELBUTTON) {
         ofxUILabelButton *button = (ofxUILabelButton *) e.widget;
-        
-        // TODO: !!!! uncomment and fix
-        /*if (wtmAppStateReceivingSettings != this->state) {
-         bool wasRunning = (wtmAppStateReceivingTouches == this->state);
-         
-         if (wasRunning)
-         this->stopSensor();
-         
-         this->state = wtmAppStateReceivingSettings;
-         cout << "trying to receive settings" << endl; // TODO: correct behavior?
-         serial.writeBytes((unsigned char*)"c\ni\n", 4);
-         
-         this->resumeAfterSettingsReceipt = wasRunning;
-         
-         button->setLabelText("CALIBRATING...");
-         }*/
-    } else if (widgetName == kGUIStartName) {
-        cout << "Start/Stop Button pressed.";
-        cout << "dropdown was: " << this->bGUISerialPortDroppedDown << endl;
-        ofxUILabelButton *button = (ofxUILabelButton *) e.widget;
-        cout << "button value: " << button->getValue() << endl;
-        if (button->getValue() == 1) {
-            cout << "Button pressed.";
-            if (wtmAppStateIdle == this->state) {
-                button->setLabelText(kGUIStopName);
-                
-                if (wtmAppStateReceivingSettings == this->state)
-                    this->resumeAfterSettingsReceipt = true;
-                else
+        if (button->getValue() == 1) { // we only use button-released, no button-pressed and not both
+            if (widgetName == kGUIBlobsName) {
+                bTrackBlobs = button->getValue();
+                return;
+            }
+            if (widgetName == kGUIGridName) {
+                // TODO
+                bDrawGrid = button->getValue();
+                return;
+            }
+            if (widgetName == kGUIStartName) {
+                cout << "start/stop button pressed." << endl;
+                if (wtmAppStateIdle == this->state) {
+                    cout << "Starting the sensor." << endl;
                     this->startSensor();
-            } else {
-                button->setLabelText(kGUIStartName);
-                
-                if (wtmAppStateReceivingSettings == this->state)
-                    this->resumeAfterSettingsReceipt = false;
-                else
+                    button->setLabelText(kGUIStopName);
+                    return;
+                }
+                if (wtmAppStateReceivingTouches == this->state) {
+                    cout << "Stopping the sensor." << endl;
                     this->stopSensor();
+                    button->setLabelText(kGUIStartName);
+                    return;
+                }
+                return;
+            }
+            if (widgetName == kGUICalibrateName) {
+                ofxUILabelButton *button = (ofxUILabelButton *) e.widget;
+            
+                // TODO: !!!! uncomment and fix
+                /*if (wtmAppStateReceivingSettings != this->state) {
+                 bool wasRunning = (wtmAppStateReceivingTouches == this->state);
+                 
+                 if (wasRunning)
+                 this->stopSensor();
+             
+                 this->state = wtmAppStateReceivingSettings;
+                 cout << "trying to receive settings" << endl; // TODO: correct behavior?
+                 serial.writeBytes((unsigned char*)"c\ni\n", 4);
+             
+                 this->resumeAfterSettingsReceipt = wasRunning;
+             
+                 button->setLabelText("CALIBRATING...");
+                 }*/
+                return;
             }
         }
     }
-}
-void wtmApp::initSerialConnection(char* serialDeviceName) {
-    cout << "initalizing serial connection: " << serialDeviceName << endl;
-    int baud = 300;
-    bSerialConnectionAvailable = serial.setup(serialDeviceName, baud);
+    
+    // sliders
+    if (e.widget->getKind() == OFX_UI_WIDGET_SLIDER_H) {
+        ofxUISlider *slider = (ofxUISlider *) e.widget;
+        if (widgetName == kGUIHalfwaveAmpName) {
+            sendSliderData(e, 'h');
+        } else if (widgetName == kGUIOutputAmpName) {
+            sendSliderData(e, 'o');
+        } else if (widgetName == kGUISampleDelayName) {
+            sendSliderData(e, 'd');
+        } else if (widgetName == kGUIUpSamplingName) {
+            int val = round(slider->getScaledValue());
+            slider->setValue(val);
+            this->interpolatorUpsampleX = val;
+            this->interpolatorUpsampleY = val;
+            this->updateInterpolator();
+        } else if (widgetName == kGUISignalFrequencyName) {
+            sendSliderData(e, 'f');
+        } else if (widgetName == kGUIBlobThresholdName) {
+            int val = round(slider->getScaledValue());
+            slider->setValue(val);
+            this->blobTracker.threshold = val;
+        } else if (widgetName == kGUIBlobVisualizationName) {
+            int val = round(slider->getScaledValue());
+            slider->setValue(val);
+            this->thresholdImageAlpha = val;
+        } else if (widgetName == kGUIBlobAdaptiveThresholdRangeName) {
+            double value = (slider->getScaledValue()/100.0) * this->interpolator->getOutputWidth();
+            this->blobTracker.setAdaptiveThresholdRange(((int) value) | 1);
+        } else if (widgetName == kGUIBlobGammaName) {
+            this->inputGamma = slider->getScaledValue();
+        }
+    }
 }
 
 //--------------------------------------------------------------
 void wtmApp::keyReleased(int key) {
     
 }
-
 
 //--------------------------------------------------------------
 void wtmApp::keyPressed(int key) {

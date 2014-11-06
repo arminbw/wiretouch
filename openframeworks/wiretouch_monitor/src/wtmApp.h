@@ -70,7 +70,8 @@ typedef enum _wtmAppState {
     wtmAppStateNoSerialConnection,
     wtmAppStateIdle,
     wtmAppStateReceivingSettings,
-    wtmAppStateReceivingTouches
+    wtmAppStateReceivingTouches,
+    wtmAppStateCalibrating
 } wtmAppState;
 
 class wtmApp : public ofBaseApp {
@@ -100,8 +101,10 @@ class wtmApp : public ofBaseApp {
         void updateInterpolator();
         void startSensor();
         void stopSensor();
-        void initSerialConnection(char* serialDeviceName);
+        bool initSerialConnection(string);
+        void closeSerialConnection();
         void drainSerial();
+        void receiveSettings();
         void guiEvent(ofxUIEventArgs &e);
         void sendSliderData(ofxUIEventArgs &e, char command);
         void updateFPSLabelWithValue(float fps);
@@ -119,13 +122,13 @@ class wtmApp : public ofBaseApp {
         bool bGUISerialPortDroppedDown;
     
         ofSerial serial;
-        bool bSerialConnectionAvailable, bSerialConnectionConfigured;
-        bool resumeAfterSettingsReceipt;
+        bool bSerialConnectionAvailable, bSerialConnectionConfigured; // TODO
+        bool resumeAfterSettingsReceipt; // TODO
         unsigned char* recvBuffer;
         float lastRecvFrameTime;
         float lastWindowResizeTime;
         float serialOpenTime;
-        bool bSerialUpdated;
+        bool bSerialUpdated; // TODO
     
         string* settingsString;
     
