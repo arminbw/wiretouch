@@ -4,10 +4,9 @@ WireTouch is an open capacitive multi-touch tracker in the making.
 Please visit http://www.wiretouch.net for demos and background information.
 
 ##WireTouch Firmware
-The heart of the WireTouch hardware is an ATmega328P microcontroller equipped with an Arduino bootloader. To upload the WireTouch firmware connect the mainboard with your computer. Use a USB to serial UART FTDI 5V cable. Install the Virtual Com Port [FTDI driver](http://www.ftdichip.com/Drivers/VCP.htm). Open arduino/sensor/sensor.io in the [http://arduino.cc/en/Main/Software](Arduino IDE). Choose "Tools>Board>Arduino UNO" and the correct port. **Upload the Arduino sketch**.
+The heart of the WireTouch hardware is an ATmega328P microcontroller equipped with an Arduino bootloader. To upload the WireTouch firmware connect the mainboard with your computer. Use an USB to serial UART FTDI 5V cable. Install the virtual com port [FTDI driver](http://www.ftdichip.com/Drivers/VCP.htm). Open arduino/sensor/sensor.io in the [Arduino IDE](http://arduino.cc/en/Main/Software). Select "Tools>Board>Arduino UNO" and the correct port. **Upload the Arduino sketch**.
 
-To increase the baud rate of the computer-mainboard connection you need to patch the FTDIUSBSerialDriver configuration. We wrote a little perl script for that. Run it as the superuser:
-
+You need to patch the FTDIUSBSerialDriver configuration to increase the baud rate of the computer-mainboard connection. We wrote a little perl script for that. Run it as the superuser:
 ```sudo perl/modify-ftdi-driver-settings.pl```
 
 ##WireTouch Monitor

@@ -3,6 +3,7 @@
 *.tmproj
 ._*.*
 ._*
+*~
 
 *.xcworkspace
 xcuserdata
