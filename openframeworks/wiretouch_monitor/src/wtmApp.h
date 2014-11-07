@@ -71,7 +71,6 @@ typedef enum _wtmAppState {
     wtmAppStateIdle,
     wtmAppStateReceivingSettings,
     wtmAppStateReceivingTouches,
-    wtmAppStateCalibrating
 } wtmAppState;
 
 class wtmApp : public ofBaseApp {
@@ -100,13 +99,15 @@ class wtmApp : public ofBaseApp {
         void initGUI();
         void updateInterpolator();
         void startSensor();
+        void startCalibration();
         void stopSensor();
         bool initSerialConnection(string);
         void closeSerialConnection();
         void drainSerial();
         void receiveSettings();
         void guiEvent(ofxUIEventArgs &e);
-        void sendSliderData(ofxUIEventArgs &e, char command);
+        void sendSliderData(ofxUISlider* slider);
+        void sendAllSliderValues();
         void updateFPSLabelWithValue(float fps);
         void updateInterpolationTypeLabel(const char* newName);
         void updateFirmwareVersionLabel(const char* newVersion);
