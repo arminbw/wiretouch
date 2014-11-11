@@ -29,8 +29,7 @@ void wtmApp::setup() {
     this->sensorColumns = 32;
     this->sensorRows = 22;
     
-    this->inputGamma = 1;
-    
+    this->inputGamma = 1; // TODO
     
     this->bytesPerFrame = (sensorColumns*sensorRows*10)/8;
     this->recvBuffer = (unsigned char*)malloc(this->bytesPerFrame * sizeof(unsigned char));
@@ -42,24 +41,21 @@ void wtmApp::setup() {
     this->interpolatorUpsampleX = 8;
     this->interpolatorUpsampleY = 8;
     this->updateInterpolator();
-
+    
     initGUI(); // see wtmApp_Gui.cpp
     
-    gui->setTriggerWidgetsUponLoad(false); // TODO
+    // gui->setTriggerWidgetsUponLoad(false); // TODO
     // gui->loadSettings("GUI/guiSettings.xml");   // TODO: no serial here yet!
 
-    this->state = wtmAppStateIdle;
-    this->bSerialUpdated = false;
-    bSerialConnectionAvailable = false; // TODO
-    bSerialConnectionConfigured = false;
-    this->serialOpenTime = ofGetElapsedTimef();
+    this->state = wtmAppStateNoSerialConnection;
     
     cout << "starting up local TUIO Server." << endl;
     this->tuioServer = new wtmTuioServer();
     this->tuioServer->start("127.0.0.1", 3333);
     
     this->lastWindowResizeTime = -1.0;
-    
+    this->serialOpenTime = 0;
+    this->bNewDataToShow = false;
 }
 
 //--------------------------------------------------------------
@@ -83,16 +79,28 @@ void wtmApp::update() {
     
     // serial communication
     // the application has 4 different states
-    // wtmAppStateNoSerialConnection:   The serial connection has not been initialized yet.
-    // wtmAppStateReceivingTouches:     The user pressed START. The application continously retrieves data.
-    // wtmAppStateIdle:                 The user pressed STOP.
-    // wtmAppStateReceivingSettings:    The user pressed CALIBRATE. Settings are now retrieved from the hardware.
+    // wtmAppStateNoSerialConnection:           The serial connection has not been initialized yet.
+    // wtmAppStateStartWhenSerialInitalized:    The serial connection is opening. Changes into wtmAppStateReceivingTouches.
+    // wtmAppStateReceivingTouches:             The application continously retrieves touch data.
+    // wtmAppStateIdle:                         The user pressed STOP.
+    // wtmAppStateReceivingSettings:            The user pressed CALIBRATE. Settings are now retrieved from the hardware.
     switch (this->state) {
         case wtmAppStateNoSerialConnection: {
             break;
         }
+        case wtmAppStateStartWhenSerialInitalized: {
+            if (serial.isInitialized()) {
+                if (now > (this->serialOpenTime + 2)) { // let's give the serial connection some time (2 seconds)
+                    cout << "init finished" << endl;
+                    this->startSensor();
+                }
+            } else {
+                cout << "waiting" << endl;
+            }
+            break;
+        }
         case wtmAppStateReceivingSettings: {
-            while(serial.available()) {
+            while (serial.available()) {
                 if (NULL == this->settingsString) this->settingsString = new string();
                 int c = serial.readByte();
                 
@@ -129,10 +137,10 @@ void wtmApp::update() {
                     this->consumePacketData();
                 }
                 if (this->bTrackBlobs) {
-                    if (this->bSerialUpdated) {
+                    if (this->bNewDataToShow) {
                         this->blobTracker.update();
                         this->distributeTuio();
-                        this->bSerialUpdated = false;
+                        this->bNewDataToShow = false;
                     }
                 }
             }
@@ -216,7 +224,7 @@ void wtmApp::consumePacketData() {
         this->blobTracker.setGrayscalePixels(this->interpolator->currentPixels(),
                                              this->interpolator->getOutputWidth(),
                                              this->interpolator->getOutputHeight());
-    this->bSerialUpdated = true;
+    this->bNewDataToShow = true;
 }
 
 //--------------------------------------------------------------
@@ -270,15 +278,17 @@ void wtmApp::updateInterpolator()
 }
 
 //--------------------------------------------------------------
-bool wtmApp::initSerialConnection(string serialDeviceName) {
+bool wtmApp::initAndStartSerialConnection(string serialDeviceName) {
     // TODO
-    cout << "initalizing serial connection: " << serialDeviceName << endl;
     int baud = 300;
-    serial.listDevices();
+    // serial.listDevices();
     if (serial.setup(serialDeviceName, baud)) {
-        this->state = wtmAppStateReceivingSettings;
+        this->state = wtmAppStateStartWhenSerialInitalized;
+        cout << "initalizing serial connection: " << serialDeviceName << endl;
+        this->serialOpenTime = ofGetElapsedTimef();
         return true;
     }
+    cout << "can't open serial connection." << endl;
     return false;
 }
 
@@ -291,13 +301,13 @@ void wtmApp::closeSerialConnection() {
 //--------------------------------------------------------------
 void wtmApp::startSensor() {
     cout << "starting sensor" << endl;
-    this->state = wtmAppStateReceivingTouches;
-    this->drainSerial();
+    ofxUISlider *slider;
     serial.writeBytes((unsigned char*)"s\n", 2);
-    sendSliderData((ofxUISlider *) gui->getWidget(kGUIHalfwaveAmpName));
-    sendSliderData((ofxUISlider *) gui->getWidget(kGUIOutputAmpName));
-    sendSliderData((ofxUISlider *) gui->getWidget(kGUISampleDelayName));
-    sendSliderData((ofxUISlider *) gui->getWidget(kGUISignalFrequencyName));
+    sendSliderData((ofxUISlider *)  gui->getWidget(kGUIOutputAmpName));
+    sendSliderData((ofxUISlider *)  gui->getWidget(kGUIHalfwaveAmpName));
+    sendSliderData((ofxUISlider *)  gui->getWidget(kGUISampleDelayName));
+    sendSliderData((ofxUISlider *)  gui->getWidget(kGUISignalFrequencyName));
+    this->state = wtmAppStateReceivingTouches;
 }
 
 //--------------------------------------------------------------
@@ -330,19 +340,17 @@ void wtmApp::receiveSettings() {
 
 //--------------------------------------------------------------
 void wtmApp::sendSliderData(ofxUISlider* slider) {
-    if (this->state == wtmAppStateReceivingTouches) {
-        int val = round(slider->getScaledValue());
-        slider->setValue(val);
-        string widgetName = slider->getName();
-        char command;
-        if (widgetName == kGUIHalfwaveAmpName) command = 'h';
-        if (widgetName == kGUIOutputAmpName) command = 'o';
-        if (widgetName == kGUISampleDelayName) command = 'd';
-        if (widgetName == kGUISignalFrequencyName) command = 'f';
-        char buf[32];
-        snprintf(buf, sizeof(buf), "%c%d\n", command, val);
-        serial.writeBytes((unsigned char*)buf, strlen(buf));
-    }
+   int val = round(slider->getScaledValue());
+   slider->setValue(val);
+   string widgetName = slider->getName();
+   char command;
+   if (widgetName == kGUIHalfwaveAmpName) command = 'h';
+   if (widgetName == kGUIOutputAmpName) command = 'o';
+   if (widgetName == kGUISampleDelayName) command = 'd';
+   if (widgetName == kGUISignalFrequencyName) command = 'f';
+   char buf[32];
+   snprintf(buf, sizeof(buf), "%c%d\n", command, val);
+   serial.writeBytes((unsigned char*)buf, strlen(buf));
 }
 
 //--------------------------------------------------------------
@@ -366,8 +374,12 @@ void wtmApp::updateFirmwareVersionLabel(const char* newVersion) {
 
 //--------------------------------------------------------------
 void wtmApp::exit() {
-    this->closeSerialConnection();
-    gui->saveSettings("GUI/guiSettings.xml");
+    cout << "exiting" << endl;
+    if (wtmAppStateNoSerialConnection != this->state) {
+        if (wtmAppStateReceivingTouches == this->state) stopSensor();
+        this->closeSerialConnection();
+    }
+    // gui->saveSettings("GUI/guiSettings.xml");
     delete gui;
     ofSleepMillis(100);
 }

@@ -2,6 +2,7 @@
  * Copyright (C) 2011-2013 Georg Kaindl and Armin Wagner
  *
  * This file is part of WireTouch
+ 
  *
  * WireTouch is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,8 +57,8 @@ void wtmApp::initGUI() {
     
     gui->addWidgetDown(new ofxUILabel("BLOB DETECTION", OFX_UI_FONT_MEDIUM));
     ofxUILabelToggle* toggle = gui->addLabelToggle(kGUIBlobsName, false, (WIDGETWIDTH/2)-OFX_UI_GLOBAL_WIDGET_SPACING, WIDGETHEIGHT);
-    toggle->setLabelVisible(true); // doesn't get set by default! TODO
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
+    // TODO: Grid
     // toggle = gui->addLabelToggle(kGUIGridName, false, (WIDGETWIDTH/2)-(OFX_UI_GLOBAL_WIDGET_SPACING/2), WIDGETHEIGHT);
     // toggle->setLabelVisible(true);
     
@@ -72,9 +73,10 @@ void wtmApp::initGUI() {
     gui->addWidgetDown(firmwareLabel);
     this->updateFirmwareVersionLabel("unknown");
     
-    vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
+	vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
     for(int i=0; i<deviceList.size();i++) {
         this->serialDevicesNames.push_back(deviceList[i].getDeviceName().c_str());
+        cout<<"device name: "<<serialDevicesNames.at(i)<<endl;
     }
     ofxUIDropDownList *serialDeviceDropDownMenu = gui->addDropDownList(kGUISerialDropDownName, serialDevicesNames, WIDGETWIDTH);
     serialDeviceDropDownMenu->setShowCurrentSelected(true);
@@ -134,7 +136,7 @@ void wtmApp::moveWidgetsBeneathDropdown(ofxUIDropDownList* widget, bool moveBack
 //--------------------------------------------------------------
 void wtmApp::guiEvent(ofxUIEventArgs &e) {
     string widgetName = e.widget->getName();
-    cout << "widget activated: " << widgetName << endl;
+    // cout << "widget activated: " << widgetName << endl;
 
     // interpolation type disclosure menu
     ofxUIDropDownList *dropDownlist = (ofxUIDropDownList *) gui->getWidget(kGUIInterpolationDropDownName);
@@ -166,18 +168,10 @@ void wtmApp::guiEvent(ofxUIEventArgs &e) {
             cout << "serial connection changed" << endl;
             if (this->state == wtmAppStateReceivingTouches) {
                 stopSensor();
-                ofxUILabelButton *button = (ofxUILabelButton *) gui->getWidget(kGUIStartName);
-                button->setLabelText(kGUIStopName);
+                ofxUILabelButton *startButton = (ofxUILabelButton *) gui->getWidget(kGUIStartName);
+                startButton->setLabelText(kGUIStopName);
             }
             closeSerialConnection();
-        }
-        if (initSerialConnection(dropDownlist->getSelectedNames()[0])) {
-            cout << "serial connection opened" << endl;
-            // receiveSettings();
-            // TODO: de-greyout Start Button
-            this->state = wtmAppStateIdle;
-        } else {
-            cout << "Can't open serial connection." << endl;
         }
         return;
     }
@@ -196,17 +190,24 @@ void wtmApp::guiEvent(ofxUIEventArgs &e) {
                 return;
             }
             if (widgetName == kGUIStartName) {
-                cout << "start/stop button pressed." << endl;
+                cout << "start/stop button pressed" << endl;
+                if (wtmAppStateNoSerialConnection == this->state) {
+                    vector<string> selected = dropDownlist->getSelectedNames();
+                    if (selected.empty()) {
+                        cout << "no serial connection selected" << endl;
+                    } else {
+                        initAndStartSerialConnection(selected[0]);
+                        button->setLabelText(kGUIStopName);
+                    }
+                    return;
+                }
                 if (wtmAppStateIdle == this->state) {
-                    cout << "Starting the sensor." << endl;
                     this->startSensor();
                     button->setLabelText(kGUIStopName);
                     return;
                 }
                 if (wtmAppStateReceivingTouches == this->state) {
-                    cout << "Stopping the sensor." << endl;
                     this->stopSensor();
-                    ofSleepMillis(100); // TODO
                     button->setLabelText(kGUIStartName);
                     return;
                 }
@@ -214,7 +215,7 @@ void wtmApp::guiEvent(ofxUIEventArgs &e) {
             }
             if (widgetName == kGUICalibrateName) {
                 if (wtmAppStateReceivingTouches == this->state) {
-                    cout << "Calibration button pressed." << endl;
+                    cout << "calibration button pressed" << endl;
                     this->startCalibration();
                     button->setLabelText("CALIBRATING...");
                 }
@@ -279,7 +280,6 @@ void wtmApp::mouseDragged(int x, int y, int button) {
 
 //--------------------------------------------------------------
 void wtmApp::mousePressed(int x, int y, int button) {
-    // TODO: close all pullDown menus when click happens somewhere outside the menus
     
 }
 

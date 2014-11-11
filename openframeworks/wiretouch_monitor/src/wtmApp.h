@@ -68,6 +68,7 @@
 
 typedef enum _wtmAppState {
     wtmAppStateNoSerialConnection,
+    wtmAppStateStartWhenSerialInitalized,
     wtmAppStateIdle,
     wtmAppStateReceivingSettings,
     wtmAppStateReceivingTouches,
@@ -101,7 +102,7 @@ class wtmApp : public ofBaseApp {
         void startSensor();
         void startCalibration();
         void stopSensor();
-        bool initSerialConnection(string);
+        bool initAndStartSerialConnection(string);
         void closeSerialConnection();
         void drainSerial();
         void receiveSettings();
@@ -120,16 +121,11 @@ class wtmApp : public ofBaseApp {
     
         int sensorColumns, sensorRows, bytesPerFrame;
     
-        bool bGUISerialPortDroppedDown;
-    
         ofSerial serial;
-        bool bSerialConnectionAvailable, bSerialConnectionConfigured; // TODO
-        bool resumeAfterSettingsReceipt; // TODO
         unsigned char* recvBuffer;
         float lastRecvFrameTime;
         float lastWindowResizeTime;
         float serialOpenTime;
-        bool bSerialUpdated; // TODO
     
         string* settingsString;
     
@@ -144,6 +140,7 @@ class wtmApp : public ofBaseApp {
         wtmBlobTracker          blobTracker;
     
         ofxUISuperCanvas *gui;
+        bool bNewDataToShow;
         bool bTrackBlobs;
         bool bDrawGrid;
     
