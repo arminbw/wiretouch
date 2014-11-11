@@ -89,7 +89,7 @@ close FILE;
 
 if ($kext_loaded) {
    print "finished writing Info.plist, re-loading kext now...\n";
-   
+   print "if the kextunload fails, please check System Preferences>Network, remove the modem-device, reboot and try again.\n";   
    system("kextunload -b com.FTDI.driver.FTDIUSBSerialDriver");
    system("kextload -b com.FTDI.driver.FTDIUSBSerialDriver");
 }

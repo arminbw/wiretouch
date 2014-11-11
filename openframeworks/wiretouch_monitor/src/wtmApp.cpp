@@ -32,9 +32,9 @@ void wtmApp::setup() {
     this->inputGamma = 1; // TODO
     
     this->bytesPerFrame = (sensorColumns*sensorRows*10)/8;
-    this->recvBuffer = (unsigned char*)malloc(this->bytesPerFrame * sizeof(unsigned char));
+    this->recvBuffer = (unsigned char*) malloc(this->bytesPerFrame * sizeof(unsigned char));
     this->settingsString = NULL;
-    this->capGridValues = (uint16_t*)malloc(sensorColumns * sensorRows * sizeof(uint16_t));
+    this->capGridValues = (uint16_t*) malloc(sensorColumns * sensorRows * sizeof(uint16_t));
     
     this->interpolator = NULL;
     this->interpolatorType = wtmInterpolatorTypeCatmullRom;
@@ -42,16 +42,18 @@ void wtmApp::setup() {
     this->interpolatorUpsampleY = 8;
     this->updateInterpolator();
     
+    this->blobTracker = new wtmBlobTracker();
+    
     initGUI(); // see wtmApp_Gui.cpp
     
-    // gui->setTriggerWidgetsUponLoad(false); // TODO
-    // gui->loadSettings("GUI/guiSettings.xml");   // TODO: no serial here yet!
+    // gui->setTriggerWidgetsUponLoad(false);
+    // gui->loadSettings("GUI/guiSettings.xml");    // TODO: change to cJSON?
 
     this->state = wtmAppStateNoSerialConnection;
     
     cout << "starting up local TUIO Server." << endl;
     this->tuioServer = new wtmTuioServer();
-    this->tuioServer->start("127.0.0.1", 3333);
+    this->tuioServer->start("127.0.0.1", 3333);     // TODO
     
     this->lastWindowResizeTime = -1.0;
     this->serialOpenTime = 0;
@@ -92,6 +94,7 @@ void wtmApp::update() {
             if (serial.isInitialized()) {
                 if (now > (this->serialOpenTime + 2)) { // let's give the serial connection some time (2 seconds)
                     cout << "init finished" << endl;
+                    this->stopSensor(); // restart. just in case (the mainboard might already send data)
                     this->startSensor();
                 }
             } else {
@@ -138,7 +141,7 @@ void wtmApp::update() {
                 }
                 if (this->bTrackBlobs) {
                     if (this->bNewDataToShow) {
-                        this->blobTracker.update();
+                        this->blobTracker->update();
                         this->distributeTuio();
                         this->bNewDataToShow = false;
                     }
@@ -155,7 +158,7 @@ void wtmApp::update() {
 
 //--------------------------------------------------------------
 void wtmApp::distributeTuio() {
-    vector<ofxStoredBlobVO>& blobs = this->blobTracker.currentBlobs();
+    vector<ofxStoredBlobVO>& blobs = this->blobTracker->currentBlobs();
     
     float w = this->interpolator->getOutputWidth(), h = this->interpolator->getOutputHeight();
     int numBlobs = blobs.size();
@@ -177,7 +180,7 @@ void wtmApp::draw() {
 
     if (this->bTrackBlobs) {
         if (wtmAppStateReceivingTouches == this->state && 0 < this->thresholdImageAlpha) {
-            ofTexture* thresholdedTexture = this->blobTracker.currentTresholdedTexture();
+            ofTexture* thresholdedTexture = this->blobTracker->currentTresholdedTexture();
             
             if (NULL != thresholdedTexture) {
                 ofPushStyle();
@@ -190,7 +193,7 @@ void wtmApp::draw() {
                 ofPopStyle();
             }
         }
-        this->blobTracker.draw();
+        this->blobTracker->draw();
     }
 }
 
@@ -221,7 +224,7 @@ void wtmApp::consumePacketData() {
     this->texture = this->interpolator->currentTexture();
     
     if (this->bTrackBlobs)
-        this->blobTracker.setGrayscalePixels(this->interpolator->currentPixels(),
+        this->blobTracker->setGrayscalePixels(this->interpolator->currentPixels(),
                                              this->interpolator->getOutputWidth(),
                                              this->interpolator->getOutputHeight());
     this->bNewDataToShow = true;

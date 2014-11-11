@@ -2,7 +2,6 @@
  * Copyright (C) 2011-2013 Georg Kaindl and Armin Wagner
  *
  * This file is part of WireTouch
- 
  *
  * WireTouch is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,10 +31,10 @@ void wtmApp::initGUI() {
     
     gui->addWidgetDown(new ofxUILabel("SENSOR PARAMETERS", OFX_UI_FONT_MEDIUM));
     // TODO: don't hardcode values here
-    gui->addSlider(kGUIHalfwaveAmpName, 1.0, 255.0, 190, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
-    gui->addSlider(kGUIOutputAmpName, 1.0, 255.0, 103, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
+    gui->addSlider(kGUIHalfwaveAmpName, 1.0, 255.0, 164, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
+    gui->addSlider(kGUIOutputAmpName, 1.0, 255.0, 111, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSlider(kGUISampleDelayName, 1.0, 100.0, 1, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
-    ofxUISlider* slider = gui->addSlider(kGUISignalFrequencyName, 1.0, 60.0, 16, WIDGETWIDTH, WIDGETHEIGHT);
+    ofxUISlider* slider = gui->addSlider(kGUISignalFrequencyName, 1.0, 60.0, 20, WIDGETWIDTH, WIDGETHEIGHT);
     slider->setLabelPrecision(2);
     slider->getLabelWidget()->setLabel(slider->getName() + ": " + ofxUIToString(16000000./(round(slider->getScaledValue())+1.)/2000., 3) + " kHz");
     gui->addSpacer();
@@ -63,10 +62,12 @@ void wtmApp::initGUI() {
     // toggle->setLabelVisible(true);
     
     gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
-    gui->addSlider(kGUIBlobThresholdName, 0.0, 255.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
-    gui->addSlider(kGUIBlobVisualizationName, 0.0, 255.0, 50, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
+    gui->addSlider(kGUIBlobThresholdName, 0.0, 255.0, 161, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
+    this->blobTracker->setThreshold(161);
+    gui->addSlider(kGUIBlobVisualizationName, 0.0, 255.0, 31, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSlider(kGUIBlobGammaName, 0.0, 16.0, this->inputGamma, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(2);
-    gui->addSlider(kGUIBlobAdaptiveThresholdRangeName, 0.0, 100.0, 50, WIDGETWIDTH, WIDGETHEIGHT);
+    gui->addSlider(kGUIBlobAdaptiveThresholdRangeName, 3.0, 100.0, 41, WIDGETWIDTH, WIDGETHEIGHT);
+    this->blobTracker->setAdaptiveThresholdRange(((int) 41) | 1);
     gui->addSpacer();
     
     ofxUILabel* firmwareLabel = new ofxUILabel(kGUIFirmwareName, OFX_UI_FONT_SMALL);
@@ -176,14 +177,10 @@ void wtmApp::guiEvent(ofxUIEventArgs &e) {
         return;
     }
     
-    // buttons
+    // push buttons
     if (e.widget->getKind() == OFX_UI_WIDGET_LABELBUTTON) {
         ofxUILabelButton *button = (ofxUILabelButton *) e.widget;
         if (button->getValue() == 1) { // we only use button-released, not button-pressed and not both
-            if (widgetName == kGUIBlobsName) {
-                bTrackBlobs = button->getValue();
-                return;
-            }
             if (widgetName == kGUIGridName) {
                 // TODO
                 bDrawGrid = button->getValue();
@@ -223,6 +220,16 @@ void wtmApp::guiEvent(ofxUIEventArgs &e) {
         }
     }
     
+    // toggle buttons
+    if (e.widget->getKind() == OFX_UI_WIDGET_LABELTOGGLE) {
+        ofxUILabelToggle *toggle = (ofxUILabelToggle *) e.widget;
+        if (widgetName == kGUIBlobsName) {
+            cout << toggle->getValue() << endl;
+            bTrackBlobs = toggle->getValue();
+            return;
+        }
+    }
+    
     // sliders
     if (e.widget->getKind() == OFX_UI_WIDGET_SLIDER_H) {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
@@ -244,14 +251,14 @@ void wtmApp::guiEvent(ofxUIEventArgs &e) {
         } else if (widgetName == kGUIBlobThresholdName) {
             int val = round(slider->getScaledValue());
             slider->setValue(val);
-            this->blobTracker.threshold = val;
+            this->blobTracker->setThreshold(val);
         } else if (widgetName == kGUIBlobVisualizationName) {
             int val = round(slider->getScaledValue());
             slider->setValue(val);
             this->thresholdImageAlpha = val;
         } else if (widgetName == kGUIBlobAdaptiveThresholdRangeName) {
             double value = (slider->getScaledValue()/100.0) * this->interpolator->getOutputWidth();
-            this->blobTracker.setAdaptiveThresholdRange(((int) value) | 1);
+            this->blobTracker->setAdaptiveThresholdRange(((int) value) | 1);
         } else if (widgetName == kGUIBlobGammaName) {
             this->inputGamma = slider->getScaledValue();
         }
