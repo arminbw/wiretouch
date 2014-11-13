@@ -23,10 +23,6 @@
 void wtmApp::initGUI() {
     // setup the graphical user interface
     gui = new ofxUISuperCanvas(WIRETOUCHVERSION, WINDOWWIDTH-(GUIWIDTH+WINDOWBORDERDISTANCE), WINDOWBORDERDISTANCE, GUIWIDTH, GUIHEIGHT);
-    
-    ofxUILabel* fpsLabel = new ofxUILabel(kGUIFPS, OFX_UI_FONT_SMALL);
-    gui->addWidgetPosition(fpsLabel, OFX_UI_WIDGET_POSITION_RIGHT, OFX_UI_ALIGN_RIGHT);
-    this->updateFPSLabelWithValue(0.);
     gui->addSpacer();
     
     gui->addWidgetDown(new ofxUILabel("SENSOR PARAMETERS", OFX_UI_FONT_MEDIUM));
@@ -36,7 +32,7 @@ void wtmApp::initGUI() {
     gui->addSlider(kGUISampleDelayName, 1.0, 100.0, 1, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     ofxUISlider* slider = gui->addSlider(kGUISignalFrequencyName, 1.0, 60.0, 20, WIDGETWIDTH, WIDGETHEIGHT);
     slider->setLabelPrecision(2);
-    slider->getLabelWidget()->setLabel(slider->getName() + ": " + ofxUIToString(16000000./(round(slider->getScaledValue())+1.)/2000., 3) + " kHz");
+    this->updateFrequencyLabel(slider);
     gui->addSpacer();
     
     gui->addWidgetDown(new ofxUILabel("INTERPOLATION", OFX_UI_FONT_MEDIUM));
@@ -50,6 +46,7 @@ void wtmApp::initGUI() {
     interpolationTypes.push_back(kGUILagrangeName);
     ofxUIDropDownList *interpolationDropDownMenu = gui->addDropDownList(kGUIInterpolationDropDownName, interpolationTypes, WIDGETWIDTH);
     interpolationDropDownMenu->setAutoClose(true);
+    interpolationDropDownMenu->getSelected().push_back(gui->getWidget(kGUICatmullName));
     interpolationDropDownMenu->setShowCurrentSelected(true);
     gui->addSlider(kGUIUpSamplingName, 1.0, 12.0, 8, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSpacer();
@@ -70,10 +67,6 @@ void wtmApp::initGUI() {
     this->blobTracker->setAdaptiveThresholdRange(((int) 41) | 1);
     gui->addSpacer();
     
-    ofxUILabel* firmwareLabel = new ofxUILabel(kGUIFirmwareName, OFX_UI_FONT_SMALL);
-    gui->addWidgetDown(firmwareLabel);
-    this->updateFirmwareVersionLabel("unknown");
-    
 	vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
     for(int i=0; i<deviceList.size();i++) {
         this->serialDevicesNames.push_back(deviceList[i].getDeviceName().c_str());
@@ -82,12 +75,22 @@ void wtmApp::initGUI() {
     ofxUIDropDownList *serialDeviceDropDownMenu = gui->addDropDownList(kGUISerialDropDownName, serialDevicesNames, WIDGETWIDTH);
     serialDeviceDropDownMenu->setShowCurrentSelected(true);
     serialDeviceDropDownMenu->setAutoClose(true);
-       
-    ofxUILabelButton* button = gui->addLabelButton(kGUICalibrateName, false, WIDGETWIDTH, WIDGETHEIGHT);
+    
+    ofxUILabelButton* button = gui->addLabelButton(kGUIStartName, false, WIDGETWIDTH, WIDGETHEIGHT);
     button->setLabelVisible(true);
     
-    button = gui->addLabelButton(kGUIStartName, false, WIDGETWIDTH, WIDGETHEIGHT);
+    button = gui->addLabelButton(kGUICalibrateName, false, WIDGETWIDTH, WIDGETHEIGHT);
     button->setLabelVisible(true);
+    
+    gui->addSpacer();
+
+    ofxUILabel* firmwareLabel = new ofxUILabel(kGUIFirmwareName, OFX_UI_FONT_SMALL);
+    gui->addWidgetDown(firmwareLabel);
+    this->updateFirmwareVersionLabel("unknown");
+
+    ofxUILabel* fpsLabel = new ofxUILabel(kGUIFPS, OFX_UI_FONT_SMALL);
+    gui->addWidgetDown(fpsLabel);
+    this->updateFPSLabelWithValue(0.);
     
     gui->setWidgetColor(OFX_UI_WIDGET_COLOR_BACK, ofColor(120));
     gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL, ofColor(255, 120)); // font color
@@ -99,12 +102,28 @@ void wtmApp::initGUI() {
 
 //--------------------------------------------------------------
 void wtmApp::updateFPSLabelWithValue(float fps) {
-    ofxUILabel* fpsLabel = (ofxUILabel*)gui->getWidget(kGUIFPS);
+    ofxUILabel* fpsLabel = (ofxUILabel*) gui->getWidget(kGUIFPS);
     if (NULL != fpsLabel) {
         char buf[16];
         snprintf(buf, 16, "FPS: %.2f", fps);
         fpsLabel->setLabel(buf);
     }
+}
+
+//--------------------------------------------------------------
+void wtmApp::updateFirmwareVersionLabel(const char* newVersion) {
+    ofxUILabel* firmwareLabel = (ofxUILabel*)gui->getWidget(kGUIFirmwareName);
+    if (NULL != firmwareLabel) {
+        char buf[64];
+        snprintf(buf, 64, "FIRMWARE VERSION: %s", newVersion);
+        
+        firmwareLabel->setLabel(buf);
+    }
+}
+
+//--------------------------------------------------------------
+void wtmApp::updateFrequencyLabel(ofxUISlider* slider) {
+    slider->getLabelWidget()->setLabel(slider->getName() + ": ~" + ofxUIToString(16000000./(round(slider->getScaledValue())+1.)/2000., 0) + " kHz");
 }
 
 //--------------------------------------------------------------
@@ -247,7 +266,7 @@ void wtmApp::guiEvent(ofxUIEventArgs &e) {
             this->updateInterpolator();
         } else if (widgetName == kGUISignalFrequencyName) {
             sendSliderData(slider);
-            slider->getLabelWidget()->setLabel(widgetName + ": " + ofxUIToString(16000000./(round(slider->getScaledValue())+1.)/2000., 3) + " kHz");
+            this->updateFrequencyLabel(slider);
         } else if (widgetName == kGUIBlobThresholdName) {
             int val = round(slider->getScaledValue());
             slider->setValue(val);

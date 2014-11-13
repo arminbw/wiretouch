@@ -33,8 +33,8 @@
 #define WINDOWWIDTH 1024
 #define WINDOWHEIGHT 768
 #define WINDOWBORDERDISTANCE 10
-#define GUIWIDTH 300
-#define GUIHEIGHT 600
+#define GUIWIDTH 280
+#define GUIHEIGHT 620
 #define WIDGETWIDTH (GUIWIDTH-(OFX_UI_GLOBAL_WIDGET_SPACING*2))
 #define WIDGETHEIGHT 22
 
@@ -47,7 +47,7 @@
 #define kGUIUpSamplingName          ("UPSAMPLING")
 #define kGUIGridName                ("GRID")
 #define kGUIInterpolationDropDownName   ("INTERPOLATION TYPE")
-#define kGUISerialDropDownName          ("SERIAL PORT")
+#define kGUISerialDropDownName          ("CHOOSE SERIAL PORT")
 #define kGUIBlobsName               ("BLOBS")
 #define kGUICalibrateName           ("CALIBRATE")
 #define kGUIStartName               ("START")
@@ -110,7 +110,7 @@ class wtmApp : public ofBaseApp {
         void sendSliderData(ofxUISlider* slider);
         void sendAllSliderValues();
         void updateFPSLabelWithValue(float fps);
-        void updateInterpolationTypeLabel(const char* newName);
+        void updateFrequencyLabel(ofxUISlider* slider);
         void updateFirmwareVersionLabel(const char* newVersion);
         void distributeTuio();
     
@@ -124,6 +124,7 @@ class wtmApp : public ofBaseApp {
         ofSerial serial;
         unsigned char* recvBuffer;
         float lastRecvFrameTime;
+        int fpsCounter;
         float lastWindowResizeTime;
         float serialOpenTime;
     

@@ -43,21 +43,20 @@ void wtmApp::setup() {
     this->updateInterpolator();
     
     this->blobTracker = new wtmBlobTracker();
+
+    this->state = wtmAppStateNoSerialConnection;
+    this->lastWindowResizeTime = -1.0;
+    this->serialOpenTime = 0;
+    this->bNewDataToShow = false;
     
     initGUI(); // see wtmApp_Gui.cpp
     
     // gui->setTriggerWidgetsUponLoad(false);
     // gui->loadSettings("GUI/guiSettings.xml");    // TODO: change to cJSON?
-
-    this->state = wtmAppStateNoSerialConnection;
     
     cout << "starting up local TUIO Server." << endl;
     this->tuioServer = new wtmTuioServer();
-    this->tuioServer->start("127.0.0.1", 3333);     // TODO
-    
-    this->lastWindowResizeTime = -1.0;
-    this->serialOpenTime = 0;
-    this->bNewDataToShow = false;
+    this->tuioServer->start("127.0.0.1", 3333);     // TODO    
 }
 
 //--------------------------------------------------------------
@@ -130,10 +129,12 @@ void wtmApp::update() {
                 if (len == this->bytesPerFrame) {
                     if (0 != this->lastRecvFrameTime) {
                         float now = ofGetElapsedTimef();
-                        
-                        this->updateFPSLabelWithValue(1.0 / (now - this->lastRecvFrameTime));
-                        
-                        this->lastRecvFrameTime = now;
+                        fpsCounter++;
+                        if (now - this->lastRecvFrameTime > 1.0) {
+                            this->updateFPSLabelWithValue(fpsCounter);
+                            fpsCounter = 0;
+                            this->lastRecvFrameTime = now;
+                        }
                     } else
                         this->lastRecvFrameTime = ofGetElapsedTimef();
                     
@@ -361,17 +362,6 @@ void wtmApp::sendSliderData(ofxUISlider* slider) {
 void wtmApp::drainSerial() {
     if (serial.isInitialized()) {
         while (serial.available()) (void)serial.readByte();
-    }
-}
-
-//--------------------------------------------------------------
-void wtmApp::updateFirmwareVersionLabel(const char* newVersion) {
-    ofxUILabel* firmwareLabel = (ofxUILabel*)gui->getWidget(kGUIFirmwareName);
-    if (NULL != firmwareLabel) {
-        char buf[64];
-        snprintf(buf, 64, "FIRMWARE VERSION: %s", newVersion);
-        
-        firmwareLabel->setLabel(buf);
     }
 }
 
