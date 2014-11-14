@@ -22,6 +22,8 @@
 #include "ofMain.h"
 #include "ofxUI.h"
 
+#include "cJSON.h"
+
 #include "interpolator-types.h"
 #include "interpolator.h"
 
@@ -43,7 +45,6 @@
 #define kGUIOutputAmpName           ("OUTPUT AMP")
 #define kGUISampleDelayName         ("SAMPLE DELAY")
 #define kGUISignalFrequencyName     ("SIGNAL FREQUENCY")
-#define kGUIPostProcessingName      ("POST PROCESSING")
 #define kGUIUpSamplingName          ("UPSAMPLING")
 #define kGUIGridName                ("GRID")
 #define kGUIInterpolationDropDownName   ("INTERPOLATION TYPE")
@@ -61,6 +62,7 @@
 #define kGUIHermiteName             ("HERMITE")
 #define kGUIWNNName                 ("WNN")
 #define kGUILagrangeName            ("LAGRANGE")
+
 #define kGUIBlobThresholdName       ("THRESHOLD")
 #define kGUIBlobVisualizationName   ("BLOB VISUALIZATION")
 #define kGUIBlobGammaName           ("GAMMA")
@@ -94,7 +96,10 @@ class wtmApp : public ofBaseApp {
         void exit();
 
         void consumePacketData();
-        void consumeSettings(const char* json);
+        void consumeCalibrationResults(const char* json);
+        void saveSettings();
+        void getJSONObject(cJSON *root, const char* string);
+        void loadSettings();
     
     protected:
         void initGUI();
@@ -105,7 +110,7 @@ class wtmApp : public ofBaseApp {
         bool initAndStartSerialConnection(string);
         void closeSerialConnection();
         void drainSerial();
-        void receiveSettings();
+        void receiveCalibrationSettings();
         void guiEvent(ofxUIEventArgs &e);
         void sendSliderData(ofxUISlider* slider);
         void sendAllSliderValues();

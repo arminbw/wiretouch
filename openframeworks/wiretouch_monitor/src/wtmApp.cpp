@@ -49,10 +49,9 @@ void wtmApp::setup() {
     this->serialOpenTime = 0;
     this->bNewDataToShow = false;
     
-    initGUI(); // see wtmApp_Gui.cpp
-    
-    // gui->setTriggerWidgetsUponLoad(false);
-    // gui->loadSettings("GUI/guiSettings.xml");    // TODO: change to cJSON?
+    // see wtmApp_Gui.cpp
+    initGUI();
+    loadSettings();
     
     cout << "starting up local TUIO Server." << endl;
     this->tuioServer = new wtmTuioServer();
@@ -112,7 +111,7 @@ void wtmApp::update() {
                     ofxUILabelButton* button = (ofxUILabelButton*)gui->getWidget(kGUICalibrateName);
                     button->setLabelText(kGUICalibrateName);
                     
-                    this->consumeSettings(this->settingsString->c_str());
+                    this->consumeCalibrationResults(this->settingsString->c_str());
                     
                     delete this->settingsString;
                     this->settingsString = NULL;
@@ -232,9 +231,8 @@ void wtmApp::consumePacketData() {
 }
 
 //--------------------------------------------------------------
-void wtmApp::consumeSettings(const char* json) {
+void wtmApp::consumeCalibrationResults(const char* json) {
     if (NULL != json) {
-        cout << json << endl;
         cJSON* root = cJSON_Parse(json);
         cout << "parsing received settings" << endl;
         if (NULL != root) {
@@ -331,12 +329,12 @@ void wtmApp::startCalibration() {
     cout << "starting calibration" << endl;
     this->stopSensor();
     serial.writeBytes((unsigned char*)"c\n", 2);
-    this->receiveSettings();
+    this->receiveCalibrationSettings();
 }
 
 //--------------------------------------------------------------
-void wtmApp::receiveSettings() {
-    cout << "receiving settings" << endl;
+void wtmApp::receiveCalibrationSettings() {
+    cout << "receiving calibration settings" << endl;
     this->drainSerial();
     this->state = wtmAppStateReceivingSettings;
     serial.writeBytes((unsigned char*)"i\n", 2);
@@ -372,7 +370,7 @@ void wtmApp::exit() {
         if (wtmAppStateReceivingTouches == this->state) stopSensor();
         this->closeSerialConnection();
     }
-    // gui->saveSettings("GUI/guiSettings.xml");
+    this->saveSettings();
     delete gui;
     ofSleepMillis(100);
 }

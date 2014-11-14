@@ -18,6 +18,7 @@
  */
 
 #include "wtmApp.h"
+#include "cJSON.h"
 
 //--------------------------------------------------------------
 void wtmApp::initGUI() {
@@ -70,7 +71,7 @@ void wtmApp::initGUI() {
 	vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
     for(int i=0; i<deviceList.size();i++) {
         this->serialDevicesNames.push_back(deviceList[i].getDeviceName().c_str());
-        cout<<"device name: "<<serialDevicesNames.at(i)<<endl;
+        // cout<<"device name: "<<serialDevicesNames.at(i)<<endl;
     }
     ofxUIDropDownList *serialDeviceDropDownMenu = gui->addDropDownList(kGUISerialDropDownName, serialDevicesNames, WIDGETWIDTH);
     serialDeviceDropDownMenu->setShowCurrentSelected(true);
@@ -98,6 +99,81 @@ void wtmApp::initGUI() {
     gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL_HIGHLIGHT, ofColor(239, 171, 233));
     gui->setColorBack(ofColor(100, 80));
     ofAddListener(gui->newGUIEvent, this, &wtmApp::guiEvent);
+}
+
+//--------------------------------------------------------------
+void wtmApp::saveSettings() {
+    cout << "saving settings" << endl;
+    cJSON *root = cJSON_CreateObject();
+    cJSON_AddNumberToObject(root, kGUIHalfwaveAmpName, round(((ofxUISlider *) gui->getWidget(kGUIHalfwaveAmpName))->getScaledValue()) );
+    cJSON_AddNumberToObject(root, kGUIOutputAmpName, round(((ofxUISlider *) gui->getWidget(kGUIOutputAmpName))->getScaledValue()) );
+    cJSON_AddNumberToObject(root, kGUISampleDelayName, round(((ofxUISlider *) gui->getWidget(kGUISampleDelayName))->getScaledValue()) );
+    cJSON_AddNumberToObject(root, kGUISignalFrequencyName, round(((ofxUISlider *) gui->getWidget(kGUISignalFrequencyName))->getScaledValue()) );
+    cJSON_AddNumberToObject(root, kGUIUpSamplingName, ((ofxUISlider *) gui->getWidget(kGUIUpSamplingName))->getScaledValue() );
+    cJSON_AddNumberToObject(root, kGUIBlobThresholdName, round(((ofxUISlider *) gui->getWidget(kGUIBlobThresholdName))->getScaledValue()) );
+    cJSON_AddNumberToObject(root, kGUIBlobVisualizationName, round(((ofxUISlider *) gui->getWidget(kGUIBlobVisualizationName))->getScaledValue()) );
+    cJSON_AddNumberToObject(root, kGUIBlobGammaName, round(((ofxUISlider *) gui->getWidget(kGUIBlobGammaName))->getScaledValue()) );
+    cJSON_AddNumberToObject(root, kGUIBlobAdaptiveThresholdRangeName, ((ofxUISlider *) gui->getWidget(kGUIBlobAdaptiveThresholdRangeName))->getScaledValue() );
+    
+    ofxUIDropDownList *interpolationDropDown = (ofxUIDropDownList *) gui->getWidget(kGUIInterpolationDropDownName);
+    if (!(vector<string> *) interpolationDropDown->getSelectedNames().empty())
+        cJSON_AddStringToObject(root, kGUIInterpolationDropDownName, interpolationDropDown->getSelectedNames()[0].c_str() );
+    ofxUIDropDownList *serialDropDown = (ofxUIDropDownList *) gui->getWidget(kGUISerialDropDownName);
+    if (!(vector<string> *) serialDropDown->getSelectedNames().empty())
+        cJSON_AddStringToObject(root, kGUISerialDropDownName, serialDropDown->getSelectedNames()[0].c_str() );
+    
+    cJSON_AddNumberToObject(root, kGUIBlobsName, this->bTrackBlobs );
+    // cJSON_AddNumberToObject(root, kGUIGridName, this->bDrawGrid ); // TODO
+    
+    char *renderedJson = cJSON_Print(root);
+    ofFile file;
+    file.open(ofToDataPath("settings.json"), ofFile::WriteOnly, false);
+    file << renderedJson;
+    file.close();
+    cJSON_Delete(root);
+    delete(renderedJson);
+}
+
+//--------------------------------------------------------------
+void wtmApp::loadSettings() {
+    cout << "loading settings" << endl;
+    ofFile file;
+    if (file.open(ofToDataPath("settings.json"), ofFile::ReadOnly, false) == false) return;
+    ofBuffer buffer = file.readToBuffer();
+    cJSON *root = cJSON_Parse((buffer.getText()).c_str());
+    cout << cJSON_Print(root);
+    if (cJSON_GetObjectItem(root, kGUIHalfwaveAmpName) != NULL)
+        ((ofxUISlider *) gui->getWidget(kGUIHalfwaveAmpName))->setValue(cJSON_GetObjectItem(root, kGUIHalfwaveAmpName)->valueint);
+    if (cJSON_GetObjectItem(root, kGUIOutputAmpName) != NULL)
+        ((ofxUISlider *) gui->getWidget(kGUIOutputAmpName))->setValue(cJSON_GetObjectItem(root, kGUIOutputAmpName)->valueint);
+    if (cJSON_GetObjectItem(root, kGUISampleDelayName) != NULL)
+        ((ofxUISlider *) gui->getWidget(kGUISampleDelayName))->setValue(cJSON_GetObjectItem(root, kGUISampleDelayName)->valueint);
+    if (cJSON_GetObjectItem(root, kGUISignalFrequencyName) != NULL) {
+        ((ofxUISlider *) gui->getWidget(kGUISignalFrequencyName))->setValue(cJSON_GetObjectItem(root, kGUISignalFrequencyName)->valueint);
+        gui->triggerEvent(gui->getWidget(kGUISignalFrequencyName));
+    }
+    if (cJSON_GetObjectItem(root, kGUIUpSamplingName) != NULL)
+        ((ofxUISlider *) gui->getWidget(kGUIUpSamplingName))->setValue(cJSON_GetObjectItem(root, kGUIUpSamplingName)->valueint);
+    if (cJSON_GetObjectItem(root, kGUIBlobThresholdName) != NULL)
+        ((ofxUISlider *) gui->getWidget(kGUIBlobThresholdName))->setValue(cJSON_GetObjectItem(root, kGUIBlobThresholdName)->valueint);
+    if (cJSON_GetObjectItem(root, kGUIBlobVisualizationName) != NULL)
+        ((ofxUISlider *) gui->getWidget(kGUIBlobVisualizationName))->setValue(cJSON_GetObjectItem(root, kGUIBlobVisualizationName)->valueint);
+    if (cJSON_GetObjectItem(root, kGUIBlobGammaName) != NULL)
+        ((ofxUISlider *) gui->getWidget(kGUIBlobGammaName))->setValue(cJSON_GetObjectItem(root, kGUIBlobGammaName)->valueint);
+    if (cJSON_GetObjectItem(root, kGUIBlobAdaptiveThresholdRangeName) != NULL)
+        ((ofxUISlider *) gui->getWidget(kGUIBlobAdaptiveThresholdRangeName))->setValue(cJSON_GetObjectItem(root, kGUIBlobAdaptiveThresholdRangeName)->valueint);
+    if (cJSON_GetObjectItem(root, kGUIInterpolationDropDownName) != NULL)
+        gui->triggerEvent(gui->getWidget(cJSON_GetObjectItem(root, kGUIInterpolationDropDownName)->valuestring));
+    if (cJSON_GetObjectItem(root, kGUISerialDropDownName) != NULL) {
+        ofxUIDropDownList *serialDropDown = (ofxUIDropDownList *) gui->getWidget(kGUISerialDropDownName);
+        moveWidgetsBeneathDropdown(serialDropDown, false); // TODO
+        serialDropDown->triggerEvent(gui->getWidget(cJSON_GetObjectItem(root, kGUISerialDropDownName)->valuestring));
+    }
+    if (cJSON_GetObjectItem(root, kGUIBlobsName) != NULL)
+        ((ofxUILabelToggle *) gui->getWidget(kGUIBlobsName))->setValue(cJSON_GetObjectItem(root, kGUIBlobGammaName)->valueint);
+    
+    file.close();
+    cJSON_Delete(root);
 }
 
 //--------------------------------------------------------------
@@ -131,8 +207,7 @@ void wtmApp::updateFrequencyLabel(ofxUISlider* slider) {
 // as it triggers events of widgets positioned underneath the dropdown menu.
 // This workaround changes the dropdown menu into a "disclosure menu".
 //
-void wtmApp::moveWidgetsBeneathDropdown(ofxUIDropDownList* widget, bool moveBack)
-{
+void wtmApp::moveWidgetsBeneathDropdown(ofxUIDropDownList* widget, bool moveBack) {
     // calculate the size of the toggles
     float summand = 0;
     vector<ofxUILabelToggle*> toggles = widget->getToggles();
@@ -156,7 +231,7 @@ void wtmApp::moveWidgetsBeneathDropdown(ofxUIDropDownList* widget, bool moveBack
 //--------------------------------------------------------------
 void wtmApp::guiEvent(ofxUIEventArgs &e) {
     string widgetName = e.widget->getName();
-    // cout << "widget activated: " << widgetName << endl;
+    cout << "widget activated: " << widgetName << endl;
 
     // interpolation type disclosure menu
     ofxUIDropDownList *dropDownlist = (ofxUIDropDownList *) gui->getWidget(kGUIInterpolationDropDownName);
@@ -189,7 +264,6 @@ void wtmApp::guiEvent(ofxUIEventArgs &e) {
             if (this->state == wtmAppStateReceivingTouches) {
                 stopSensor();
                 ofxUILabelButton *startButton = (ofxUILabelButton *) gui->getWidget(kGUIStartName);
-                startButton->setLabelText(kGUIStopName);
             }
             closeSerialConnection();
         }
@@ -200,11 +274,11 @@ void wtmApp::guiEvent(ofxUIEventArgs &e) {
     if (e.widget->getKind() == OFX_UI_WIDGET_LABELBUTTON) {
         ofxUILabelButton *button = (ofxUILabelButton *) e.widget;
         if (button->getValue() == 1) { // we only use button-released, not button-pressed and not both
+            /* TODO
             if (widgetName == kGUIGridName) {
-                // TODO
                 bDrawGrid = button->getValue();
                 return;
-            }
+            }*/
             if (widgetName == kGUIStartName) {
                 cout << "start/stop button pressed" << endl;
                 if (wtmAppStateNoSerialConnection == this->state) {
