@@ -27,13 +27,12 @@ void wtmApp::initGUI() {
     gui->addSpacer();
     
     gui->addWidgetDown(new ofxUILabel("SENSOR PARAMETERS", OFX_UI_FONT_MEDIUM));
-    // TODO: don't hardcode values here
     gui->addSlider(kGUIHalfwaveAmpName, 1.0, 255.0, 164, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSlider(kGUIOutputAmpName, 1.0, 255.0, 111, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSlider(kGUISampleDelayName, 1.0, 100.0, 1, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     ofxUISlider* slider = gui->addSlider(kGUISignalFrequencyName, 1.0, 60.0, 20, WIDGETWIDTH, WIDGETHEIGHT);
     slider->setLabelPrecision(2);
-    this->updateFrequencyLabel(slider);
+    this->updateFrequencyLabel();
     gui->addSpacer();
     
     gui->addWidgetDown(new ofxUILabel("INTERPOLATION", OFX_UI_FONT_MEDIUM));
@@ -71,7 +70,6 @@ void wtmApp::initGUI() {
 	vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
     for(int i=0; i<deviceList.size();i++) {
         this->serialDevicesNames.push_back(deviceList[i].getDeviceName().c_str());
-        // cout<<"device name: "<<serialDevicesNames.at(i)<<endl;
     }
     ofxUIDropDownList *serialDeviceDropDownMenu = gui->addDropDownList(kGUISerialDropDownName, serialDevicesNames, WIDGETWIDTH);
     serialDeviceDropDownMenu->setShowCurrentSelected(true);
@@ -105,15 +103,13 @@ void wtmApp::initGUI() {
 void wtmApp::saveSettings() {
     cout << "saving settings" << endl;
     cJSON *root = cJSON_CreateObject();
-    cJSON_AddNumberToObject(root, kGUIHalfwaveAmpName, round(((ofxUISlider *) gui->getWidget(kGUIHalfwaveAmpName))->getScaledValue()) );
-    cJSON_AddNumberToObject(root, kGUIOutputAmpName, round(((ofxUISlider *) gui->getWidget(kGUIOutputAmpName))->getScaledValue()) );
-    cJSON_AddNumberToObject(root, kGUISampleDelayName, round(((ofxUISlider *) gui->getWidget(kGUISampleDelayName))->getScaledValue()) );
-    cJSON_AddNumberToObject(root, kGUISignalFrequencyName, round(((ofxUISlider *) gui->getWidget(kGUISignalFrequencyName))->getScaledValue()) );
-    cJSON_AddNumberToObject(root, kGUIUpSamplingName, ((ofxUISlider *) gui->getWidget(kGUIUpSamplingName))->getScaledValue() );
-    cJSON_AddNumberToObject(root, kGUIBlobThresholdName, round(((ofxUISlider *) gui->getWidget(kGUIBlobThresholdName))->getScaledValue()) );
-    cJSON_AddNumberToObject(root, kGUIBlobVisualizationName, round(((ofxUISlider *) gui->getWidget(kGUIBlobVisualizationName))->getScaledValue()) );
-    cJSON_AddNumberToObject(root, kGUIBlobGammaName, round(((ofxUISlider *) gui->getWidget(kGUIBlobGammaName))->getScaledValue()) );
-    cJSON_AddNumberToObject(root, kGUIBlobAdaptiveThresholdRangeName, ((ofxUISlider *) gui->getWidget(kGUIBlobAdaptiveThresholdRangeName))->getScaledValue() );
+    const char* sliderNames[9] = {
+        kGUIHalfwaveAmpName, kGUIOutputAmpName, kGUISampleDelayName, kGUISignalFrequencyName, kGUIUpSamplingName,
+        kGUIBlobThresholdName, kGUIBlobVisualizationName, kGUIBlobGammaName, kGUIBlobAdaptiveThresholdRangeName
+    };
+    for (int i=0; i < 8; i++) {
+        cJSON_AddNumberToObject(root, sliderNames[i], ((ofxUISlider *) gui->getWidget(sliderNames[i]))->getValue() );
+    }
     
     ofxUIDropDownList *interpolationDropDown = (ofxUIDropDownList *) gui->getWidget(kGUIInterpolationDropDownName);
     if (!(vector<string> *) interpolationDropDown->getSelectedNames().empty())
@@ -141,33 +137,30 @@ void wtmApp::loadSettings() {
     if (file.open(ofToDataPath("settings.json"), ofFile::ReadOnly, false) == false) return;
     ofBuffer buffer = file.readToBuffer();
     cJSON *root = cJSON_Parse((buffer.getText()).c_str());
-    cout << cJSON_Print(root);
-    if (cJSON_GetObjectItem(root, kGUIHalfwaveAmpName) != NULL)
-        ((ofxUISlider *) gui->getWidget(kGUIHalfwaveAmpName))->setValue(cJSON_GetObjectItem(root, kGUIHalfwaveAmpName)->valueint);
-    if (cJSON_GetObjectItem(root, kGUIOutputAmpName) != NULL)
-        ((ofxUISlider *) gui->getWidget(kGUIOutputAmpName))->setValue(cJSON_GetObjectItem(root, kGUIOutputAmpName)->valueint);
-    if (cJSON_GetObjectItem(root, kGUISampleDelayName) != NULL)
-        ((ofxUISlider *) gui->getWidget(kGUISampleDelayName))->setValue(cJSON_GetObjectItem(root, kGUISampleDelayName)->valueint);
-    if (cJSON_GetObjectItem(root, kGUISignalFrequencyName) != NULL) {
-        ((ofxUISlider *) gui->getWidget(kGUISignalFrequencyName))->setValue(cJSON_GetObjectItem(root, kGUISignalFrequencyName)->valueint);
-        gui->triggerEvent(gui->getWidget(kGUISignalFrequencyName));
+    
+    const char* sliderNames[9] = {
+        kGUIHalfwaveAmpName, kGUIOutputAmpName, kGUISampleDelayName, kGUISignalFrequencyName, kGUIUpSamplingName,
+        kGUIBlobThresholdName, kGUIBlobVisualizationName, kGUIBlobGammaName, kGUIBlobAdaptiveThresholdRangeName
+    };
+    for (int i=0; i < 8; i++) {
+        if (cJSON_GetObjectItem(root, sliderNames[i]) != NULL) {
+            ((ofxUISlider *) gui->getWidget(sliderNames[i]))->setValue(cJSON_GetObjectItem(root, sliderNames[i])->valueint);
+        }
     }
-    if (cJSON_GetObjectItem(root, kGUIUpSamplingName) != NULL)
-        ((ofxUISlider *) gui->getWidget(kGUIUpSamplingName))->setValue(cJSON_GetObjectItem(root, kGUIUpSamplingName)->valueint);
-    if (cJSON_GetObjectItem(root, kGUIBlobThresholdName) != NULL)
-        ((ofxUISlider *) gui->getWidget(kGUIBlobThresholdName))->setValue(cJSON_GetObjectItem(root, kGUIBlobThresholdName)->valueint);
-    if (cJSON_GetObjectItem(root, kGUIBlobVisualizationName) != NULL)
-        ((ofxUISlider *) gui->getWidget(kGUIBlobVisualizationName))->setValue(cJSON_GetObjectItem(root, kGUIBlobVisualizationName)->valueint);
-    if (cJSON_GetObjectItem(root, kGUIBlobGammaName) != NULL)
-        ((ofxUISlider *) gui->getWidget(kGUIBlobGammaName))->setValue(cJSON_GetObjectItem(root, kGUIBlobGammaName)->valueint);
-    if (cJSON_GetObjectItem(root, kGUIBlobAdaptiveThresholdRangeName) != NULL)
-        ((ofxUISlider *) gui->getWidget(kGUIBlobAdaptiveThresholdRangeName))->setValue(cJSON_GetObjectItem(root, kGUIBlobAdaptiveThresholdRangeName)->valueint);
+    this->updateFrequencyLabel();
+    this->updateInterpolator();
+    
     if (cJSON_GetObjectItem(root, kGUIInterpolationDropDownName) != NULL)
         gui->triggerEvent(gui->getWidget(cJSON_GetObjectItem(root, kGUIInterpolationDropDownName)->valuestring));
     if (cJSON_GetObjectItem(root, kGUISerialDropDownName) != NULL) {
+        string selectedDeviceName = (char *) cJSON_GetObjectItem(root, kGUISerialDropDownName)->valuestring;
         ofxUIDropDownList *serialDropDown = (ofxUIDropDownList *) gui->getWidget(kGUISerialDropDownName);
-        moveWidgetsBeneathDropdown(serialDropDown, false); // TODO
-        serialDropDown->triggerEvent(gui->getWidget(cJSON_GetObjectItem(root, kGUISerialDropDownName)->valuestring));
+        for (int i=0; i<this->serialDevicesNames.size(); ++i) {
+            if (selectedDeviceName == serialDevicesNames[i]) {
+                moveWidgetsBeneathDropdown(serialDropDown, false); // TODO: refactor
+                serialDropDown->triggerEvent(gui->getWidget(cJSON_GetObjectItem(root, kGUISerialDropDownName)->valuestring));
+            }
+        }
     }
     if (cJSON_GetObjectItem(root, kGUIBlobsName) != NULL)
         ((ofxUILabelToggle *) gui->getWidget(kGUIBlobsName))->setValue(cJSON_GetObjectItem(root, kGUIBlobGammaName)->valueint);
@@ -198,8 +191,9 @@ void wtmApp::updateFirmwareVersionLabel(const char* newVersion) {
 }
 
 //--------------------------------------------------------------
-void wtmApp::updateFrequencyLabel(ofxUISlider* slider) {
-    slider->getLabelWidget()->setLabel(slider->getName() + ": ~" + ofxUIToString(16000000./(round(slider->getScaledValue())+1.)/2000., 0) + " kHz");
+void wtmApp::updateFrequencyLabel() {
+    ofxUISlider* slider = (ofxUISlider*) gui->getWidget(kGUISignalFrequencyName);
+    slider->getLabelWidget()->setLabel(slider->getName() + ": ~" + ofxUIToString(16000000./(round(slider->getValue())+1.)/2000., 0) + " kHz");
 }
 
 //--------------------------------------------------------------
@@ -231,7 +225,7 @@ void wtmApp::moveWidgetsBeneathDropdown(ofxUIDropDownList* widget, bool moveBack
 //--------------------------------------------------------------
 void wtmApp::guiEvent(ofxUIEventArgs &e) {
     string widgetName = e.widget->getName();
-    cout << "widget activated: " << widgetName << endl;
+    // cout << "widget activated: " << widgetName << endl;
 
     // interpolation type disclosure menu
     ofxUIDropDownList *dropDownlist = (ofxUIDropDownList *) gui->getWidget(kGUIInterpolationDropDownName);
@@ -306,6 +300,9 @@ void wtmApp::guiEvent(ofxUIEventArgs &e) {
             if (widgetName == kGUICalibrateName) {
                 if (wtmAppStateReceivingTouches == this->state) {
                     cout << "calibration button pressed" << endl;
+                    this->stopSensor(); // TODO: serial buffer issue
+                    ofSleepMillis(100); // this is a
+                    this->stopSensor(); // lousy workaround
                     this->startCalibration();
                     button->setLabelText("CALIBRATING...");
                 }
@@ -326,34 +323,36 @@ void wtmApp::guiEvent(ofxUIEventArgs &e) {
     // sliders
     if (e.widget->getKind() == OFX_UI_WIDGET_SLIDER_H) {
         ofxUISlider *slider = (ofxUISlider *) e.widget;
+        float val = slider->getValue();
         if (widgetName == kGUIHalfwaveAmpName) {
+            slider->setValue(round(val));
             sendSliderData(slider);
         } else if (widgetName == kGUIOutputAmpName) {
+            slider->setValue(round(val));
             sendSliderData(slider);
         } else if (widgetName == kGUISampleDelayName) {
+            slider->setValue(round(val));
             sendSliderData(slider);
         } else if (widgetName == kGUIUpSamplingName) {
-            int val = round(slider->getScaledValue());
-            slider->setValue(val);
+            slider->setValue(round(val));
             this->interpolatorUpsampleX = val;
             this->interpolatorUpsampleY = val;
             this->updateInterpolator();
         } else if (widgetName == kGUISignalFrequencyName) {
+            slider->setValue(round(val));
+            this->updateFrequencyLabel();
             sendSliderData(slider);
-            this->updateFrequencyLabel(slider);
         } else if (widgetName == kGUIBlobThresholdName) {
-            int val = round(slider->getScaledValue());
-            slider->setValue(val);
-            this->blobTracker->setThreshold(val);
+            slider->setValue(round(val));
+            this->blobTracker->setThreshold(round(val));
         } else if (widgetName == kGUIBlobVisualizationName) {
-            int val = round(slider->getScaledValue());
-            slider->setValue(val);
-            this->thresholdImageAlpha = val;
+            slider->setValue(round(val));
+            this->thresholdImageAlpha = round(val);
         } else if (widgetName == kGUIBlobAdaptiveThresholdRangeName) {
-            double value = (slider->getScaledValue()/100.0) * this->interpolator->getOutputWidth();
+            double value = (slider->getValue()/100.0) * this->interpolator->getOutputWidth();
             this->blobTracker->setAdaptiveThresholdRange(((int) value) | 1);
         } else if (widgetName == kGUIBlobGammaName) {
-            this->inputGamma = slider->getScaledValue();
+            this->inputGamma = slider->getValue();
         }
     }
 }

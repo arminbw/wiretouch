@@ -19,7 +19,7 @@
 
 #include <SPI.h>
 
-#define FIRMWARE_VERSION    "1.0b2"
+#define FIRMWARE_VERSION    "1.0b3"
 
 #define SERIAL_BAUD         500000    // serial baud rate
 #define SER_BUF_SIZE        256       // serial buffer for sending
@@ -325,24 +325,20 @@ auto_tune_output_amp()
 void
 print_configuration_info()
 {
-   char buf[96];
-   
+   char buf[128] = {0};
    sprintf(buf, "{ \"halfwave_amp\":\"%d\", \"output_amp\":\"%d\", "
-     "\"delay\":\"%d\", \"freq\":\"%d\",",
-     halfwavePotBase, outputAmpPotBase, measureDelay, waveFrequency);
-   Serial.print(buf);
-   
-   for (uint16_t k = 0; k < verticalWires; k++) {    
+     "\"delay\":\"%d\", \"freq\":\"%d\", \"version\":\"%s\"}",
+     halfwavePotBase, outputAmpPotBase, measureDelay, waveFrequency, FIRMWARE_VERSION);
+   Serial.println(buf);
+ 
+   /* for (uint16_t k = 0; k < verticalWires; k++) {    
      for (uint16_t l = 0; l < horizontalWires; l++) {
         sprintf(buf, "\"tune_%d_%d\":\"%d\",",
           k, l, output_amp_tuning_for_point(k, l));
         Serial.print(buf);
      }
-   }
-   
-   sprintf(buf, "\"version\":\"%s\"", FIRMWARE_VERSION);
-   Serial.print(buf);
-   
+   }*/
+   Serial.print(buf);   
    Serial.println("}");
 }
 
@@ -421,7 +417,8 @@ process_cmd(char* cmd)
     }
     
     case 'x': {
-      isRunning = 0;
+      isRunning = 0;  // stop sending measurement data
+      Serial.flush(); // wait for the transmission of the outgoing data to complete
       break;
     }
     

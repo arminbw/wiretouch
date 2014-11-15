@@ -72,7 +72,7 @@ typedef enum _wtmAppState {
     wtmAppStateNoSerialConnection,
     wtmAppStateStartWhenSerialInitalized,
     wtmAppStateIdle,
-    wtmAppStateReceivingSettings,
+    wtmAppStateReceivingCalibrationResults,
     wtmAppStateReceivingTouches,
 } wtmAppState;
 
@@ -107,15 +107,14 @@ class wtmApp : public ofBaseApp {
         void startSensor();
         void startCalibration();
         void stopSensor();
-        bool initAndStartSerialConnection(string);
+        bool initAndStartSerialConnection(string serialDeviceName);
         void closeSerialConnection();
         void drainSerial();
-        void receiveCalibrationSettings();
         void guiEvent(ofxUIEventArgs &e);
         void sendSliderData(ofxUISlider* slider);
         void sendAllSliderValues();
         void updateFPSLabelWithValue(float fps);
-        void updateFrequencyLabel(ofxUISlider* slider);
+        void updateFrequencyLabel();
         void updateFirmwareVersionLabel(const char* newVersion);
         void distributeTuio();
     
@@ -133,7 +132,7 @@ class wtmApp : public ofBaseApp {
         float lastWindowResizeTime;
         float serialOpenTime;
     
-        string* settingsString;
+        string calibrationResultsString;
     
         ofTexture* texture;
     
