@@ -33,4 +33,4 @@ WireTouch is free software: you can redistribute it and/or modify it under the t
 
 A few of the included 3rd-party libraries are licensed under the GPL-compatible MIT license.
 
-Wiretouch is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of merchantability or fitness for a particular purpose. See the [http://www.gnu.org/licenses](GNU General Public License) for more details.
+WireTouch is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of merchantability or fitness for a particular purpose. See the [http://www.gnu.org/licenses](GNU General Public License) for more details.
