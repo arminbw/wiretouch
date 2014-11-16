@@ -91,11 +91,11 @@ void wtmApp::initGUI() {
     gui->addWidgetDown(fpsLabel);
     this->updateFPSLabelWithValue(0.);
     
-    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_BACK, ofColor(120));
-    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL, ofColor(255, 120)); // font color
-    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_OUTLINE_HIGHLIGHT, ofColor(0,0,255));
-    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL_HIGHLIGHT, ofColor(239, 171, 233));
-    gui->setColorBack(ofColor(100, 80));
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_BACK, ofColor(41, 41, 41));                       // slider background, button color
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_OUTLINE_HIGHLIGHT, ofColor(41, 41, 41));
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL, ofColor(160, 160, 160));                    // font color
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL_HIGHLIGHT, ofColor(82, 208, 207));           // pressed button
+    gui->setColorBack(ofColor(41, 41, 42, 140));
     ofAddListener(gui->newGUIEvent, this, &wtmApp::guiEvent);
 }
 
