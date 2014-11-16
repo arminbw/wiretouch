@@ -5,7 +5,7 @@ Please visit http://www.wiretouch.net for demos and background information.
 
 ##Building
 ###WireTouch Firmware
-1, The heart of the WireTouch hardware is an ATmega328P microcontroller equipped with an Arduino bootloader. To upload the WireTouch firmware connect the mainboard with your computer. Use an USB to serial UART FTDI 5V cable.
+1. The heart of the WireTouch hardware is an ATmega328P microcontroller equipped with an Arduino bootloader. To upload the WireTouch firmware connect the mainboard with your computer. Use an USB to serial UART FTDI 5V cable.
 
 2. Install the virtual com port [FTDI driver](http://www.ftdichip.com/Drivers/VCP.htm). Open arduino/sensor/sensor.io in the [Arduino IDE](http://arduino.cc/en/Main/Software). Select "Tools>Board>Arduino UNO" and the correct port. **Upload the Arduino sketch**.
 
@@ -16,9 +16,9 @@ Please visit http://www.wiretouch.net for demos and background information.
 1. Download [openFrameworks 0.8.4](https://github.com/openframeworks/openFrameworks).
 2. Download the following openFrameworks addons and put them into your openFrameworks "addons" directory.
 
-* ofxCv: https://github.com/kylemcdonald/ofxCv
-* ofxUI: https://github.com/rezaali/ofxUI
-* ofxBlobsManager: https://github.com/peteruithoven/ofxBlobsManager
+  * ofxCv: https://github.com/kylemcdonald/ofxCv
+  * ofxUI: https://github.com/rezaali/ofxUI
+  * ofxBlobsManager: https://github.com/peteruithoven/ofxBlobsManager
 
 3. Copy the wiretouch_monitor directory of this repository into your openFrameworks "apps/myApps/" directory.
 4. We are currently using Xcode 6.1 on OSX 10.10 for development. Open the Xcode project. **Build it**.
