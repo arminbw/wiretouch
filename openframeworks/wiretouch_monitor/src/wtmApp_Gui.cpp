@@ -134,7 +134,11 @@ void wtmApp::saveSettings() {
 void wtmApp::loadSettings() {
     cout << "loading settings" << endl;
     ofFile file;
-    if (file.open(ofToDataPath("settings.json"), ofFile::ReadOnly, false) == false) return;
+    if (!file.doesFileExist(ofToDataPath("settings.json"))) {
+        cout << "no settings file found" << endl;
+        return;
+    }
+    file.open(ofToDataPath("settings.json"), ofFile::ReadOnly, false);
     ofBuffer buffer = file.readToBuffer();
     cJSON *root = cJSON_Parse((buffer.getText()).c_str());
     
