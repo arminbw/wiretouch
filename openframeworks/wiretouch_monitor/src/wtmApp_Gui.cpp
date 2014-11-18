@@ -166,9 +166,10 @@ void wtmApp::loadSettings() {
             }
         }
     }
-    if (cJSON_GetObjectItem(root, kGUIBlobsName) != NULL)
-        ((ofxUILabelToggle *) gui->getWidget(kGUIBlobsName))->setValue(cJSON_GetObjectItem(root, kGUIBlobGammaName)->valueint);
-    
+    if (cJSON_GetObjectItem(root, kGUIBlobsName) != NULL) {
+        this->bTrackBlobs = cJSON_GetObjectItem(root, kGUIBlobGammaName)->valueint;
+        ((ofxUILabelToggle *) gui->getWidget(kGUIBlobsName))->setValue(this->bTrackBlobs);
+    }
     file.close();
     cJSON_Delete(root);
 }

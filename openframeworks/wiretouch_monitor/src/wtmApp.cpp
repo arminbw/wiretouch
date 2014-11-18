@@ -246,16 +246,6 @@ void wtmApp::consumeCalibrationResults(const char* json) {
                 slider = (ofxUISlider*)gui->getWidget(kGUIOutputAmpName);
                 slider->setValue(atoi(cur->valuestring));
             }
-            cur = cJSON_GetObjectItem(root, "delay");
-            if (cur != NULL) {
-                slider = (ofxUISlider*)gui->getWidget(kGUISampleDelayName);
-                slider->setValue(atoi(cur->valuestring));
-            }
-            cur = cJSON_GetObjectItem(root, "freq");
-            if (cur != NULL) {
-                slider = (ofxUISlider*)gui->getWidget(kGUISignalFrequencyName);
-                slider->setValue(atoi(cur->valuestring));
-            }
             cJSON_Delete(root);
         }
     }
