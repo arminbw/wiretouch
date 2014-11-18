@@ -19,7 +19,7 @@
 
 #include <SPI.h>
 
-#define FIRMWARE_VERSION    "1.0b3"
+#define FIRMWARE_VERSION    "1.0b4"
 
 #define SERIAL_BAUD         500000    // serial baud rate
 #define SER_BUF_SIZE        256       // serial buffer for sending
@@ -326,9 +326,8 @@ void
 print_configuration_info()
 {
    char buf[128] = {0};
-   sprintf(buf, "{ \"halfwave_amp\":\"%d\", \"output_amp\":\"%d\", "
-     "\"delay\":\"%d\", \"freq\":\"%d\", \"version\":\"%s\"}",
-     halfwavePotBase, outputAmpPotBase, measureDelay, waveFrequency, FIRMWARE_VERSION);
+   sprintf(buf, "{ \"halfwave_amp\":\"%d\", \"output_amp\":\"%d\", \"version\":\"%s\"}",
+     halfwavePotBase, outputAmpPotBase, FIRMWARE_VERSION);
    Serial.println(buf);
  
    /* for (uint16_t k = 0; k < verticalWires; k++) {    
