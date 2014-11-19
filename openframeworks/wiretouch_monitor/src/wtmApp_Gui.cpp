@@ -52,35 +52,31 @@ void wtmApp::initGUI() {
     gui->addSpacer();
     
     gui->addWidgetDown(new ofxUILabel("BLOB DETECTION", OFX_UI_FONT_MEDIUM));
-    ofxUILabelToggle* toggle = gui->addLabelToggle(kGUIBlobsName, false, (WIDGETWIDTH/2)-OFX_UI_GLOBAL_WIDGET_SPACING, WIDGETHEIGHT);
-    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_RIGHT);
-    // TODO: Grid
-    // toggle = gui->addLabelToggle(kGUIGridName, false, (WIDGETWIDTH/2)-(OFX_UI_GLOBAL_WIDGET_SPACING/2), WIDGETHEIGHT);
-    // toggle->setLabelVisible(true);
-    
-    gui->setWidgetPosition(OFX_UI_WIDGET_POSITION_DOWN);
+    gui->addSlider(kGUIBlobGammaName, 0.0, 16.0, this->inputGamma, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(2);
     gui->addSlider(kGUIBlobThresholdName, 0.0, 255.0, 161, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     this->blobTracker->setThreshold(161);
     gui->addSlider(kGUIBlobVisualizationName, 0.0, 255.0, 31, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
-    gui->addSlider(kGUIBlobGammaName, 0.0, 16.0, this->inputGamma, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(2);
     gui->addSlider(kGUIBlobAdaptiveThresholdRangeName, 3.0, 100.0, 41, WIDGETWIDTH, WIDGETHEIGHT);
     this->blobTracker->setAdaptiveThresholdRange(((int) 41) | 1);
+    ofxUILabelToggle* toggle = gui->addLabelToggle(kGUIBlobsName, false, WIDGETWIDTH, WIDGETHEIGHT);
     gui->addSpacer();
     
+    gui->addWidgetDown(new ofxUILabel("CALIBRATION", OFX_UI_FONT_MEDIUM));
+    // gui->addLabelToggle(kGUIGridName, false, (WIDGETWIDTH/2)-(OFX_UI_GLOBAL_WIDGET_SPACING/2), WIDGETHEIGHT); // TODO: Grid
+    gui->addLabelButton(kGUICalibrateName, false, WIDGETWIDTH, WIDGETHEIGHT);
+    gui->addLabelButton(kGUIResetName, false, WIDGETWIDTH, WIDGETHEIGHT);
+    gui->addSpacer();
+
+    gui->addWidgetDown(new ofxUILabel("CONNECTION", OFX_UI_FONT_MEDIUM));
 	vector <ofSerialDeviceInfo> deviceList = serial.getDeviceList();
-    for(int i=0; i<deviceList.size();i++) {
+    for(int i=0; i<deviceList.size(); i++) {
         this->serialDevicesNames.push_back(deviceList[i].getDeviceName().c_str());
     }
     ofxUIDropDownList *serialDeviceDropDownMenu = gui->addDropDownList(kGUISerialDropDownName, serialDevicesNames, WIDGETWIDTH);
     serialDeviceDropDownMenu->setShowCurrentSelected(true);
     serialDeviceDropDownMenu->setAutoClose(true);
     
-    ofxUILabelButton* button = gui->addLabelButton(kGUIStartName, false, WIDGETWIDTH, WIDGETHEIGHT);
-    button->setLabelVisible(true);
-    
-    button = gui->addLabelButton(kGUICalibrateName, false, WIDGETWIDTH, WIDGETHEIGHT);
-    button->setLabelVisible(true);
-    
+    gui->addLabelButton(kGUIStartName, false, WIDGETWIDTH, WIDGETHEIGHT);
     gui->addSpacer();
 
     ofxUILabel* firmwareLabel = new ofxUILabel(kGUIFirmwareName, OFX_UI_FONT_SMALL);
@@ -91,17 +87,17 @@ void wtmApp::initGUI() {
     gui->addWidgetDown(fpsLabel);
     this->updateFPSLabelWithValue(0.);
     
-    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_BACK, ofColor(41, 41, 41));                       // slider background, button color
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_BACK, ofColor(51, 51, 51));                       // slider background, button color
     gui->setWidgetColor(OFX_UI_WIDGET_COLOR_OUTLINE_HIGHLIGHT, ofColor(41, 41, 41));
-    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL, ofColor(160, 160, 160));                    // font color
+    gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL, ofColor(255, 255, 255, 140));               // font color
     gui->setWidgetColor(OFX_UI_WIDGET_COLOR_FILL_HIGHLIGHT, ofColor(82, 208, 207));           // pressed button
-    gui->setColorBack(ofColor(41, 41, 42, 140));
+    gui->setColorBack(ofColor(51, 51, 52, 140));
     ofAddListener(gui->newGUIEvent, this, &wtmApp::guiEvent);
 }
 
 //--------------------------------------------------------------
 void wtmApp::saveSettings() {
-    cout << "saving settings" << endl;
+    ofLogNotice() << "saving settings";
     cJSON *root = cJSON_CreateObject();
     const char* sliderNames[9] = {
         kGUIHalfwaveAmpName, kGUIOutputAmpName, kGUISampleDelayName, kGUISignalFrequencyName, kGUIUpSamplingName,
@@ -132,10 +128,10 @@ void wtmApp::saveSettings() {
 
 //--------------------------------------------------------------
 void wtmApp::loadSettings() {
-    cout << "loading settings" << endl;
+    ofLogNotice() << "loading settings";
     ofFile file;
     if (!file.doesFileExist(ofToDataPath("settings.json"))) {
-        cout << "no settings file found" << endl;
+        ofLogError() << "no settings file found";
         return;
     }
     file.open(ofToDataPath("settings.json"), ofFile::ReadOnly, false);
@@ -230,7 +226,7 @@ void wtmApp::moveWidgetsBeneathDropdown(ofxUIDropDownList* widget, bool moveBack
 //--------------------------------------------------------------
 void wtmApp::guiEvent(ofxUIEventArgs &e) {
     string widgetName = e.widget->getName();
-    // cout << "widget activated: " << widgetName << endl;
+    // ofLogNotice() << "widget activated: " << widgetName;
 
     // interpolation type disclosure menu
     ofxUIDropDownList *dropDownlist = (ofxUIDropDownList *) gui->getWidget(kGUIInterpolationDropDownName);
@@ -259,7 +255,7 @@ void wtmApp::guiEvent(ofxUIEventArgs &e) {
     }
     if (e.widget->getParent() == dropDownlist) {
         if (serial.isInitialized()) {
-            cout << "serial connection changed" << endl;
+            ofLogNotice() << "serial connection changed";
             if (this->state == wtmAppStateReceivingTouches) {
                 stopSensor();
                 ofxUILabelButton *startButton = (ofxUILabelButton *) gui->getWidget(kGUIStartName);
@@ -279,11 +275,10 @@ void wtmApp::guiEvent(ofxUIEventArgs &e) {
                 return;
             }*/
             if (widgetName == kGUIStartName) {
-                cout << "start/stop button pressed" << endl;
                 if (wtmAppStateNoSerialConnection == this->state) {
                     vector<string> selected = dropDownlist->getSelectedNames();
                     if (selected.empty()) {
-                        cout << "no serial connection selected" << endl;
+                        ofLogError() << "no serial connection selected";
                     } else {
                         initAndStartSerialConnection(selected[0]);
                         button->setLabelText(kGUIStopName);
@@ -304,12 +299,17 @@ void wtmApp::guiEvent(ofxUIEventArgs &e) {
             }
             if (widgetName == kGUICalibrateName) {
                 if (wtmAppStateReceivingTouches == this->state) {
-                    cout << "calibration button pressed" << endl;
                     this->stopSensor(); // TODO: serial buffer issue
                     ofSleepMillis(100); // this is a
                     this->stopSensor(); // lousy workaround
                     this->startCalibration();
                     button->setLabelText("CALIBRATING...");
+                }
+                return;
+            }
+            if (widgetName == kGUIResetName) {
+                if (wtmAppStateReceivingTouches == this->state) {
+                    this->resetCalibration();
                 }
             }
         }
@@ -319,9 +319,12 @@ void wtmApp::guiEvent(ofxUIEventArgs &e) {
     if (e.widget->getKind() == OFX_UI_WIDGET_LABELTOGGLE) {
         ofxUILabelToggle *toggle = (ofxUILabelToggle *) e.widget;
         if (widgetName == kGUIBlobsName) {
-            cout << toggle->getValue() << endl;
             bTrackBlobs = toggle->getValue();
             return;
+        }
+        if (bTrackBlobs) {
+            toggle->setColorFill(gui->getColorBack());
+            toggle->setColorFillHighlight(gui->getColorBack());
         }
     }
     

@@ -88,13 +88,18 @@ setup()
   PORTD |= (1 << 2) | (1 << 4);
   
   set_wave_frequency(waveFrequency);
-  
   set_halfwave_pot(halfwavePotBase);
-  
+  reset_output_amp_tuning();
+}
+
+void
+reset_output_amp_tuning()
+{
   for (int i=0; i<sizeof(outputAmpPotTune); i++)
     outputAmpPotTune[i] =
       (OUTPUT_AMP_POT_TUNE_DEFAULT) | (OUTPUT_AMP_POT_TUNE_DEFAULT << 4);
 }
+
 
 byte
 output_amp_tuning_for_point(byte x, byte y)
@@ -424,6 +429,11 @@ process_cmd(char* cmd)
     case 'c': {
       auto_tune_output_amp();
       break;
+    }
+    
+    case 'r': {
+      reset_output_amp_tuning();
+      break; 
     }
     
     case 'i': {

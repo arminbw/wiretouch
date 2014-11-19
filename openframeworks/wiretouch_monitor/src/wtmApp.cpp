@@ -53,7 +53,7 @@ void wtmApp::setup() {
     initGUI();
     loadSettings();
     
-    cout << "starting up local TUIO Server." << endl;
+    ofLogNotice() << "starting up local TUIO Server.";
     this->tuioServer = new wtmTuioServer();
     this->tuioServer->start("127.0.0.1", 3333);     // TODO    
 }
@@ -91,7 +91,7 @@ void wtmApp::update() {
         case wtmAppStateStartWhenSerialInitalized: {
             if (serial.isInitialized()) {
                 if (now > (this->serialOpenTime + 2)) { // let's give the serial connection some time (2 seconds)
-                    cout << "init finished" << endl;
+                    ofLogNotice() << "init finished";
                     this->stopSensor(); // restart. just in case (the mainboard might already send data)
                     this->startSensor();
                 }
@@ -226,10 +226,10 @@ void wtmApp::consumePacketData() {
 
 //--------------------------------------------------------------
 void wtmApp::consumeCalibrationResults(const char* json) {
-    cout << json << endl;
+    ofLogNotice() << json;
     if (NULL != json) {
         cJSON* root = cJSON_Parse(json);
-        cout << "parsing received settings" << endl;
+        ofLogNotice() << "parsing received settings";
         if (NULL != root) {
             cJSON* cur = cJSON_GetObjectItem(root, "version");
             if (cur != NULL) {
@@ -272,11 +272,11 @@ bool wtmApp::initAndStartSerialConnection(string serialDeviceName) {
     // serial.listDevices();
     if (serial.setup(serialDeviceName, baud)) {
         this->state = wtmAppStateStartWhenSerialInitalized;
-        cout << "initalizing serial connection: " << serialDeviceName << endl;
+        ofLogNotice() << "initalizing serial connection: " << serialDeviceName;
         this->serialOpenTime = ofGetElapsedTimef();
         return true;
     }
-    cout << "can't open serial connection." << endl;
+    ofLogError() << "can't open serial connection.";
     return false;
 }
 
@@ -288,7 +288,7 @@ void wtmApp::closeSerialConnection() {
 
 //--------------------------------------------------------------
 void wtmApp::startSensor() {
-    cout << "starting sensor" << endl;
+    ofLogNotice() << "starting sensor";
     ofxUISlider *slider;
     sendSliderData((ofxUISlider *)  gui->getWidget(kGUIOutputAmpName));
     sendSliderData((ofxUISlider *)  gui->getWidget(kGUIHalfwaveAmpName));
@@ -300,7 +300,7 @@ void wtmApp::startSensor() {
 
 //--------------------------------------------------------------
 void wtmApp::stopSensor() {
-    cout << "stopping sensor" << endl;
+    ofLogNotice() << "stopping sensor";
     serial.writeBytes((unsigned char*)"x\n", 2); // mainboard flushes the remaining outgoing data
     this->drainSerial();
     this->state = wtmAppStateIdle;
@@ -308,10 +308,15 @@ void wtmApp::stopSensor() {
 
 //--------------------------------------------------------------
 void wtmApp::startCalibration() {
-    cout << "starting calibration" << endl;
+    ofLogNotice() << "starting calibration";
     this->state = wtmAppStateReceivingCalibrationResults;
     serial.writeBytes((unsigned char*)"c\ni\n", 4);
-    cout << "receiving calibration settings" << endl;
+    ofLogNotice() << "receiving calibration settings";
+}
+
+void wtmApp::resetCalibration() {
+    ofLogNotice() << "reseting calibration";
+    serial.writeBytes((unsigned char*)"r\n", 2);
 }
 
 //--------------------------------------------------------------
@@ -323,6 +328,7 @@ void wtmApp::sendSliderData(ofxUISlider* slider) {
    if (widgetName == kGUIOutputAmpName) command = 'o';
    if (widgetName == kGUISampleDelayName) command = 'd';
    if (widgetName == kGUISignalFrequencyName) command = 'f';
+   if (widgetName == kGUIResetName) command = 'r';
    char buf[32];
    snprintf(buf, sizeof(buf), "%c%d\n", command, val);
    serial.writeBytes((unsigned char*)buf, strlen(buf));
@@ -335,7 +341,7 @@ void wtmApp::drainSerial() {
 
 //--------------------------------------------------------------
 void wtmApp::exit() {
-    cout << "exiting" << endl;
+    ofLogNotice() << "exiting";
     if (wtmAppStateNoSerialConnection != this->state) {
         if (wtmAppStateReceivingTouches == this->state) stopSensor();
         this->closeSerialConnection();

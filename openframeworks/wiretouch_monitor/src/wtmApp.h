@@ -36,7 +36,7 @@
 #define WINDOWHEIGHT 768
 #define WINDOWBORDERDISTANCE 10
 #define GUIWIDTH 280
-#define GUIHEIGHT 620
+#define GUIHEIGHT 695
 #define WIDGETWIDTH (GUIWIDTH-(OFX_UI_GLOBAL_WIDGET_SPACING*2))
 #define WIDGETHEIGHT 22
 
@@ -49,8 +49,9 @@
 #define kGUIGridName                ("GRID")
 #define kGUIInterpolationDropDownName   ("INTERPOLATION TYPE")
 #define kGUISerialDropDownName          ("CHOOSE SERIAL PORT")
-#define kGUIBlobsName               ("BLOBS")
+#define kGUIBlobsName               ("SHOW BLOBS")
 #define kGUICalibrateName           ("CALIBRATE")
+#define kGUIResetName               ("RESET")
 #define kGUIStartName               ("START")
 #define kGUIStopName                ("STOP")
 #define kGUIFirmwareName            ("FIRMWARE")
@@ -105,14 +106,14 @@ class wtmApp : public ofBaseApp {
         void initGUI();
         void updateInterpolator();
         void startSensor();
-        void startCalibration();
         void stopSensor();
+        void startCalibration();
+        void resetCalibration();
         bool initAndStartSerialConnection(string serialDeviceName);
         void closeSerialConnection();
         void drainSerial();
         void guiEvent(ofxUIEventArgs &e);
         void sendSliderData(ofxUISlider* slider);
-        void sendAllSliderValues();
         void updateFPSLabelWithValue(float fps);
         void updateFrequencyLabel();
         void updateFirmwareVersionLabel(const char* newVersion);
