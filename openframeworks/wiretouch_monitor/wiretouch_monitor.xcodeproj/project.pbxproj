@@ -325,14 +325,8 @@
 		C6305369801B450557086284 /* ofxUISpectrum.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = ofxUISpectrum.h; path = ../../../addons/ofxUI/src/ofxUISpectrum.h; sourceTree = SOURCE_ROOT; };
 		C649742B1A0AA7E400EC1FEA /* wtmApp_Gui.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = wtmApp_Gui.cpp; sourceTree = "<group>"; };
 		C66C6414C8B86FDB99ED3B70 /* core.hpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 30; name = core.hpp; path = ../../../addons/ofxOpenCv/libs/opencv/include/opencv2/core/core.hpp; sourceTree = SOURCE_ROOT; };
-		C6E6D97F1A078919003B8C12 /* guiSettings.xml */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = guiSettings.xml; sourceTree = "<group>"; };
-		C6E6D9811A078919003B8C12 /* App.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = App.png; sourceTree = "<group>"; };
-		C6E6D9821A078919003B8C12 /* Preview.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Preview.png; sourceTree = "<group>"; };
+		C6B18E681A222EB100C6EE2D /* settings.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = settings.json; sourceTree = "<group>"; };
 		C6E6D9831A078919003B8C12 /* NewMedia Fett.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "NewMedia Fett.ttf"; sourceTree = "<group>"; };
-		C6E6D9841A078919003B8C12 /* toggle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = toggle.png; sourceTree = "<group>"; };
-		C6E6D9851A078919003B8C12 /* toggledown.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = toggledown.png; sourceTree = "<group>"; };
-		C6E6D9861A078919003B8C12 /* toggleon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = toggleon.png; sourceTree = "<group>"; };
-		C6E6D9871A078919003B8C12 /* toggleover.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = toggleover.png; sourceTree = "<group>"; };
 		C6F8E6FB1A02A8DE00E77077 /* cJSON.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = cJSON.c; sourceTree = "<group>"; };
 		C6F8E6FC1A02A8DE00E77077 /* cJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cJSON.h; sourceTree = "<group>"; };
 		C6F8E6FF1A02A8DE00E77077 /* TuioClient.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TuioClient.cpp; sourceTree = "<group>"; };
@@ -904,6 +898,7 @@
 		C6E6D97C1A078919003B8C12 /* data */ = {
 			isa = PBXGroup;
 			children = (
+				C6B18E681A222EB100C6EE2D /* settings.json */,
 				C6E6D97E1A078919003B8C12 /* GUI */,
 			);
 			name = data;
@@ -913,24 +908,9 @@
 		C6E6D97E1A078919003B8C12 /* GUI */ = {
 			isa = PBXGroup;
 			children = (
-				C6E6D97F1A078919003B8C12 /* guiSettings.xml */,
-				C6E6D9801A078919003B8C12 /* images */,
 				C6E6D9831A078919003B8C12 /* NewMedia Fett.ttf */,
-				C6E6D9841A078919003B8C12 /* toggle.png */,
-				C6E6D9851A078919003B8C12 /* toggledown.png */,
-				C6E6D9861A078919003B8C12 /* toggleon.png */,
-				C6E6D9871A078919003B8C12 /* toggleover.png */,
 			);
 			path = GUI;
-			sourceTree = "<group>";
-		};
-		C6E6D9801A078919003B8C12 /* images */ = {
-			isa = PBXGroup;
-			children = (
-				C6E6D9811A078919003B8C12 /* App.png */,
-				C6E6D9821A078919003B8C12 /* Preview.png */,
-			);
-			path = images;
 			sourceTree = "<group>";
 		};
 		C6F8E6F91A02A8DE00E77077 /* 3rd-party */ = {

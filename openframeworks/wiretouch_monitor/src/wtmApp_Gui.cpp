@@ -30,7 +30,7 @@ void wtmApp::initGUI() {
     gui->addSlider(kGUIHalfwaveAmpName, 1.0, 255.0, 164, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSlider(kGUIOutputAmpName, 1.0, 255.0, 111, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
     gui->addSlider(kGUISampleDelayName, 1.0, 100.0, 1, WIDGETWIDTH, WIDGETHEIGHT)->setLabelPrecision(0);
-    ofxUISlider* slider = gui->addSlider(kGUISignalFrequencyName, 1.0, 60.0, 20, WIDGETWIDTH, WIDGETHEIGHT);
+    ofxUISlider* slider = gui->addSlider(kGUISignalFrequencyName, 60.0, 10.0, 20, WIDGETWIDTH, WIDGETHEIGHT);
     slider->setLabelPrecision(2);
     this->updateFrequencyLabel();
     gui->addSpacer();
@@ -114,7 +114,7 @@ void wtmApp::saveSettings() {
     if (!(vector<string> *) serialDropDown->getSelectedNames().empty())
         cJSON_AddStringToObject(root, kGUISerialDropDownName, serialDropDown->getSelectedNames()[0].c_str() );
     
-    cJSON_AddNumberToObject(root, kGUIBlobsName, this->bTrackBlobs );
+    cJSON_AddNumberToObject(root, kGUIBlobsName, (int) this->bTrackBlobs );
     // cJSON_AddNumberToObject(root, kGUIGridName, this->bDrawGrid ); // TODO
     
     char *renderedJson = cJSON_Print(root);
@@ -163,7 +163,7 @@ void wtmApp::loadSettings() {
         }
     }
     if (cJSON_GetObjectItem(root, kGUIBlobsName) != NULL) {
-        this->bTrackBlobs = cJSON_GetObjectItem(root, kGUIBlobGammaName)->valueint;
+        this->bTrackBlobs = (bool) cJSON_GetObjectItem(root, kGUIBlobsName)->valueint;
         ((ofxUILabelToggle *) gui->getWidget(kGUIBlobsName))->setValue(this->bTrackBlobs);
     }
     file.close();
@@ -194,7 +194,8 @@ void wtmApp::updateFirmwareVersionLabel(const char* newVersion) {
 //--------------------------------------------------------------
 void wtmApp::updateFrequencyLabel() {
     ofxUISlider* slider = (ofxUISlider*) gui->getWidget(kGUISignalFrequencyName);
-    slider->getLabelWidget()->setLabel(slider->getName() + ": ~" + ofxUIToString(16000000./(round(slider->getValue())+1.)/2000., 0) + " kHz");
+    int reverseValue = (round(slider->getValue()));
+    slider->getLabelWidget()->setLabel(slider->getName() + ": ~" + ofxUIToString(16000000./(round(reverseValue)+1.)/2000., 0) + " kHz");
 }
 
 //--------------------------------------------------------------
@@ -322,10 +323,6 @@ void wtmApp::guiEvent(ofxUIEventArgs &e) {
             bTrackBlobs = toggle->getValue();
             return;
         }
-        if (bTrackBlobs) {
-            toggle->setColorFill(gui->getColorBack());
-            toggle->setColorFillHighlight(gui->getColorBack());
-        }
     }
     
     // sliders
@@ -342,10 +339,14 @@ void wtmApp::guiEvent(ofxUIEventArgs &e) {
             slider->setValue(round(val));
             sendSliderData(slider);
         } else if (widgetName == kGUIUpSamplingName) {
-            slider->setValue(round(val));
-            this->interpolatorUpsampleX = val;
-            this->interpolatorUpsampleY = val;
-            this->updateInterpolator();
+            int oldValue = this->interpolatorUpsampleX;
+            int newValue = round(val);
+            slider->setValue(newValue);
+            if (oldValue != newValue) {
+                this->interpolatorUpsampleX = newValue;
+                this->interpolatorUpsampleY = newValue;
+                this->updateInterpolator();
+            }
         } else if (widgetName == kGUISignalFrequencyName) {
             slider->setValue(round(val));
             this->updateFrequencyLabel();

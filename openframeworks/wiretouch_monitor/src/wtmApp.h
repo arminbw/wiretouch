@@ -32,8 +32,14 @@
 
 #define WIRETOUCHVERSION            ("WireTouch 0.21")
 
-#define WINDOWWIDTH 1024
-#define WINDOWHEIGHT 768
+// #define SIGNALWIRES 32
+// #define SENSORWIRES 22
+
+#define SIGNALWIRES 22
+#define SENSORWIRES 32
+
+#define WINDOWWIDTH 768
+#define WINDOWHEIGHT 1024
 #define WINDOWBORDERDISTANCE 10
 #define GUIWIDTH 280
 #define GUIHEIGHT 695
@@ -124,7 +130,7 @@ class wtmApp : public ofBaseApp {
     
         wtmAppState state;
     
-        int sensorColumns, sensorRows, bytesPerFrame;
+        int signalWires, sensorWires, bytesPerFrame;
     
         ofSerial serial;
         unsigned char* recvBuffer;

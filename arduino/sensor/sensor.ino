@@ -48,8 +48,11 @@
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 #endif
 
-const byte verticalWires = 32;
-const byte horizontalWires = 22;
+// const byte signalboardWires = 32;
+// const byte sensorboardWires = 22;
+const byte signalboardWires = 22;
+const byte sensorboardWires = 32;
+
 
 static uint8_t sbuf[SER_BUF_SIZE+1];
 static uint16_t sbufpos = 0;
@@ -59,7 +62,7 @@ static byte outputAmpPotBase  = OUTPUT_AMP_POT_VALUE;
 static byte waveFrequency     = WAVE_FREQUENCY;
 static uint16_t measureDelay  = DEFAULT_MEASURE_DELAY;
 
-static byte outputAmpPotTune[((verticalWires*horizontalWires)>>1)+1];
+static byte outputAmpPotTune[((signalboardWires*sensorboardWires)>>1)+1];
 
 static byte isRunning;
 
@@ -104,14 +107,14 @@ reset_output_amp_tuning()
 byte
 output_amp_tuning_for_point(byte x, byte y)
 {
-  uint16_t pt = y * verticalWires + x;
+  uint16_t pt = y * signalboardWires + x;
   return (outputAmpPotTune[pt >> 1] >> (4 * (pt & 1))) & 0xf;
 }
 
 void
 set_output_amp_tuning_for_point(byte x, byte y, byte val)
 {
-   uint16_t pt = y * verticalWires + x;
+   uint16_t pt = y * signalboardWires + x;
    outputAmpPotTune[pt >> 1] =
       (outputAmpPotTune[pt >> 1] & ((pt & 1) ? 0x0f : 0xf0)) |
         ((val & 0x0f) << (4 * (pt & 1)));
@@ -227,11 +230,11 @@ inline void
 map_coords(uint16_t x, uint16_t y, uint16_t* mx, uint16_t* my)
 {
 #if ORDER_MEASURE_UNORDERED
-  uint16_t a = x * horizontalWires + y;
-  uint16_t b = (59*a + 13) % (horizontalWires*verticalWires);
+  uint16_t a = x * sensorboardWires + y;
+  uint16_t b = (59*a + 13) % (sensorboardWires*signalboardWires);
   
-  *mx = b / horizontalWires;
-  *my = b - (*mx) * ((uint16_t)horizontalWires);
+  *mx = b / sensorboardWires;
+  *my = b - (*mx) * ((uint16_t)sensorboardWires);
 #else
   *mx = x;
   *my = y;
@@ -277,7 +280,7 @@ void
 auto_tune_output_amp()
 {   
   uint16_t targetValue = 0;
-  byte mid_x = verticalWires >> 1, mid_y = horizontalWires >> 1;
+  byte mid_x = signalboardWires >> 1, mid_y = sensorboardWires >> 1;
   uint16_t xx, yy;
   
   for (uint16_t oabase = 255; oabase > 0; oabase--) {
@@ -291,8 +294,8 @@ auto_tune_output_amp()
        break;
   }
     
-  for (uint16_t k = 0; k < verticalWires; k++) {    
-    for (uint16_t l = 0; l < horizontalWires; l++) {
+  for (uint16_t k = 0; k < signalboardWires; k++) {    
+    for (uint16_t l = 0; l < sensorboardWires; l++) {
       uint16_t minDiff = 0xffff, tune_val = 0;
       
       map_coords(k, l, &xx, &yy);
@@ -335,8 +338,8 @@ print_configuration_info()
      halfwavePotBase, outputAmpPotBase, FIRMWARE_VERSION);
    Serial.println(buf);
  
-   /* for (uint16_t k = 0; k < verticalWires; k++) {    
-     for (uint16_t l = 0; l < horizontalWires; l++) {
+   /* for (uint16_t k = 0; k < signalboardWires; k++) {    
+     for (uint16_t l = 0; l < sensorboardWires; l++) {
         sprintf(buf, "\"tune_%d_%d\":\"%d\",",
           k, l, output_amp_tuning_for_point(k, l));
         Serial.print(buf);
@@ -471,14 +474,14 @@ loop()
       return;
 
   int cnt = 0;
-  for (uint16_t k = 0; k < verticalWires; k++) {    
-    for (uint16_t l = 0; l < horizontalWires; l++) {
+  for (uint16_t k = 0; k < signalboardWires; k++) {    
+    for (uint16_t l = 0; l < sensorboardWires; l++) {
       sample = measure_one(k, l);
 
       cnt++;
 #if PRINT_BINARY
-      send_packed10(sample, (cnt >= verticalWires*horizontalWires));
-      if (cnt >= verticalWires*horizontalWires) cnt = 0;
+      send_packed10(sample, (cnt >= signalboardWires*sensorboardWires));
+      if (cnt >= signalboardWires*sensorboardWires) cnt = 0;
 #else
       Serial.print(sample, DEC);
       Serial.print(",");

@@ -26,15 +26,15 @@ void wtmApp::setup() {
 	ofBackground(0);
 	ofSetLogLevel(OF_LOG_VERBOSE);
     
-    this->sensorColumns = 32;
-    this->sensorRows = 22;
+    this->signalWires = SIGNALWIRES;
+    this->sensorWires = SENSORWIRES;
     
     this->inputGamma = 1; // TODO
     
-    this->bytesPerFrame = (sensorColumns*sensorRows*10)/8;
+    this->bytesPerFrame = (signalWires*sensorWires*10)/8;
     this->recvBuffer = (unsigned char*) malloc(this->bytesPerFrame * sizeof(unsigned char));
     this->calibrationResultsString.clear();
-    this->capGridValues = (uint16_t*) malloc(sensorColumns * sensorRows * sizeof(uint16_t));
+    this->capGridValues = (uint16_t*) malloc(signalWires * sensorWires * sizeof(uint16_t));
     
     this->interpolator = NULL;
     this->interpolatorType = wtmInterpolatorTypeCatmullRom;
@@ -200,13 +200,13 @@ void wtmApp::consumePacketData() {
         br |= b[i] << bs;
         bs += 8;
         while (bs >= 10) {
-            int px = cnt / this->sensorRows, py = cnt % this->sensorRows;
+            int px = cnt / this->sensorWires, py = cnt % this->sensorWires;
             
             int pix_val = br & 0x3ff;
             
             pix_val = pow((double)pix_val / 1023, this->inputGamma) * 1023;
             
-            this->capGridValues[py * this->sensorColumns + px] = pix_val;
+            this->capGridValues[py * this->signalWires + px] = pix_val;
             
             br >>= 10;
             bs -= 10;
@@ -260,8 +260,8 @@ void wtmApp::updateInterpolator()
     }
     
     this->interpolator = wtmInterpolatorOfType(this->interpolatorType,
-                                               this->sensorColumns,
-                                               this->sensorRows,
+                                               this->signalWires,
+                                               this->sensorWires,
                                                this->interpolatorUpsampleX,
                                                this->interpolatorUpsampleY);
 }
