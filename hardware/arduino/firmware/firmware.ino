@@ -50,8 +50,8 @@
 
 // const byte signalboardWires = 32;
 // const byte sensorboardWires = 22;
-const byte signalboardWires = 22;
-const byte sensorboardWires = 32;
+const byte signalboardWires = 32;
+const byte sensorboardWires = 22;
 
 
 static uint8_t sbuf[SER_BUF_SIZE+1];

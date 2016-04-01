@@ -1,0 +1,1 @@
+Designator	Part	Midx	Midy	Refx	Refy	Padx	Pady	TB	Rotation
