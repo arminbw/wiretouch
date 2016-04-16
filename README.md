@@ -14,7 +14,7 @@ Please visit http://www.wiretouch.net for demos and background information.
 If you are running El Capitan you will also have to deactivate the new system integrity protection to make this work \(see [issue #1](https://github.com/arminbw/wiretouch/issues/1)\).
 
 ###WireTouch Monitor
-1. Download [https://github.com/openframeworks/openFrameworks](openFrameworks 0.8.4).
+1. Download [openFrameworks 0.8.4](https://github.com/openframeworks/openFrameworks).
 2. Download the following openFrameworks addons and put them into your openFrameworks "addons" directory.
 
   * [ofxCv](https://github.com/kylemcdonald/ofxCv)
@@ -34,4 +34,4 @@ WireTouch is free software: you can redistribute it and/or modify it under the t
 
 A few of the included 3rd-party libraries are licensed under the GPL-compatible MIT license.
 
-WireTouch is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of merchantability or fitness for a particular purpose. See the [http://www.gnu.org/licenses](GNU General Public License) for more details.
+WireTouch is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of merchantability or fitness for a particular purpose. See the [GNU General Public License](http://www.gnu.org/licenses) for more details.
