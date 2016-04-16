@@ -66,8 +66,7 @@ static byte outputAmpPotTune[((signalboardWires*sensorboardWires)>>1)+1];
 
 static byte isRunning;
 
-void
-setup()
+void setup()
 {
   Serial.begin(SERIAL_BAUD);
   
@@ -95,8 +94,7 @@ setup()
   reset_output_amp_tuning();
 }
 
-void
-reset_output_amp_tuning()
+void reset_output_amp_tuning()
 {
   for (int i=0; i<sizeof(outputAmpPotTune); i++)
     outputAmpPotTune[i] =
@@ -104,15 +102,13 @@ reset_output_amp_tuning()
 }
 
 
-byte
-output_amp_tuning_for_point(byte x, byte y)
+byte output_amp_tuning_for_point(byte x, byte y)
 {
   uint16_t pt = y * signalboardWires + x;
   return (outputAmpPotTune[pt >> 1] >> (4 * (pt & 1))) & 0xf;
 }
 
-void
-set_output_amp_tuning_for_point(byte x, byte y, byte val)
+void set_output_amp_tuning_for_point(byte x, byte y, byte val)
 {
    uint16_t pt = y * signalboardWires + x;
    outputAmpPotTune[pt >> 1] =
@@ -120,8 +116,7 @@ set_output_amp_tuning_for_point(byte x, byte y, byte val)
         ((val & 0x0f) << (4 * (pt & 1)));
 }
 
-void
-set_wave_frequency(byte freq)
+void set_wave_frequency(byte freq)
 {
   TCCR2A = B00100011;
   TCCR2B = B11001;
@@ -129,8 +124,7 @@ set_wave_frequency(byte freq)
   OCR2B = freq;
 }
 
-inline void
-muxSPI(byte output, byte vertical, byte off)
+inline void muxSPI(byte output, byte vertical, byte off)
 {
   if (vertical)
     PORTB &= ~(1<<1);
@@ -170,8 +164,7 @@ muxSPI(byte output, byte vertical, byte off)
     PORTD |= (1<<6);
 }
 
-inline void
-set_halfwave_pot(uint16_t value)
+inline void set_halfwave_pot(uint16_t value)
 {
   PORTD &= ~(1<<2);
   SPDR = (value >> 8) & 0xff;
@@ -181,8 +174,7 @@ set_halfwave_pot(uint16_t value)
   PORTD |= (1<<2);
 }
 
-inline void
-set_output_amp_pot(uint16_t value)
+inline void set_output_amp_pot(uint16_t value)
 {
   PORTD &= ~(1<<4);
   SPDR = (value >> 8) & 0xff;
@@ -192,14 +184,12 @@ set_output_amp_pot(uint16_t value)
   PORTD |= (1<<4);
 }
 
-inline unsigned int
-measure_with_atmega_adc()
+inline unsigned int measure_with_atmega_adc()
 {
   return analogRead(0);
 }
 
-inline void
-send_packed10(uint16_t w16, byte flush_all)
+inline void send_packed10(uint16_t w16, byte flush_all)
 {
   static byte p = 0;
   static uint16_t d16 = 0;
@@ -226,8 +216,7 @@ send_packed10(uint16_t w16, byte flush_all)
   }
 }
 
-inline void
-map_coords(uint16_t x, uint16_t y, uint16_t* mx, uint16_t* my)
+inline void map_coords(uint16_t x, uint16_t y, uint16_t* mx, uint16_t* my)
 {
 #if ORDER_MEASURE_UNORDERED
   uint16_t a = x * sensorboardWires + y;
@@ -241,8 +230,7 @@ map_coords(uint16_t x, uint16_t y, uint16_t* mx, uint16_t* my)
 #endif
 }
 
-uint16_t
-measure_one(uint16_t x, uint16_t y)
+uint16_t measure_one(uint16_t x, uint16_t y)
 {
   uint16_t xx, yy, sample;
    
@@ -264,8 +252,7 @@ measure_one(uint16_t x, uint16_t y)
   return sample;
 }
 
-uint16_t
-measure_one_avg(uint16_t x, uint16_t y, uint16_t passes)
+uint16_t measure_one_avg(uint16_t x, uint16_t y, uint16_t passes)
 {
   uint16_t p = passes;
   uint32_t avg_sample = 0;
@@ -276,8 +263,7 @@ measure_one_avg(uint16_t x, uint16_t y, uint16_t passes)
   return (avg_sample / passes);
 }
 
-void
-auto_tune_output_amp()
+void auto_tune_output_amp()
 {   
   uint16_t targetValue = 0;
   byte mid_x = signalboardWires >> 1, mid_y = sensorboardWires >> 1;
@@ -330,8 +316,7 @@ auto_tune_output_amp()
   }
 }
 
-void
-print_configuration_info()
+void print_configuration_info()
 {
    char buf[128] = {0};
    sprintf(buf, "{ \"halfwave_amp\":\"%d\", \"output_amp\":\"%d\", \"version\":\"%s\"}",
@@ -349,8 +334,7 @@ print_configuration_info()
    Serial.println("}");
 }
 
-void
-process_cmd(char* cmd)
+void process_cmd(char* cmd)
 {
   switch (*cmd++) {
     case 'e': {
@@ -449,8 +433,7 @@ process_cmd(char* cmd)
   }
 }
 
-void
-loop()
+void loop()
 {
   static byte ibuf_pos = 0;
   static char ibuf[IBUF_LEN];

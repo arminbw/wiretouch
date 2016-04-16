@@ -78,7 +78,7 @@ void wtmApp::update() {
     }
     
     // serial communication
-    // the application has 4 different states
+    // the application has 5 different states
     // wtmAppStateNoSerialConnection:           The serial connection has not been initialized yet.
     // wtmAppStateStartWhenSerialInitalized:    The serial connection is opening. Changes into wtmAppStateReceivingTouches.
     // wtmAppStateReceivingTouches:             The application continously retrieves touch data.
@@ -195,6 +195,7 @@ void wtmApp::draw() {
 void wtmApp::consumePacketData() {
     unsigned char* b = this->recvBuffer;
     int bs = 0, br = 0, cnt = 0;
+        // ofLogNotice() << "consuming packet:";
     
     for (int i=0; i<this->bytesPerFrame; i++) {
         br |= b[i] << bs;
@@ -268,9 +269,8 @@ void wtmApp::updateInterpolator()
 
 //--------------------------------------------------------------
 bool wtmApp::initAndStartSerialConnection(string serialDeviceName) {
-    int baud = 300;
     // serial.listDevices();
-    if (serial.setup(serialDeviceName, baud)) {
+    if (serial.setup(serialDeviceName, BAUD)) {
         this->state = wtmAppStateStartWhenSerialInitalized;
         ofLogNotice() << "initalizing serial connection: " << serialDeviceName;
         this->serialOpenTime = ofGetElapsedTimef();
