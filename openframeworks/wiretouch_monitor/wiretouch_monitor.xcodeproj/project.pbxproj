@@ -1676,7 +1676,6 @@
 					../../../addons/ofxUI/libs,
 					../../../addons/ofxUI/src,
 					"src/**",
-					/usr/local/opt/openssl/include,
 				);
 				ICON = "$(ICON_NAME_DEBUG)";
 				ICON_FILE = "$(ICON_FILE_PATH)$(ICON)";
@@ -1803,7 +1802,6 @@
 					../../../addons/ofxUI/libs,
 					../../../addons/ofxUI/src,
 					"src/**",
-					/usr/local/opt/openssl/include,
 				);
 				ICON = "$(ICON_NAME_RELEASE)";
 				ICON_FILE = "$(ICON_FILE_PATH)$(ICON)";
