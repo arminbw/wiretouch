@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="7.2.0">
+<eagle version="7.5.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
 <setting verticaltext="up"/>
 </settings>
-<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
+<grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.05" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="no" active="no"/>
 <layer number="16" name="Bottom" color="1" fill="1" visible="no" active="no"/>
@@ -4904,6 +4904,55 @@ SMT- SWCH-08247</description>
 </deviceset>
 </devicesets>
 </library>
+<library name="frames">
+<description>&lt;b&gt;Frames for Sheet and Layout&lt;/b&gt;</description>
+<packages>
+</packages>
+<symbols>
+<symbol name="A3L-LOC">
+<wire x1="288.29" y1="3.81" x2="342.265" y2="3.81" width="0.1016" layer="94"/>
+<wire x1="342.265" y1="3.81" x2="373.38" y2="3.81" width="0.1016" layer="94"/>
+<wire x1="373.38" y1="3.81" x2="383.54" y2="3.81" width="0.1016" layer="94"/>
+<wire x1="383.54" y1="3.81" x2="383.54" y2="8.89" width="0.1016" layer="94"/>
+<wire x1="383.54" y1="8.89" x2="383.54" y2="13.97" width="0.1016" layer="94"/>
+<wire x1="383.54" y1="13.97" x2="383.54" y2="19.05" width="0.1016" layer="94"/>
+<wire x1="383.54" y1="19.05" x2="383.54" y2="24.13" width="0.1016" layer="94"/>
+<wire x1="288.29" y1="3.81" x2="288.29" y2="24.13" width="0.1016" layer="94"/>
+<wire x1="288.29" y1="24.13" x2="342.265" y2="24.13" width="0.1016" layer="94"/>
+<wire x1="342.265" y1="24.13" x2="383.54" y2="24.13" width="0.1016" layer="94"/>
+<wire x1="373.38" y1="3.81" x2="373.38" y2="8.89" width="0.1016" layer="94"/>
+<wire x1="373.38" y1="8.89" x2="383.54" y2="8.89" width="0.1016" layer="94"/>
+<wire x1="373.38" y1="8.89" x2="342.265" y2="8.89" width="0.1016" layer="94"/>
+<wire x1="342.265" y1="8.89" x2="342.265" y2="3.81" width="0.1016" layer="94"/>
+<wire x1="342.265" y1="8.89" x2="342.265" y2="13.97" width="0.1016" layer="94"/>
+<wire x1="342.265" y1="13.97" x2="383.54" y2="13.97" width="0.1016" layer="94"/>
+<wire x1="342.265" y1="13.97" x2="342.265" y2="19.05" width="0.1016" layer="94"/>
+<wire x1="342.265" y1="19.05" x2="383.54" y2="19.05" width="0.1016" layer="94"/>
+<wire x1="342.265" y1="19.05" x2="342.265" y2="24.13" width="0.1016" layer="94"/>
+<text x="344.17" y="15.24" size="2.54" layer="94">&gt;DRAWING_NAME</text>
+<text x="344.17" y="10.16" size="2.286" layer="94">&gt;LAST_DATE_TIME</text>
+<text x="357.505" y="5.08" size="2.54" layer="94">&gt;SHEET</text>
+<text x="343.916" y="4.953" size="2.54" layer="94">Sheet:</text>
+<frame x1="0" y1="0" x2="387.35" y2="260.35" columns="8" rows="5" layer="94"/>
+</symbol>
+</symbols>
+<devicesets>
+<deviceset name="A3L-LOC" prefix="FRAME" uservalue="yes">
+<description>&lt;b&gt;FRAME&lt;/b&gt;&lt;p&gt;
+DIN A3, landscape with location and doc. field</description>
+<gates>
+<gate name="G$1" symbol="A3L-LOC" x="0" y="0"/>
+</gates>
+<devices>
+<device name="">
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+</devicesets>
+</library>
 </libraries>
 <attributes>
 </attributes>
@@ -4986,6 +5035,7 @@ SMT- SWCH-08247</description>
 <part name="GND6" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 <part name="5V5" library="SparkFun-Aesthetics" deviceset="5V" device=""/>
 <part name="RESET" library="SparkFun-Electromechanical" deviceset="TAC_SWITCH" device="PTH"/>
+<part name="FRAME1" library="frames" deviceset="A3L-LOC" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -4995,9 +5045,7 @@ SMT- SWCH-08247</description>
 <wire x1="99.06" y1="-7.62" x2="58.42" y2="-7.62" width="0.1524" layer="97"/>
 <wire x1="58.42" y1="-7.62" x2="58.42" y2="35.56" width="0.1524" layer="97"/>
 <wire x1="58.42" y1="35.56" x2="99.06" y2="35.56" width="0.1524" layer="97"/>
-<text x="58.42" y="55.88" size="1.778" layer="91" font="vector">MAINBOARD V1.21
-by Armin B. Wagner
-&amp; Georg C. Kaindl</text>
+<text x="335.28" y="-81.28" size="3.556" layer="94" font="vector" distance="100">www.wiretouch.net</text>
 </plain>
 <instances>
 <instance part="REGULATOR" gate="G$1" x="78.74" y="22.86" smashed="yes">
@@ -5089,8 +5137,8 @@ by Armin B. Wagner
 <instance part="5V8" gate="G$1" x="214.63" y="10.16"/>
 <instance part="GND9" gate="1" x="214.63" y="-6.35"/>
 <instance part="SIGNAL-BOARD" gate="G$1" x="251.46" y="-25.4" smashed="yes" rot="R180">
-<attribute name="VALUE" x="256.54" y="-12.7" size="1.778" layer="96" rot="R180"/>
-<attribute name="NAME" x="254" y="-18.542" size="1.778" layer="95" rot="R270"/>
+<attribute name="VALUE" x="255.27" y="-36.83" size="1.778" layer="96" rot="R90"/>
+<attribute name="NAME" x="257.302" y="-19.558" size="1.778" layer="95" rot="R270"/>
 </instance>
 <instance part="5V30" gate="G$1" x="242.57" y="-17.78"/>
 <instance part="GND31" gate="1" x="242.57" y="-43.18"/>
@@ -5098,18 +5146,18 @@ by Armin B. Wagner
 <instance part="5V9" gate="G$1" x="81.28" y="-22.86"/>
 <instance part="2.5V2" gate="G$1" x="86.36" y="-22.86"/>
 <instance part="SENSOR-BOARD" gate="G$1" x="63.5" y="-30.48" smashed="yes">
-<attribute name="VALUE" x="58.42" y="-43.18" size="1.778" layer="96"/>
-<attribute name="NAME" x="60.96" y="-39.878" size="1.778" layer="95" rot="R90"/>
+<attribute name="VALUE" x="60.96" y="-39.37" size="1.778" layer="96" rot="R90"/>
+<attribute name="NAME" x="57.15" y="-41.148" size="1.778" layer="95" rot="R90"/>
 </instance>
-<instance part="OPA2350-5" gate="A" x="140.97" y="109.22" smashed="yes">
-<attribute name="NAME" x="129.2606" y="87.8586" size="2.0828" layer="95" ratio="10" rot="SR0"/>
-<attribute name="VALUE" x="136.906" y="92.1512" size="2.0828" layer="96" ratio="10" rot="SR0"/>
+<instance part="OPA2350-5" gate="A" x="138.43" y="109.22" smashed="yes">
+<attribute name="NAME" x="126.7206" y="87.8586" size="2.0828" layer="95" ratio="10" rot="SR0"/>
+<attribute name="VALUE" x="134.366" y="92.1512" size="2.0828" layer="96" ratio="10" rot="SR0"/>
 </instance>
 <instance part="GND11" gate="1" x="120.65" y="93.98"/>
 <instance part="5V10" gate="G$1" x="120.65" y="114.3"/>
-<instance part="R16" gate="G$1" x="140.97" y="124.46" smashed="yes" rot="R180">
-<attribute name="NAME" x="142.24" y="128.0414" size="1.778" layer="95" rot="R180"/>
-<attribute name="VALUE" x="142.24" y="122.682" size="1.778" layer="96" rot="R180"/>
+<instance part="R16" gate="G$1" x="138.43" y="124.46" smashed="yes" rot="R180">
+<attribute name="NAME" x="139.7" y="128.0414" size="1.778" layer="95" rot="R180"/>
+<attribute name="VALUE" x="139.7" y="122.682" size="1.778" layer="96" rot="R180"/>
 </instance>
 <instance part="R17" gate="G$1" x="104.14" y="124.46" smashed="yes" rot="R180">
 <attribute name="NAME" x="105.41" y="128.0414" size="1.778" layer="95" rot="R180"/>
@@ -5124,7 +5172,7 @@ by Armin B. Wagner
 <attribute name="NAME" x="106.4514" y="92.71" size="1.778" layer="95" rot="R90"/>
 <attribute name="VALUE" x="108.712" y="92.71" size="1.778" layer="96" rot="R90"/>
 </instance>
-<instance part="R20" gate="G$1" x="246.38" y="116.84"/>
+<instance part="R20" gate="G$1" x="241.3" y="116.84"/>
 <instance part="MCP41451-1" gate="A" x="262.89" y="20.32" smashed="yes">
 <attribute name="NAME" x="251.8156" y="1.27" size="2.0828" layer="95" ratio="10" rot="SR0"/>
 <attribute name="VALUE" x="252.0442" y="5.7404" size="2.0828" layer="96" ratio="10" rot="SR0"/>
@@ -5149,6 +5197,7 @@ by Armin B. Wagner
 <attribute name="NAME" x="118.11" y="44.45" size="1.778" layer="95"/>
 <attribute name="VALUE" x="119.38" y="31.75" size="1.778" layer="96"/>
 </instance>
+<instance part="FRAME1" gate="G$1" x="45.72" y="-86.36"/>
 </instances>
 <busses>
 </busses>
@@ -5233,7 +5282,6 @@ by Armin B. Wagner
 <segment>
 <pinref part="OPA2350-5" gate="A" pin="V+"/>
 <pinref part="5V10" gate="G$1" pin="5V"/>
-<wire x1="123.19" y1="114.3" x2="120.65" y2="114.3" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="MCP41451-1" gate="A" pin="P0A"/>
@@ -5282,12 +5330,12 @@ by Armin B. Wagner
 </segment>
 <segment>
 <pinref part="OPA2350-5" gate="A" pin="+IN_A"/>
-<wire x1="123.19" y1="109.22" x2="114.3" y2="109.22" width="0.1524" layer="91"/>
+<wire x1="120.65" y1="109.22" x2="114.3" y2="109.22" width="0.1524" layer="91"/>
 <pinref part="2.5V3" gate="G$1" pin="2.8V"/>
 <wire x1="114.3" y1="109.22" x2="114.3" y2="114.3" width="0.1524" layer="91"/>
 <wire x1="114.3" y1="109.22" x2="114.3" y2="101.6" width="0.1524" layer="91"/>
 <pinref part="OPA2350-5" gate="A" pin="+IN_B"/>
-<wire x1="114.3" y1="101.6" x2="123.19" y2="101.6" width="0.1524" layer="91"/>
+<wire x1="114.3" y1="101.6" x2="120.65" y2="101.6" width="0.1524" layer="91"/>
 <junction x="114.3" y="109.22"/>
 </segment>
 </net>
@@ -5405,7 +5453,6 @@ by Armin B. Wagner
 <segment>
 <pinref part="OPA2350-5" gate="A" pin="V-"/>
 <pinref part="GND11" gate="1" pin="GND"/>
-<wire x1="123.19" y1="96.52" x2="120.65" y2="96.52" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="MCP41451-1" gate="A" pin="VSS"/>
@@ -5478,7 +5525,7 @@ by Armin B. Wagner
 <pinref part="R3" gate="G$1" pin="1"/>
 <wire x1="254" y1="116.84" x2="271.78" y2="116.84" width="0.1524" layer="91"/>
 <pinref part="R20" gate="G$1" pin="2"/>
-<wire x1="254" y1="116.84" x2="251.46" y2="116.84" width="0.1524" layer="91"/>
+<wire x1="254" y1="116.84" x2="246.38" y2="116.84" width="0.1524" layer="91"/>
 <junction x="254" y="116.84"/>
 </segment>
 </net>
@@ -5781,21 +5828,21 @@ by Armin B. Wagner
 <wire x1="195.58" y1="73.66" x2="163.83" y2="73.66" width="0.1524" layer="91"/>
 <wire x1="163.83" y1="73.66" x2="163.83" y2="114.3" width="0.1524" layer="91"/>
 <pinref part="OPA2350-5" gate="A" pin="OUT_A"/>
-<wire x1="163.83" y1="114.3" x2="158.75" y2="114.3" width="0.1524" layer="91"/>
+<wire x1="163.83" y1="114.3" x2="156.21" y2="114.3" width="0.1524" layer="91"/>
 <wire x1="163.83" y1="114.3" x2="163.83" y2="124.46" width="0.1524" layer="91"/>
 <pinref part="R16" gate="G$1" pin="1"/>
-<wire x1="163.83" y1="124.46" x2="146.05" y2="124.46" width="0.1524" layer="91"/>
+<wire x1="163.83" y1="124.46" x2="143.51" y2="124.46" width="0.1524" layer="91"/>
 <junction x="163.83" y="114.3"/>
 </segment>
 </net>
 <net name="N$25" class="0">
 <segment>
 <pinref part="R16" gate="G$1" pin="2"/>
-<wire x1="135.89" y1="124.46" x2="110.49" y2="124.46" width="0.1524" layer="91"/>
+<wire x1="133.35" y1="124.46" x2="110.49" y2="124.46" width="0.1524" layer="91"/>
 <pinref part="R17" gate="G$1" pin="1"/>
 <pinref part="OPA2350-5" gate="A" pin="-IN_A"/>
 <wire x1="110.49" y1="124.46" x2="109.22" y2="124.46" width="0.1524" layer="91"/>
-<wire x1="123.19" y1="106.68" x2="110.49" y2="106.68" width="0.1524" layer="91"/>
+<wire x1="120.65" y1="106.68" x2="110.49" y2="106.68" width="0.1524" layer="91"/>
 <wire x1="110.49" y1="106.68" x2="110.49" y2="124.46" width="0.1524" layer="91"/>
 <junction x="110.49" y="124.46"/>
 </segment>
@@ -5807,16 +5854,19 @@ by Armin B. Wagner
 <wire x1="110.49" y1="86.36" x2="160.02" y2="86.36" width="0.1524" layer="91"/>
 <pinref part="R19" gate="G$1" pin="1"/>
 <junction x="110.49" y="88.9"/>
-<wire x1="160.02" y1="86.36" x2="195.58" y2="86.36" width="0.1524" layer="91"/>
-<wire x1="157.48" y1="111.76" x2="160.02" y2="111.76" width="0.1524" layer="91"/>
-<wire x1="160.02" y1="111.76" x2="160.02" y2="86.36" width="0.1524" layer="91"/>
 <junction x="160.02" y="86.36"/>
+<wire x1="160.02" y1="86.36" x2="195.58" y2="86.36" width="0.1524" layer="91"/>
+<wire x1="160.02" y1="86.36" x2="160.02" y2="111.76" width="0.1524" layer="91"/>
+<wire x1="160.02" y1="111.76" x2="156.21" y2="111.76" width="0.1524" layer="91"/>
+<pinref part="OPA2350-5" gate="A" pin="OUT_B"/>
+<wire x1="156.21" y1="111.76" x2="154.94" y2="111.76" width="0.1524" layer="91"/>
+<junction x="156.21" y="111.76"/>
 </segment>
 </net>
 <net name="DIGI_POT1" class="0">
 <segment>
 <pinref part="R20" gate="G$1" pin="1"/>
-<wire x1="241.3" y1="116.84" x2="223.52" y2="116.84" width="0.1524" layer="91"/>
+<wire x1="236.22" y1="116.84" x2="223.52" y2="116.84" width="0.1524" layer="91"/>
 <label x="223.52" y="116.586" size="1.778" layer="95"/>
 </segment>
 <segment>
@@ -5850,7 +5900,7 @@ by Armin B. Wagner
 <segment>
 <pinref part="R18" gate="G$1" pin="1"/>
 <pinref part="OPA2350-5" gate="A" pin="-IN_B"/>
-<wire x1="123.19" y1="104.14" x2="110.49" y2="104.14" width="0.1524" layer="91"/>
+<wire x1="120.65" y1="104.14" x2="110.49" y2="104.14" width="0.1524" layer="91"/>
 <wire x1="110.49" y1="104.14" x2="109.22" y2="104.14" width="0.1524" layer="91"/>
 <pinref part="R19" gate="G$1" pin="2"/>
 <wire x1="110.49" y1="104.14" x2="110.49" y2="99.06" width="0.1524" layer="91"/>
@@ -5888,12 +5938,54 @@ by Armin B. Wagner
 </nets>
 </sheet>
 </sheets>
+<errors>
+<approved hash="104,1,195.58,101.6,SWITCH,V+,5V,,,"/>
+<approved hash="104,1,195.58,96.52,SWITCH,VL,5V,,,"/>
+<approved hash="202,1,195.58,83.82,SWITCH,S4,,,,"/>
+<approved hash="202,1,195.58,71.12,SWITCH,IN4,,,,"/>
+<approved hash="104,1,195.58,66.04,SWITCH,V-,GND,,,"/>
+<approved hash="104,1,261.62,106.68,OPA2350-2,V+,5V,,,"/>
+<approved hash="104,1,261.62,88.9,OPA2350-2,V-,GND,,,"/>
+<approved hash="104,1,309.88,109.22,OPA2350-3,V+,5V,,,"/>
+<approved hash="104,1,309.88,91.44,OPA2350-3,V-,GND,,,"/>
+<approved hash="104,1,370.84,111.76,OPA2350-4,V+,5V,,,"/>
+<approved hash="202,1,370.84,101.6,OPA2350-4,-IN_B,,,,"/>
+<approved hash="202,1,370.84,99.06,OPA2350-4,+IN_B,,,,"/>
+<approved hash="104,1,370.84,93.98,OPA2350-4,V-,GND,,,"/>
+<approved hash="104,1,120.65,114.3,OPA2350-5,V+,5V,,,"/>
+<approved hash="104,1,120.65,96.52,OPA2350-5,V-,GND,,,"/>
+<approved hash="104,1,245.11,22.86,MCP41451-1,VDD,5V,,,"/>
+<approved hash="104,1,245.11,10.16,MCP41451-1,VSS,GND,,,"/>
+<approved hash="104,1,309.88,-6.35,MCP41451-2,VDD,5V,,,"/>
+<approved hash="104,1,309.88,-19.05,MCP41451-2,VSS,GND,,,"/>
+<approved hash="208,1,86.36,22.86,2.8V,out,,,,"/>
+<approved hash="208,1,91.44,25.4,2.8V,sup,,,,"/>
+<approved hash="208,1,86.36,-22.86,2.8V,sup,,,,"/>
+<approved hash="208,1,114.3,114.3,2.8V,sup,,,,"/>
+<approved hash="208,1,78.74,0,GND,sup,,,,"/>
+<approved hash="208,1,185.42,58.42,GND,sup,,,,"/>
+<approved hash="208,1,256.54,63.5,GND,sup,,,,"/>
+<approved hash="208,1,231.14,99.06,GND,out,,,,"/>
+<approved hash="208,1,309.88,63.5,GND,sup,,,,"/>
+<approved hash="208,1,370.84,63.5,GND,sup,,,,"/>
+<approved hash="208,1,419.1,63.5,GND,sup,,,,"/>
+<approved hash="208,1,114.3,-20.32,GND,sup,,,,"/>
+<approved hash="208,1,242.57,-40.64,GND,sup,,,,"/>
+<approved hash="208,1,71.12,-40.64,GND,sup,,,,"/>
+<approved hash="208,1,120.65,96.52,GND,sup,,,,"/>
+<approved hash="208,1,242.57,0,GND,sup,,,,"/>
+<approved hash="208,1,307.34,-40.64,GND,sup,,,,"/>
+<approved hash="208,1,214.63,-3.81,GND,sup,,,,"/>
+<approved hash="206,1,231.14,101.6,N$1,,,,,"/>
+<approved hash="206,1,231.14,96.52,N$1,,,,,"/>
+<approved hash="113,1,328.93,121.598,LED1,,,,,"/>
+<approved hash="113,1,415.29,112.082,LED2,,,,,"/>
+<approved hash="113,1,221.463,2.34527,FTDI,,,,,"/>
+<approved hash="113,1,250.867,-27.2069,SIGNAL-BOARD,,,,,"/>
+<approved hash="113,1,63.8387,-29.6587,SENSOR-BOARD,,,,,"/>
+<approved hash="113,1,121.92,40.2505,RESET,,,,,"/>
+<approved hash="113,1,239.291,43.711,FRAME1,,,,,"/>
+</errors>
 </schematic>
 </drawing>
-<compatibility>
-<note version="6.3" minversion="6.2.2" severity="warning">
-Since Version 6.2.2 text objects can contain more than one line,
-which will not be processed correctly with this version.
-</note>
-</compatibility>
 </eagle>
