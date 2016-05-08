@@ -2023,8 +2023,8 @@ DIN A3, landscape with location and doc. field</description>
 <attribute name="NAME" x="130.81" y="157.4038" size="2.0828" layer="95" ratio="10" rot="SR0"/>
 <attribute name="VALUE" x="186.2328" y="160.5788" size="2.0828" layer="96" ratio="10" rot="SR0"/>
 </instance>
-<instance part="U$1" gate="G$1" x="-33.02" y="162.56"/>
-<instance part="U$2" gate="G$1" x="119.38" y="218.44"/>
+<instance part="U$1" gate="G$1" x="-33.02" y="165.1"/>
+<instance part="U$2" gate="G$1" x="119.38" y="220.98"/>
 <instance part="GND1" gate="1" x="-33.02" y="105.41"/>
 <instance part="GND2" gate="1" x="120.65" y="161.29"/>
 <instance part="SHIFT1" gate="A" x="-66.04" y="83.82" smashed="yes">
@@ -2047,7 +2047,7 @@ DIN A3, landscape with location and doc. field</description>
 <attribute name="VALUE" x="-121.92" y="66.04" size="1.778" layer="96"/>
 <attribute name="NAME" x="-123.19" y="68.072" size="1.778" layer="95" rot="R90"/>
 </instance>
-<instance part="U$4" gate="G$1" x="-109.22" y="93.98"/>
+<instance part="U$4" gate="G$1" x="-109.22" y="101.6"/>
 <instance part="GND4" gate="1" x="-106.68" y="64.77"/>
 <instance part="U$5" gate="G$1" x="144.78" y="132.08"/>
 <instance part="GND5" gate="1" x="144.78" y="101.6"/>
@@ -2061,13 +2061,13 @@ DIN A3, landscape with location and doc. field</description>
 <pinref part="MUX1" gate="A" pin="VDD"/>
 <pinref part="U$1" gate="G$1" pin="5V"/>
 <wire x1="-27.94" y1="160.02" x2="-33.02" y2="160.02" width="0.1524" layer="91"/>
-<wire x1="-33.02" y1="160.02" x2="-33.02" y2="162.56" width="0.1524" layer="91"/>
+<wire x1="-33.02" y1="160.02" x2="-33.02" y2="165.1" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="MUX2" gate="A" pin="VDD"/>
 <pinref part="U$2" gate="G$1" pin="5V"/>
 <wire x1="124.46" y1="215.9" x2="119.38" y2="215.9" width="0.1524" layer="91"/>
-<wire x1="119.38" y1="215.9" x2="119.38" y2="218.44" width="0.1524" layer="91"/>
+<wire x1="119.38" y1="215.9" x2="119.38" y2="220.98" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="SHIFT1" gate="A" pin="VCC"/>
@@ -2085,7 +2085,7 @@ DIN A3, landscape with location and doc. field</description>
 <pinref part="MAINBOARD" gate="G$1" pin="1"/>
 <pinref part="U$4" gate="G$1" pin="5V"/>
 <wire x1="-111.76" y1="71.12" x2="-109.22" y2="71.12" width="0.1524" layer="91"/>
-<wire x1="-109.22" y1="71.12" x2="-109.22" y2="93.98" width="0.1524" layer="91"/>
+<wire x1="-109.22" y1="71.12" x2="-109.22" y2="101.6" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="OPA1" gate="A" pin="V+"/>
