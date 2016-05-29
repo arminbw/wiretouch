@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE eagle SYSTEM "eagle.dtd">
-<eagle version="7.5.0">
+<eagle version="7.6.0">
 <drawing>
 <settings>
 <setting alwaysvectorfont="no"/>
@@ -2002,12 +2002,12 @@ DIN A3, landscape with location and doc. field</description>
 <part name="SENSORPANEL-16-31" library="SparkFun-Connectors" deviceset="M16" device="LOCK_LONGPADS"/>
 <part name="U$3" library="SparkFun-Aesthetics" deviceset="5V" device=""/>
 <part name="GND3" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
-<part name="MAINBOARD" library="SparkFun-Connectors" deviceset="M08" device="LONGPADS"/>
+<part name="MAINBOARD" library="SparkFun-Connectors" deviceset="M08" device="LONGPADS" value="MAINBOARD"/>
 <part name="U$4" library="SparkFun-Aesthetics" deviceset="5V" device=""/>
 <part name="GND4" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
 <part name="U$5" library="SparkFun-Aesthetics" deviceset="5V" device=""/>
 <part name="GND5" library="SparkFun-Aesthetics" deviceset="GND" device=""/>
-<part name="FRAME1" library="frames" deviceset="A3L-LOC" device=""/>
+<part name="FRAME1" library="frames" deviceset="A3L-LOC" device="" value="FRAME"/>
 </parts>
 <sheets>
 <sheet>
@@ -2459,10 +2459,7 @@ DIN A3, landscape with location and doc. field</description>
 </segment>
 <segment>
 <pinref part="OPA1" gate="A" pin="V-"/>
-<wire x1="144.78" y1="114.3" x2="144.78" y2="109.22" width="0.1524" layer="91"/>
 <pinref part="GND5" gate="1" pin="GND"/>
-<pinref part="OPA1" gate="A" pin="+IN_B"/>
-<junction x="144.78" y="109.22"/>
 <wire x1="144.78" y1="109.22" x2="144.78" y2="104.14" width="0.1524" layer="91"/>
 </segment>
 <segment>
@@ -2562,8 +2559,15 @@ DIN A3, landscape with location and doc. field</description>
 </sheet>
 </sheets>
 <errors>
-<approved hash="202,1,157.48,119.38,OPA1,-IN_B,,,,"/>
-<approved hash="202,1,157.48,116.84,OPA1,+IN_B,,,,"/>
+<approved hash="104,1,-27.94,160.02,MUX1,VDD,5V,,,"/>
+<approved hash="104,1,-27.94,114.3,MUX1,VSS,GND,,,"/>
+<approved hash="104,1,124.46,215.9,MUX2,VDD,5V,,,"/>
+<approved hash="104,1,124.46,170.18,MUX2,VSS,GND,,,"/>
+<approved hash="104,1,-50.8,93.98,SHIFT1,VCC,5V,,,"/>
+<approved hash="104,1,144.78,127,OPA1,V+,5V,,,"/>
+<approved hash="202,1,144.78,116.84,OPA1,-IN_B,,,,"/>
+<approved hash="202,1,144.78,114.3,OPA1,+IN_B,,,,"/>
+<approved hash="104,1,144.78,109.22,OPA1,V-,GND,,,"/>
 </errors>
 </schematic>
 </drawing>
