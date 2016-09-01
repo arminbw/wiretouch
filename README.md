@@ -7,8 +7,7 @@ Please visit http://www.wiretouch.net for demos and background information.
 ###WireTouch Firmware
 1. The heart of the WireTouch hardware is an ATmega328P microcontroller equipped with an Arduino bootloader. To upload the WireTouch firmware, connect the mainboard with your computer. Use an USB to serial UART FTDI 5V cable.
 
-2. Install the virtual com port [FTDI driver](http://www.ftdichip.com/Drivers/VCP.htm). Open arduino/sensor/sensor.io in the [Arduino IDE](http://arduino.cc/en/Main/Software). Select "Tools>Board>Arduino UNO" and the correct port. **Upload the Arduino sketch**.
-
+2. Install the virtual com port [FTDI driver](http://www.ftdichip.com/Drivers/VCP.htm). Open arduino/sensor/sensor.io in the [Arduino IDE](http://arduino.cc/en/Main/Software). Select "Tools>Board>Arduino UNO" and the correct port. **Upload the Arduino sketch** (hardware/v1.xx/firmware/firmware.ino).
 3. You need to patch the FTDIUSBSerialDriver configuration to increase the baud rate of the computer-mainboard connection (see [FTDI Application Note 120](http://www.ftdichip.com/Support/Documents/AppNotes/AN_120_Aliasing_VCP_Baud_Rates.pdf)). We prepared a little perl script for that. Run it as the superuser:
 ```sudo perl/modify-ftdi-driver-settings.pl```
 If you are running El Capitan you will also have to deactivate the new system integrity protection to make this work \(see [issue #1](https://github.com/arminbw/wiretouch/issues/1)\).
