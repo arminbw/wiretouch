@@ -14,7 +14,7 @@ If you are running El Capitan you will also have to deactivate the new system in
 
 ###WireTouch Monitor
 1. Download [openFrameworks 0.8.4](https://github.com/openframeworks/openFrameworks).
-2. Download the following openFrameworks addons and put them into your openFrameworks "addons" directory.
+2. Download the following openFrameworks addons and put them into your openFrameworks "addons" directory:.
 
   * [ofxCv](https://github.com/kylemcdonald/ofxCv)
   * [ofxUI](https://github.com/rezaali/ofxUI)
