@@ -29,7 +29,7 @@ void wtmApp::setup() {
     this->signalWires = SIGNALWIRES;
     this->sensorWires = SENSORWIRES;
     
-    this->inputGamma = 1; // TODO
+    this->inputGamma = 1;
     
     this->bytesPerFrame = (signalWires*sensorWires*10)/8;
     this->recvBuffer = (unsigned char*) malloc(this->bytesPerFrame * sizeof(unsigned char));
@@ -55,7 +55,7 @@ void wtmApp::setup() {
     
     ofLogNotice() << "starting up local TUIO Server.";
     this->tuioServer = new wtmTuioServer();
-    this->tuioServer->start("127.0.0.1", 3333);     // TODO    
+    this->tuioServer->start("127.0.0.1", 3333);
 }
 
 //--------------------------------------------------------------
@@ -195,7 +195,6 @@ void wtmApp::draw() {
 void wtmApp::consumePacketData() {
     unsigned char* b = this->recvBuffer;
     int bs = 0, br = 0, cnt = 0;
-        // ofLogNotice() << "consuming packet:";
     
     for (int i=0; i<this->bytesPerFrame; i++) {
         br |= b[i] << bs;
@@ -349,4 +348,10 @@ void wtmApp::exit() {
     this->saveSettings();
     delete gui;
     ofSleepMillis(100);
+}
+
+//--------------------------------------------------------------
+void wtmApp::changeMeasurement() {
+    ofLogNotice() << "changing measurement";
+    serial.writeBytes((unsigned char*)"y\n", 2);
 }

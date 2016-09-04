@@ -30,7 +30,7 @@
 #include "wtmTuioServer.h"
 #include "wtmBlobTracker.h"
 
-#define WIRETOUCHVERSION            ("WireTouch 0.21")
+#define WIRETOUCHVERSION            ("WireTouch Monitor 0.24")
 
 #define SIGNALWIRES 32
 #define SENSORWIRES 22
@@ -50,7 +50,6 @@
 #define kGUISampleDelayName         ("SAMPLE DELAY")
 #define kGUISignalFrequencyName     ("SIGNAL FREQUENCY")
 #define kGUIUpSamplingName          ("UPSAMPLING")
-#define kGUIGridName                ("GRID")
 #define kGUIInterpolationDropDownName   ("INTERPOLATION TYPE")
 #define kGUISerialDropDownName          ("CHOOSE SERIAL PORT")
 #define kGUIBlobsName               ("SHOW BLOBS")
@@ -99,6 +98,7 @@ class wtmApp : public ofBaseApp {
         void dragEvent(ofDragInfo dragInfo);
         void gotMessage(ofMessage msg);
         void exit();
+        void changeMeasurement();
 
         void consumePacketData();
         void consumeCalibrationResults(const char* json);

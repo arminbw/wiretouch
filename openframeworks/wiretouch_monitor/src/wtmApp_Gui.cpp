@@ -62,7 +62,6 @@ void wtmApp::initGUI() {
     gui->addSpacer();
     
     gui->addWidgetDown(new ofxUILabel("CALIBRATION", OFX_UI_FONT_MEDIUM));
-    // gui->addLabelToggle(kGUIGridName, false, (WIDGETWIDTH/2)-(OFX_UI_GLOBAL_WIDGET_SPACING/2), WIDGETHEIGHT); // TODO: Grid
     gui->addLabelButton(kGUICalibrateName, false, WIDGETWIDTH, WIDGETHEIGHT);
     gui->addLabelButton(kGUIResetName, false, WIDGETWIDTH, WIDGETHEIGHT);
     gui->addSpacer();
@@ -115,7 +114,6 @@ void wtmApp::saveSettings() {
         cJSON_AddStringToObject(root, kGUISerialDropDownName, serialDropDown->getSelectedNames()[0].c_str() );
     
     cJSON_AddNumberToObject(root, kGUIBlobsName, (int) this->bTrackBlobs );
-    // cJSON_AddNumberToObject(root, kGUIGridName, this->bDrawGrid ); // TODO
     
     char *renderedJson = cJSON_Print(root);
     ofFile file;
@@ -195,7 +193,7 @@ void wtmApp::updateFirmwareVersionLabel(const char* newVersion) {
 void wtmApp::updateFrequencyLabel() {
     ofxUISlider* slider = (ofxUISlider*) gui->getWidget(kGUISignalFrequencyName);
     int reverseValue = (round(slider->getValue()));
-    slider->getLabelWidget()->setLabel(slider->getName() + ": ~" + ofxUIToString(16000000./(round(reverseValue)+1.)/2000., 0) + " kHz");
+    slider->getLabelWidget()->setLabel(slider->getName() + ": ~" + ofxUIToString(16000000./(round(reverseValue)+0.5)/2000., 0) + " kHz");
 }
 
 //--------------------------------------------------------------
@@ -270,11 +268,6 @@ void wtmApp::guiEvent(ofxUIEventArgs &e) {
     if (e.widget->getKind() == OFX_UI_WIDGET_LABELBUTTON) {
         ofxUILabelButton *button = (ofxUILabelButton *) e.widget;
         if (button->getValue() == 1) { // we only use button-released, not button-pressed and not both
-            /* TODO
-            if (widgetName == kGUIGridName) {
-                bDrawGrid = button->getValue();
-                return;
-            }*/
             if (widgetName == kGUIStartName) {
                 if (wtmAppStateNoSerialConnection == this->state) {
                     vector<string> selected = dropDownlist->getSelectedNames();
@@ -368,7 +361,9 @@ void wtmApp::guiEvent(ofxUIEventArgs &e) {
 
 //--------------------------------------------------------------
 void wtmApp::keyReleased(int key) {
-    
+    if (key == 'y') {
+        this->changeMeasurement();
+    }
 }
 
 //--------------------------------------------------------------
