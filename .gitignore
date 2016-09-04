@@ -7,8 +7,6 @@
 
 *.xcworkspace
 xcuserdata
-openframeworks/wiretouch_monitor/bin/**
-openframeworks/wiretouch_monitor/bin/data/GUI/guiSettings.xml
 !data/
 settings.json
 
