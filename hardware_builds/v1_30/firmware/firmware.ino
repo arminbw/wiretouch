@@ -21,15 +21,15 @@
 
 #define FIRMWARE_VERSION    "1.0b6"
 
-#define SERIAL_BAUD         500000  // patched serial baud rate
+#define SERIAL_BAUD         115200  // set to 500000 when using the patched FTDI driver
 #define SER_BUF_SIZE        256     // serial buffer for sending
 #define IBUF_LEN            12      // serial buffer for incoming commands
 
-#define DEFAULT_MEASURE_DELAY       14
-#define HALFWAVE_POT_VALUE          195
-#define OUTPUT_AMP_POT_VALUE        22
+#define DEFAULT_MEASURE_DELAY       8
+#define HALFWAVE_POT_VALUE          246
+#define OUTPUT_AMP_POT_VALUE        37
 #define OUTPUT_AMP_POT_TUNE_DEFAULT 8
-#define WAVE_FREQUENCY              18
+#define WAVE_FREQUENCY              18  
 
 #define CALIB_PASSES_BASE               128
 #define CALIB_PASSES_AT_EACH_CROSSPOINT 16
@@ -295,6 +295,7 @@ void auto_tune_output_amp()
       set_output_amp_tuning_for_point(xx, yy, tune_val);
     }
   }
+  // TODO: test
   for (uint16_t oabase = outputAmpPotBase; oabase > 0; oabase--) {
     outputAmpPotBase = oabase;
 

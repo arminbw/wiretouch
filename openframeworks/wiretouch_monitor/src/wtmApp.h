@@ -34,7 +34,7 @@
 
 #define SIGNALWIRES 32
 #define SENSORWIRES 22
-#define BAUD 300
+#define BAUD 115200 // when using the patched FTDI driver set this to 300 (and set SERIAL_BAUD to 500000 in firmware.ino)
 
 #define WINDOWWIDTH 1024
 #define WINDOWHEIGHT 786
