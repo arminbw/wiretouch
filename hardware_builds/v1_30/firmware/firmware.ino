@@ -17,15 +17,13 @@
    along with WireTouch. If not, see <http://www.gnu.org/licenses/>.
 */
 
-/* testing several things */
-
 #include <SPI.h>
 
-#define FIRMWARE_VERSION    "1.0b5"
+#define FIRMWARE_VERSION    "1.0b6"
 
-#define SERIAL_BAUD         9600      // patched serial baud rate (500000)
-#define SER_BUF_SIZE        256       // serial buffer for sending
-#define IBUF_LEN            12        // serial buffer for incoming commands
+#define SERIAL_BAUD         500000  // patched serial baud rate
+#define SER_BUF_SIZE        256     // serial buffer for sending
+#define IBUF_LEN            12      // serial buffer for incoming commands
 
 #define DEFAULT_MEASURE_DELAY       14
 #define HALFWAVE_POT_VALUE          195
@@ -40,7 +38,7 @@
 #define CALIB_OUTPUT_BLIND_DELTA        4
 
 #define ORDER_MEASURE_UNORDERED   0
-#define PRINT_BINARY              0 // set to 0 if you want to debug via serial monitor
+#define PRINT_BINARY              1 // set to 0 if you want to debug via serial monitor
 #define measure                   measure_with_atmega_adc
 
 #ifndef cbi
@@ -134,16 +132,13 @@ inline void muxSPI(byte output, byte vertical, byte off)
     if (off)
       bits = 0xff;
     else {
-      //bits = ((output % 2) ? (1 << 4) : (1 << 5)) | (output >> 1);
-      if (output % 2) {
+      if (output < 16) {
         bits = (1 << 4);
-        output >>= 1;
-        bits |= (output < 8) ? output : (23 - output);
-      } else {
-        bits = (1 << 5);
-        output >>= 1;
-        bits |= (output < 8) ? (7 - output) : output;
       }
+      else {
+        bits = (1 << 5);
+      }
+      bits |= output % 16;
     }
   } else {
     if (off)
@@ -263,10 +258,7 @@ uint16_t measure_one_avg(uint16_t x, uint16_t y, uint16_t passes)
 void auto_tune_output_amp()
 {
   uint16_t targetValue = 0;
-  char buf[128] = {0};
   byte mid_x = signalboardWires >> 1, mid_y = sensorboardWires >> 1;
-  sprintf(buf, "x: %d y: %d", mid_x, mid_y);
-  Serial.println(buf);
   uint16_t xx, yy;
 
   for (uint16_t oabase = 255; oabase > 0; oabase--) {
@@ -282,8 +274,6 @@ void auto_tune_output_amp()
     if ((targetValue = measure_one_avg(xx, yy, CALIB_PASSES_BASE)) > CALIB_THRESHOLD)
       break;
   }
-  sprintf(buf, "outputAmpPotBase1: %d, targetvalue: %d", outputAmpPotBase, targetValue);
-  Serial.println(buf);
 
   for (uint16_t k = 0; k < signalboardWires; k++) {
     for (uint16_t l = 0; l < sensorboardWires; l++) {
@@ -305,8 +295,6 @@ void auto_tune_output_amp()
       set_output_amp_tuning_for_point(xx, yy, tune_val);
     }
   }
-  sprintf(buf, "outputAmpPotBase2: %d", outputAmpPotBase);
-  Serial.println(buf);
   for (uint16_t oabase = outputAmpPotBase; oabase > 0; oabase--) {
     outputAmpPotBase = oabase;
 
@@ -319,8 +307,6 @@ void auto_tune_output_amp()
       break;
     }
   }
-  sprintf(buf, "outputAmpPotBase4: %d", outputAmpPotBase);
-  Serial.println(buf);
 }
 
 void print_configuration_info()
@@ -468,7 +454,7 @@ void loop()
   int cnt = 0;
   for (uint16_t k = 0; k < signalboardWires; k++) {
     for (uint16_t l = 0; l < sensorboardWires; l++) {
-      sample = measure_one(10, 10);
+      sample = measure_one(k, l);
 
       cnt++;
 #if PRINT_BINARY
