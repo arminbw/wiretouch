@@ -1,7 +1,9 @@
 # WireTouch
 
-WireTouch is an open capacitive multi-touch tracker in the making.
-Please visit http://www.wiretouch.net for demos and background information.
+WireTouch is an open multi-touch tracker based on mutual capacitance sensing.
+Please visit http://www.wiretouch.net for demos and background information. You may also want to have a look at [this paper](https://zenodo.org/record/61461).
+
+![WireTouch tracking software showing the interpolated measurements of a hand](/docs/demo.jpg?raw=true "tracked human hand")
 
 ## Building
 ### WireTouch Firmware
@@ -28,6 +30,9 @@ Next to the openFrameworks addons we are also using several other 3rd-party libr
 * [cjson](https://github.com/DaveGamble/cJSON)
 * [oscpack](http://code.google.com/p/oscpack)
 * [TUIO C++ library](https://github.com/mkalten/TUIO11_CPP)
+
+## Development
+The authors are currently not working on further updates. Feel free to fork the project and extend it as you see fit.
 
 ## License
 WireTouch is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
