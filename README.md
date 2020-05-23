@@ -1,8 +1,10 @@
 # WireTouch
 
-WireTouch is an open multi-touch tracker based on mutual (projected) capacitance sensing, designed to support and foster experimentation. Please visit http://www.arminbwagner.com/wiretouch for demos and background information. You may also want to have a look at this paper: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.61461.svg)](https://doi.org/10.5281/zenodo.61461).
+WireTouch is an open multi-touch tracker based on mutual (projected) capacitance sensing. It was designed and built to foster research in the field of human-computer interaction. Please visit http://www.arminbwagner.com/wiretouch for demos and background information. You may also want to have a look at this paper:
 
-Please note: The authors are currently not working on further updates. Feel free to fork the project and extend it as you see fit.
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.61461.svg)](https://doi.org/10.5281/zenodo.61461).
+
+The authors are currently not working on further updates. Feel free to fork the project and extend it as you see fit.
 
 ![WireTouch tracking software showing the interpolated measurements of a hand](/docs/demo.jpg?raw=true "tracked human hand")
 
